@@ -1,0 +1,25 @@
+return {
+  "lukas-reineke/headlines.nvim",
+  dependencies = "nvim-treesitter/nvim-treesitter",
+  config = function()
+    local H = require("headlines")
+
+    vim.api.nvim_create_autocmd("InsertEnter", {
+      pattern = { "*.md", "*.org", "*.txt" },
+      callback = function()
+        H.disable()
+        -- H.opts = H.opts or {}
+        -- H.opts.markdown = H.opts.markdown or {}
+        -- H.opts.markdown.headline_highlights = false
+      end,
+    })
+
+    vim.api.nvim_create_autocmd("InsertLeave", {
+      pattern = { "*.md", "*.org", "*.txt" },
+      callback = function()
+        -- H.opts.markdown.headline_highlights = true
+        -- H.setup(H.opts)
+      end,
+    })
+  end, -- or `opts = {}`
+}
