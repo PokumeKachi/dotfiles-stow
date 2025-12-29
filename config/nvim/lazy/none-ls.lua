@@ -1,0 +1,38 @@
+return {
+    -- "nvimtools/none-ls.nvim",
+    -- opts = function(_, opts)
+    --     local nls = require("null-ls")
+    --
+    --     opts.sources = vim.list_extend(opts.sources or {}, {
+    --         nls.builtins.diagnostics.markdownlint_cli2,
+    --     })
+    -- end,
+    --
+    -- dependencies = { "nvim-lua/plenary.nvim" },
+    -- config = function()
+    --     local null_ls = require("null-ls")
+    --
+    --     null_ls.setup({
+    --         sources = {
+    --             null_ls.builtins.formatting.prettier.with({
+    --                 filetypes = { "markdown" }, -- only enable for markdown
+    --             }),
+    --             -- optionally: null_ls.builtins.diagnostics.markdownlint,
+    --         },
+    --         on_attach = function(client, bufnr)
+    --             if client.supports_method("textDocument/formatting") then
+    --                 -- vim.api.nvim_clear_autocmds({ group = "LspFormatting", buffer = bufnr })
+    --                 local augroup = vim.api.nvim_create_augroup("LspFormatting", { clear = true })
+    --                 vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+    --                 vim.api.nvim_create_autocmd("BufWritePre", {
+    --                     group = vim.api.nvim_create_augroup("LspFormatting", {}),
+    --                     buffer = bufnr,
+    --                     callback = function()
+    --                         vim.lsp.buf.format({ async = false })
+    --                     end,
+    --                 })
+    --             end
+    --         end,
+    --     })
+    -- end,
+}
