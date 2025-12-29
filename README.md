@@ -1,1 +1,1 @@
-# My gnu stow config
+# My gnu stow config (dependency of ../dotfiles.git)
