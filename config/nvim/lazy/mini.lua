@@ -148,7 +148,7 @@ return {
 
 		require("mini.animate").setup({
 		    scroll = { enable = false }, -- this shit breaks mouse scrolling
-		    resize = { enable = true },
+		    resize = { enable = false },
 		    cursor = { enable = true },
 		    open   = { enable = false },
 		    close  = { enable = false },

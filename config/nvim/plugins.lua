@@ -12,6 +12,7 @@ local NonTerm = {
 	require("lazy.comfy-line-numbers"),
 	require("lazy.conform"),
 	require("lazy.flutter-tools"),
+	require("lazy.focus"),
 	-- require('lazy.fyler'),
 	-- require('lazy.headlines'), replaced by render-markdown
 	require("lazy.indent-blankline"),
