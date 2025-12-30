@@ -147,11 +147,11 @@ return {
 		})
 
 		require("mini.animate").setup({
-		    scroll = { enable = false }, -- this shit breaks mouse scrolling
-		    resize = { enable = false },
-		    cursor = { enable = true },
-		    open   = { enable = false },
-		    close  = { enable = false },
+			scroll = { enable = false }, -- this shit breaks mouse scrolling
+			resize = { enable = false },
+			cursor = { enable = true },
+			open = { enable = false },
+			close = { enable = false },
 		})
 
 		-- local cat = require("catppuccin.palettes").get_palette("mocha")
@@ -178,7 +178,17 @@ return {
 		require("mini.statusline").setup({
 			use_icons = vim.g.have_nerd_font,
 			content = {
+				inactive = function()
+					local buf = vim.api.nvim_get_current_buf()
+					local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":.")
+					return MiniStatusline.combine_groups({
+						{ hl = "Comment", strings = { filename or "" } }, -- dim gray
+						{ hl = "Comment", strings = { " %=" } }, -- keep alignment
+					})
+				end,
 				active = function()
+					local buf = vim.api.nvim_get_current_buf()
+
 					local check_macro_recording = function()
 						if vim.fn.reg_recording() ~= "" then
 							return "Recording @" .. vim.fn.reg_recording()
@@ -191,8 +201,10 @@ return {
 					local git = MiniStatusline.section_git({ trunc_width = 40 })
 					local diff = MiniStatusline.section_diff({ trunc_width = 75 })
 					local diagnostics = MiniStatusline.section_diagnostics({ trunc_width = 75 })
-					-- local lsp = MiniStatusline.section_lsp({ trunc_width = 75 })
-					local filename = MiniStatusline.section_filename({ trunc_width = 140 })
+					local lsp = MiniStatusline.section_lsp({ trunc_width = 75 })
+					-- local filename = MiniStatusline.section_filename({ trunc_width = 140 })
+					-- local filename = MiniStatusline.section_filename({ trunc_width = 140, modifiers = ":." })
+					local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":.")
 					local fileinfo = MiniStatusline.section_fileinfo({ trunc_width = 120 })
 					local search = MiniStatusline.section_searchcount({ trunc_width = 75 })
 					local macro = check_macro_recording()
@@ -210,7 +222,7 @@ return {
 						{ hl = mode_hl, strings = { mode } },
 						-- { hl = "MiniStatuslineDevinfo", strings = { git, diff, diagnostics } },
 						"%<", -- Mark general truncate point
-						{ hl = "MiniStatuslineFilename", strings = { filename } },
+						{ hl = "MiniStatuslineFilename", strings = { filename, lsp } },
 						"%=", -- End left alignment
 						{ hl = "MiniStatuslineFilename", strings = { macro } },
 						{ hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
@@ -218,11 +230,10 @@ return {
 					})
 				end,
 			},
-		}) 
+		})
 		require("mini.tabline").setup({
 			tabpage_section = "left",
 		})
 		require("mini.trailspace").setup()
-		-- add more modules here
 	end,
 }
