@@ -131,7 +131,7 @@ map("n", "<leader>r", function()
 	vim.api.nvim_feedkeys(keys, "t", false)
 end, { desc = "replace (after search)" })
 
-map({ "n", "v", "s", "o" }, "<leader>a", "<esc>gg0vG$", { desc = "select whole buffer", silent = true })
+map({ "n", "v", "s", "o" }, "<leader>a", "ggVG", { desc = "select whole buffer", silent = true })
 
 map({ "n", "x" }, "/", "/\\V", { noremap = true })
 map("v", "/", "<Esc>/\\%V\\V", { desc = "search within visual selection" })
@@ -141,32 +141,46 @@ map("n", "<leader>mt", "<cmd>Mtoc<CR>", { desc = "Create Table of Contents at cu
 
 map("n", "<leader>tt", "<cmd>term<CR>", { desc = "terminal", noremap = true, silent = true })
 map("n", "<leader>ts", "<cmd>split | wincmd w | term<CR>", {
-  desc = "terminal (horizontal split)",
-  noremap = true,
-  silent = true,
+	desc = "terminal (horizontal split)",
+	noremap = true,
+	silent = true,
 })
 map("n", "<leader>tv", "<cmd>vsplit | wincmd w | term<CR>", {
-  desc = "terminal (vertical split)",
-  noremap = true,
-  silent = true,
+	desc = "terminal (vertical split)",
+	noremap = true,
+	silent = true,
 })
 
 map("n", "<leader>gg", function()
-		-- signcolumn = true, -- Toggle with `:Gitsigns toggle_signs`
-		-- numhl = true, -- Toggle with `:Gitsigns toggle_numhl`
-		-- linehl = true, -- Toggle with `:Gitsigns toggle_linehl`
-		-- word_diff = true, -- Toggle with `:Gitsigns toggle_word_diff`
-    vim.cmd('Gitsigns toggle_signs')
-    vim.cmd('Gitsigns toggle_linehl')
-    vim.cmd('Gitsigns toggle_numhl')
-    vim.cmd('Gitsigns toggle_current_line_blame')
-    vim.cmd('Gitsigns toggle_deleted')
-    vim.cmd('Gitsigns toggle_word_diff')
+	for _, cmd in ipairs({
+		"toggle_signs",
+		"toggle_linehl",
+		"toggle_numhl",
+		"toggle_current_line_blame",
+		"toggle_deleted",
+		"toggle_word_diff",
+	}) do
+		vim.cmd("Gitsigns " .. cmd)
+	end
 end, {
-  desc = "toggle git symbols",
-  noremap = true,
-  silent = true,
+	desc = "toggle git symbols",
+	noremap = true,
+	silent = true,
 })
+
+map("n", "<leader>gc", "<cmd>Git commit<CR>", { desc = "commit", silent = true })
+map("n", "<leader>gp", "<cmd>Git push<CR>", { desc = "push", silent = true })
+map("n", "<leader>gP", "<cmd>Git pull<CR>", { desc = "pull", silent = true })
+
+map("n", "<leader>gs", function()
+  require('gitsigns').stage_hunk()
+end, { expr = true, desc = "stage/unstage hunk" })
+map("v", "<leader>gs", function()
+	require("gitsigns").stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+end, { desc = "stage/unstage selected lines" })
+map("n", "<leader>gS", function()
+	require("gitsigns").stage_buffer()
+end, { desc = "stage entire file" })
 
 -- map("n", "<leader>o", "<cmd>Outline<CR>", { desc = "see outline", silent = true })
 map("n", "<leader>o", function()
