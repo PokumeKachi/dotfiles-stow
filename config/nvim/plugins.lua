@@ -9,7 +9,7 @@ local NonTerm = {
 	require("lazy.blink"),
 	require("lazy.bullets"),
 	require("lazy.colorscheme"),
-	require("lazy.comfy-line-numbers"),
+	-- require("lazy.comfy-line-numbers"),
 	require("lazy.conform"),
 	require("lazy.flutter-tools"),
 	require("lazy.focus"),
