@@ -1,7 +1,7 @@
 ARGS := "--dotfiles --no-folding"
 
 _default:
-    just --choose
+    @just --choose
 
 link:
   stow -D {{ARGS}} -t ~/.config config

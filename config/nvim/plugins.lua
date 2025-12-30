@@ -33,6 +33,7 @@ local NonTerm = {
 	-- require('lazy.nvim-cmp'),
 	require("lazy.nvim-colorizer"),
 	-- require('lazy.nvim-surround'),
+	require("lazy.nvim-ufo"),
 	require("lazy.oil"),
 	require("lazy.outline"),
 	require("lazy.telescope"),
