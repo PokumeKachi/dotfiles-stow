@@ -140,15 +140,30 @@ map("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<cr>", { desc = "Toggle Markdo
 map("n", "<leader>mt", "<cmd>Mtoc<CR>", { desc = "Create Table of Contents at cursor" })
 
 map("n", "<leader>tt", "<cmd>term<CR>", { desc = "terminal", noremap = true, silent = true })
-
 map("n", "<leader>ts", "<cmd>split | wincmd w | term<CR>", {
   desc = "terminal (horizontal split)",
   noremap = true,
   silent = true,
 })
-
 map("n", "<leader>tv", "<cmd>vsplit | wincmd w | term<CR>", {
   desc = "terminal (vertical split)",
+  noremap = true,
+  silent = true,
+})
+
+map("n", "<leader>gg", function()
+		-- signcolumn = true, -- Toggle with `:Gitsigns toggle_signs`
+		-- numhl = true, -- Toggle with `:Gitsigns toggle_numhl`
+		-- linehl = true, -- Toggle with `:Gitsigns toggle_linehl`
+		-- word_diff = true, -- Toggle with `:Gitsigns toggle_word_diff`
+    vim.cmd('Gitsigns toggle_signs')
+    vim.cmd('Gitsigns toggle_linehl')
+    vim.cmd('Gitsigns toggle_numhl')
+    vim.cmd('Gitsigns toggle_current_line_blame')
+    vim.cmd('Gitsigns toggle_deleted')
+    vim.cmd('Gitsigns toggle_word_diff')
+end, {
+  desc = "toggle git symbols",
   noremap = true,
   silent = true,
 })
