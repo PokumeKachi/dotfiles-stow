@@ -11,6 +11,7 @@ local NonTerm = {
 	require("lazy.colorscheme"),
 	-- require("lazy.comfy-line-numbers"),
 	require("lazy.conform"),
+	require("lazy.dropbar"),
 	require("lazy.flutter-tools"),
 	require("lazy.focus"),
 	-- require('lazy.fyler'),
