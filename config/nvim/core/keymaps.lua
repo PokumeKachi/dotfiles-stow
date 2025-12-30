@@ -139,11 +139,19 @@ map("v", "/", "<Esc>/\\%V\\V", { desc = "search within visual selection" })
 map("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<cr>", { desc = "Toggle Markdown Preview" })
 map("n", "<leader>mt", "<cmd>Mtoc<CR>", { desc = "Create Table of Contents at cursor" })
 
-map("n", "<leader>t", "<cmd>term<CR>", { desc = "Open Terminal", noremap = true, silent = true })
--- map("n", "<leader>t", function()
--- 	vim.fn.termopen({ "bash" }, { curwin = true })
--- 	vim.api.nvim_buf_set_option(0, "buflisted", true)
--- end, { desc = "Open Terminal", noremap = true, silent = true })
+map("n", "<leader>tt", "<cmd>term<CR>", { desc = "terminal", noremap = true, silent = true })
+
+map("n", "<leader>ts", "<cmd>split | wincmd w | term<CR>", {
+  desc = "terminal (horizontal split)",
+  noremap = true,
+  silent = true,
+})
+
+map("n", "<leader>tv", "<cmd>vsplit | wincmd w | term<CR>", {
+  desc = "terminal (vertical split)",
+  noremap = true,
+  silent = true,
+})
 
 -- map("n", "<leader>o", "<cmd>Outline<CR>", { desc = "see outline", silent = true })
 map("n", "<leader>o", function()

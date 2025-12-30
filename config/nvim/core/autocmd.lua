@@ -2,8 +2,8 @@ local autocmd = vim.api.nvim_create_autocmd
 
 autocmd("TermOpen", {
 	callback = function()
-		vim.cmd("startinsert")
 		vim.opt_local.relativenumber = true
+		vim.cmd("startinsert")
 	end,
 })
 

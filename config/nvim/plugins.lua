@@ -15,6 +15,7 @@ local NonTerm = {
 	require("lazy.focus"),
 	-- require('lazy.fyler'),
 	-- require('lazy.headlines'), replaced by render-markdown
+	-- require("lazy.incline"), just use mini.statusline
 	require("lazy.indent-blankline"),
 	require("lazy.gitsigns"),
 	require("lazy.lspconfig"),
@@ -31,7 +32,7 @@ local NonTerm = {
 	-- require('lazy.nvim-cmp'),
 	require("lazy.nvim-colorizer"),
 	-- require('lazy.nvim-surround'),
-	require("lazy.oil"), -- replaced by fyler
+	require("lazy.oil"),
 	require("lazy.outline"),
 	require("lazy.telescope"),
 	require("lazy.template"),
