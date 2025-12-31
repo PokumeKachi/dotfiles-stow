@@ -5,8 +5,8 @@ return {
 		default_file_explorer = true,
 		columns = {
 			-- "mtime",
-			"size",
-			"permissions",
+			-- "size",
+			-- "permissions",
 			"icon",
 		},
 		buf_options = {
