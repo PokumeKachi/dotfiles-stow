@@ -12,15 +12,4 @@ return {
         --     sync_install = false,
         -- })
     end,
-
-    keys = function()
-        return {
-            {
-                "<leader>mp",
-                ':lua require("nabla").popup()<cr>',
-                -- ':lua require("nabla").toggle_virt()<cr>',
-                desc = "NablaPopUp",
-            },
-        }
-    end,
 }
