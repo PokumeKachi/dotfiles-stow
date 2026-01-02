@@ -137,7 +137,10 @@ map({ "n", "x" }, "/", "/\\V", { noremap = true })
 map("v", "/", "<Esc>/\\%V\\V", { desc = "search within visual selection" })
 
 map("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<cr>", { desc = "Toggle Markdown Preview" })
-map("n", "<leader>mt", "<cmd>Mtoc<CR>", { desc = "Create Table of Contents at cursor" })
+map({ "n", "v" }, "<leader>mp", function()
+	require("nabla").popup()
+end, { desc = "view latex" })
+map("n", "<leader>mt", "<cmd>Mtoc<CR>", { desc = "create table of contents" })
 
 map("n", "<leader>tt", "<cmd>term<CR>", { desc = "terminal", noremap = true, silent = true })
 map("n", "<leader>ts", "<cmd>split | wincmd w | term<CR>", {
@@ -173,7 +176,7 @@ map("n", "<leader>gp", "<cmd>Git push<CR>", { desc = "push", silent = true })
 map("n", "<leader>gP", "<cmd>Git pull<CR>", { desc = "pull", silent = true })
 
 map("n", "<leader>gs", function()
-  require('gitsigns').stage_hunk()
+	require("gitsigns").stage_hunk()
 end, { expr = true, desc = "stage/unstage hunk" })
 map("v", "<leader>gs", function()
 	require("gitsigns").stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
