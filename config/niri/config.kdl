@@ -19,7 +19,7 @@ environment {
     XDG_SESSION_TYPE "wayland"
     XDG_CURRENT_DESKTOP "niri"
     XDG_SESSION_DESKTOP "niri"
-    XDG_TERMINAL_EXEC "foot"
+    XDG_TERMINAL_EXEC "kitty"
     // WAYLAND_DISPLAY "wayland-0"
     // // XDG_RUNTIME_DIR "/run/user/1000"
 
@@ -318,7 +318,7 @@ window-rule {
     // This app-id regular expression will work for both:
     // - host Firefox (app-id is "firefox")
     // - Flatpak Firefox (app-id is "org.mozilla.firefox")
-    match app-id="foot"
+    match app-id="kitty"
     tiled-state true
 }
 
@@ -345,7 +345,7 @@ binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
 
     // Suggested binds for running programs: terminal, app launcher, screen locker.
-    Mod+Return hotkey-overlay-title="Open a Terminal: foot" { spawn "foot"; }
+    Mod+Return hotkey-overlay-title="Open a Terminal: kitty" { spawn "kitty"; }
     // Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
     Muhenkan hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel" "--no-icons"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
