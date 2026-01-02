@@ -9,4 +9,4 @@ return {
     -- the next line, but you can use the command `:MdMath build` to rebuild
     -- if the build fails for some reason.
     -- build = ':MdMath build'
-},
+}
