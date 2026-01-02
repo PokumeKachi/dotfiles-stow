@@ -24,6 +24,7 @@ local NonTerm = {
 	require("lazy.luau-tree"),
 	-- require('lazy.markdown-preview'),
 	require("lazy.markdown-toc"),
+	require("lazy.mdmath"),
 	-- require('lazy.markview'),
 	require("lazy.mini"),
 	require("lazy.nabla"),
