@@ -3,7 +3,9 @@ return {
     dependencies = {
         'nvim-treesitter/nvim-treesitter',
     },
-    opts = {...}
+    opts = {
+        dynamic_scale = 0.6
+    },
 
     -- The build is already done by default in lazy.nvim, so you don't need
     -- the next line, but you can use the command `:MdMath build` to rebuild
