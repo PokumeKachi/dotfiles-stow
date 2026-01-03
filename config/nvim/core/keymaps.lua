@@ -185,7 +185,7 @@ map("n", "<leader>gu", function()
 		border = "none",
 	})
 
-	vim.cmd("terminal gitui")
+	vim.cmd("term gitui")
 
 	vim.wo[win].number = false
 	vim.wo[win].relativenumber = false
