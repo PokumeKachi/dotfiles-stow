@@ -62,7 +62,8 @@ map("n", "<leader>lt", lsp.type_definition, { silent = true, desc = "go to type 
 -- map("i", "jK", "<Esc>", { noremap = true })
 -- map("i", "Jk", "<Esc>", { noremap = true })
 -- map("i", "JK", "<Esc>", { noremap = true })
-all_case_map({ "t", "i" }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
+all_case_map({ "i" }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
+-- all_case_map({ "t", "i" }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
 
 map("n", "<Tab>", ":bnext<CR>", silent)
 map("n", "<S-tab>", ":bprev<CR>", silent)
@@ -172,6 +173,7 @@ end, {
 })
 
 map("n", "<leader>gc", "<cmd>Git commit<CR>", { desc = "commit", silent = true })
+map("n", "<leader>gu", "<cmd>Git commit<CR>", { desc = "commit", silent = true })
 map("n", "<leader>gp", "<cmd>Git push<CR>", { desc = "push", silent = true })
 map("n", "<leader>gP", "<cmd>Git pull<CR>", { desc = "pull", silent = true })
 
