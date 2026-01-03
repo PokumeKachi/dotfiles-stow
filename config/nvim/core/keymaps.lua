@@ -155,7 +155,7 @@ map("n", "<leader>tv", "<cmd>vsplit | wincmd w | term<CR>", {
 	silent = true,
 })
 
-map("n", "<leader>gg", function()
+map("n", "<leader>gd", function()
 	for _, cmd in ipairs({
 		"toggle_signs",
 		"toggle_linehl",
@@ -167,13 +167,32 @@ map("n", "<leader>gg", function()
 		vim.cmd("Gitsigns " .. cmd)
 	end
 end, {
-	desc = "toggle git symbols",
+	desc = "toggle git diff",
 	noremap = true,
 	silent = true,
 })
 
 map("n", "<leader>gc", "<cmd>Git commit<CR>", { desc = "commit", silent = true })
-map("n", "<leader>gu", "<cmd>Git commit<CR>", { desc = "commit", silent = true })
+map("n", "<leader>gu", function()
+	local buf = vim.api.nvim_create_buf(false, true)
+	local win = vim.api.nvim_open_win(buf, true, {
+		relative = "editor",
+		width = vim.o.columns,
+		height = vim.o.lines,
+		row = 0,
+		col = 0,
+		style = "minimal",
+		border = "none",
+	})
+
+	vim.cmd("terminal gitui")
+
+	vim.wo[win].number = false
+	vim.wo[win].relativenumber = false
+	vim.wo[win].signcolumn = "no"
+	vim.wo[win].winbar = ""
+	vim.wo[win].statusline = ""
+end, { desc = "gitui fullscreen" })
 map("n", "<leader>gp", "<cmd>Git push<CR>", { desc = "push", silent = true })
 map("n", "<leader>gP", "<cmd>Git pull<CR>", { desc = "pull", silent = true })
 
