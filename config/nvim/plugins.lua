@@ -41,7 +41,7 @@ local NonTerm = {
 	require("lazy.template"),
 	require("lazy.tex2uni"),
 	require("lazy.tgpt"),
-	require("lazy.toggleterm"),
+	-- require("lazy.toggleterm"),
 	require("lazy.treesitter"),
 	require("lazy.treesitter-context"),
 	require("lazy.unicode"),
