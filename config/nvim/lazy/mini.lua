@@ -167,6 +167,7 @@ return {
 		require("mini.colors").setup()
 		-- require("mini.hues").setup(hues._palette)
 		require("mini.cursorword").setup()
+		require("mini.cmdline").setup()
 		require("mini.hipatterns").setup()
 		require("mini.icons").setup()
 		require("mini.indentscope").setup()
