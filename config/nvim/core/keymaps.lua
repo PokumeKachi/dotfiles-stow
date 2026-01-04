@@ -4,6 +4,19 @@ local silent = {
 	silent = true,
 }
 
+local function get_bufs()
+	return vim.tbl_filter(function(b)
+		local name = vim.api.nvim_buf_get_name(b)
+		local buftype = vim.bo[b].buftype
+		local filetype = vim.bo[b].filetype
+
+		return vim.api.nvim_buf_is_loaded(b)
+			and name ~= "" -- ignore unnamed buffers
+			and buftype == "" -- skip special buffers (help, terminal, mininotify, etc.)
+			and filetype ~= "mininotify" -- skip mininotify explicitly
+	end, vim.api.nvim_list_bufs())
+end
+
 local function all_case_map(modes, keys, action, opts)
 	local function case_combinations(str)
 		if #str == 0 then
@@ -78,14 +91,26 @@ map("n", "<S-tab>", ":bprev<CR>", silent)
 map("n", "<C-Tab>", "<C-^>", silent)
 
 map("n", "<leader>ca", ":bufdo bd<CR>", { silent = true, desc = "close all buffers" })
-map("n", "<leader>cc", ":bd<CR>", { silent = true, desc = "close buffer" })
+map("n", "<leader>cc", function()
+	local bufs = get_bufs()
+	local current_buf = vim.api.nvim_get_current_buf()
+
+	if #bufs == 1 and bufs[1] == current_buf then
+		require("oil").open()
+		vim.cmd("confirm bd " .. current_buf)
+	else
+		vim.cmd("bd")
+	end
+end, { silent = true, desc = "close buffer" })
 map("n", "<leader>co", function()
-	local bufs = vim.tbl_filter(function(b)
-		return vim.api.nvim_buf_is_loaded(b) and vim.api.nvim_buf_get_name(b) ~= ""
-	end, vim.api.nvim_list_bufs())
-	for _, b in ipairs(bufs) do
-		if b ~= vim.api.nvim_get_current_buf() then
-			vim.cmd("confirm bd " .. b)
+	local bufs = get_bufs()
+
+	for _, buf in ipairs(bufs) do
+		if
+			vim.fn.bufwinnr(buf) == -1
+			-- and vim.bo[buf].modified == false
+		then
+			vim.cmd(string.format("confirm bd %d", buf))
 		end
 	end
 end, { silent = true, desc = "close other buffers" })
