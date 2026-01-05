@@ -4,36 +4,26 @@ local LazyList = {
 }
 
 local NonTerm = {
-	-- require('lazy.auto-save'),
-	-- require('lazy.bufferline'),,
 	require("lazy.blink"),
 	require("lazy.bullets"),
 	require("lazy.colorscheme"),
-	-- require("lazy.comfy-line-numbers"),
 	require("lazy.conform"),
 	require("lazy.dropbar"),
 	require("lazy.flutter-tools"),
 	require("lazy.focus"),
-	-- require('lazy.fyler'),
-	-- require('lazy.headlines'), replaced by render-markdown
-	-- require("lazy.incline"), just use mini.statusline
 	require("lazy.indent-blankline"),
 	require("lazy.gitsigns"),
 	require("lazy.lspconfig"),
 	require("lazy.luau-lsp"),
 	require("lazy.luau-tree"),
-	-- require('lazy.markdown-preview'),
 	require("lazy.markdown-toc"),
 	require("lazy.mdmath"),
-	-- require('lazy.markview'),
 	require("lazy.mini"),
 	require("lazy.nabla"),
 	require("lazy.neoscroll"),
 	require("lazy.noice"),
 	require("lazy.none-ls"),
-	-- require('lazy.nvim-cmp'),
 	require("lazy.nvim-colorizer"),
-	-- require('lazy.nvim-surround'),
 	require("lazy.nvim-ufo"),
 	require("lazy.oil"),
 	require("lazy.outline"),
@@ -41,7 +31,6 @@ local NonTerm = {
 	require("lazy.template"),
 	require("lazy.tex2uni"),
 	require("lazy.tgpt"),
-	-- require("lazy.toggleterm"),
 	require("lazy.treesitter"),
 	require("lazy.treesitter-context"),
 	require("lazy.unicode"),
@@ -49,10 +38,8 @@ local NonTerm = {
 	require("lazy.vim-fugitive"),
 	require("lazy.rainbow-delimiters"),
 	require("lazy.render-markdown"),
-	-- require('lazy.rust-tools'),
 	require("lazy.snacks"),
 	require("lazy.zk"),
-	-- require('lazy.stay-centered'),
 }
 
 function setup_lazy(List)
