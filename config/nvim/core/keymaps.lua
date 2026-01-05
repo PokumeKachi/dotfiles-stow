@@ -4,6 +4,8 @@ local silent = {
 	silent = true,
 }
 
+local snacks = require("snacks")
+
 local function get_bufs()
 	return vim.tbl_filter(function(b)
 		local name = vim.api.nvim_buf_get_name(b)
@@ -142,6 +144,14 @@ map("n", "<esc>", "<cmd>nohlsearch<cr>", { noremap = true, silent = true })
 map({ "n", "i", "v" }, "<C-s>", function()
 	vim.cmd("write")
 end, { desc = "Save file", silent = true })
+
+map("n", "<leader>zz", function()
+    snacks.zen.zen()
+end, { desc = "zen mode", noremap = true, silent = true })
+
+map("n", "<leader>zf", function()
+    snacks.zen.zoom()
+end, { desc = "fullscreen (zoomed) mode", noremap = true, silent = true })
 
 map("n", "<leader>da", vim.lsp.buf.code_action, { desc = "Show code actions" })
 map("n", "<leader>df", vim.diagnostic.open_float, { desc = "Show floating errors", silent = true })
