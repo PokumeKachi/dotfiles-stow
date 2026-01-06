@@ -5,6 +5,7 @@ local LazyList = {
 
 local NonTerm = {
 	require("lazy.blink"),
+	require("lazy.bufdelete"),
 	require("lazy.bullets"),
 	require("lazy.colorscheme"),
 	require("lazy.conform"),
