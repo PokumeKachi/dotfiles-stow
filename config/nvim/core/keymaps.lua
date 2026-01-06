@@ -8,6 +8,16 @@ local silent = {
 local snacks = require("snacks")
 local blink_cmp = require("blink.cmp")
 
+local function is_buf_in_other_win(buf)
+	local current_win = vim.api.nvim_get_current_win()
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		if win ~= current_win and vim.api.nvim_win_get_buf(win) == buf then
+			return true
+		end
+	end
+	return false
+end
+
 local function get_bufs()
 	return vim.tbl_filter(function(b)
 		local name = vim.api.nvim_buf_get_name(b)
@@ -98,12 +108,19 @@ map("n", "<leader>ca", ":bufdo bd<CR>", { silent = true, desc = "close all buffe
 map("n", "<leader>cc", function()
 	local bufs = get_bufs()
 	local current_buf = vim.api.nvim_get_current_buf()
+	local is_in_other_win = is_buf_in_other_win(current_buf)
+
+	if is_in_other_win then
+		require("oil").open()
+		return
+	end
 
 	if #bufs == 1 and bufs[1] == current_buf then
 		require("oil").open()
-		vim.cmd("confirm bd " .. current_buf)
+		-- vim.cmd("confirm bd " .. current_buf)
+		require("bufdelete").bufdelete(current_buf)
 	else
-		vim.cmd("bd")
+		require("bufdelete").bufdelete(0)
 	end
 end, { silent = true, desc = "close buffer" })
 map("n", "<leader>co", function()
