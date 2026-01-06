@@ -1,4 +1,5 @@
 local opt = vim.opt
+vim.opt.completeopt = { "menu", "menuone", "noselect" }
 
 vim.g.mkdp_markdown_css = ''
 vim.g.mkdp_math = 1
@@ -51,6 +52,9 @@ opt.smartindent = true
 opt.termguicolors = true
 opt.inccommand = "nosplit" -- or "split" if you like a preview window
 opt.signcolumn = "yes"
+
+opt.wildmenu = true
+opt.wildmode = 'longest:full,full'
 
 vim.cmd([[
   highlight CursorLineNr guifg=#ffcc00 guibg=NONE gui=bold

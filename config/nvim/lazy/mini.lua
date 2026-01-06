@@ -91,7 +91,7 @@ return {
 	"nvim-mini/mini.nvim",
 	version = "*",
 	config = function()
-		hues = require("mini.hues")
+		local hues = require("mini.hues")
 
 		local hues_palette = {
 			foreground = "#f6d0f5",
@@ -167,13 +167,76 @@ return {
 		require("mini.colors").setup()
 		-- require("mini.hues").setup(hues._palette)
 		require("mini.cursorword").setup()
-		require("mini.cmdline").setup()
+		-- require("mini.cmdline").setup({
+		-- 	autocomplete = {
+		-- 		enable = false,
+		--
+		-- 		-- Delay (in ms) after which to trigger completion
+		-- 		-- Neovim>=0.12 is recommended for positive values
+		-- 		delay = 0,
+		--
+		-- 		-- Custom rule of when to trigger completion
+		-- 		predicate = nil,
+		--
+		-- 		-- Whether to map arrow keys for more consistent wildmenu behavior
+		-- 		map_arrows = true,
+		-- 	},
+		--
+		-- 	-- Autocorrection: adjust non-existing words (commands, options, etc.)
+		-- 	autocorrect = {
+		-- 		enable = true,
+		--
+		-- 		-- Custom autocorrection rule
+		-- 		func = nil,
+		-- 	},
+		--
+		-- 	-- Autopeek: show command's target range in a floating window
+		-- 	autopeek = {
+		-- 		enable = true,
+		--
+		-- 		-- Number of lines to show above and below range lines
+		-- 		n_context = 1,
+		--
+		-- 		-- Custom rule of when to show peek window
+		-- 		predicate = nil,
+		--
+		-- 		-- Window options
+		-- 		window = {
+		-- 			-- Floating window config
+		-- 			config = {},
+		--
+		-- 			-- Function to render statuscolumn
+		-- 			statuscolumn = nil,
+		-- 		},
+		-- 	},
+		-- })
 		require("mini.hipatterns").setup()
 		require("mini.icons").setup()
 		require("mini.indentscope").setup()
 		-- require("mini.map").setup()
 		-- require('mini.map').open()
-		require("mini.notify").setup()
+		require("mini.notify").setup({
+			content = {
+				-- Function which formats the notification message
+				-- By default prepends message with notification time
+				format = nil,
+
+				-- Function which orders notification array from most to least important
+				-- By default orders first by level and then by update timestamp
+				sort = nil,
+			},
+			lsp_progress = { enable = false },
+			window = {
+				-- Floating window config
+				config = {},
+
+				-- Maximum window width as share (between 0 and 1) of available columns
+				max_width_share = 0.382,
+
+				-- Value of 'winblend' option
+				winblend = 25,
+			},
+		})
 		-- require("mini.starter").setup()
 
 		require("mini.statusline").setup({

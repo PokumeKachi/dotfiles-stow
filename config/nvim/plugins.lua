@@ -24,6 +24,8 @@ local NonTerm = {
 	require("lazy.noice"),
 	require("lazy.none-ls"),
 	require("lazy.nvim-colorizer"),
+	require("lazy.nvim-mapper"),
+	require("lazy.nvim-notify"),
 	require("lazy.nvim-ufo"),
 	require("lazy.oil"),
 	require("lazy.outline"),
@@ -77,7 +79,7 @@ end
 
 setup_lazy(LazyList)
 
-require('diagnostics').setup()
+require("diagnostics").setup()
 
 -- local hues = require('mini.hues')
 -- local palette = hues.make_palette(hues._palette)

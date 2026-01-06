@@ -79,7 +79,7 @@ return {
 				cmd = { "vscode-html-language-server", "--stdio" },
 				filetypes = { "html" },
 				init_options = {
-					configurationSection = { "html", "css", "javascript" },
+					-- configurationSection = { "html", "css", "javascript" },
 					embeddedLanguages = {
 						css = true,
 						javascript = true,
@@ -178,16 +178,9 @@ return {
 		end
 
 		for server, config in pairs(servers) do
-			vim.lsp.config(server, {
-				capabilities = capabilities,
-				on_attach = on_attach,
-				cmd = config.cmd,
-				filetypes = config.filetypes,
-				root_dir = config.root_dir,
-				settings = config.settings,
-				init_options = config.init_options,
-			})
+            config.capabilities = capabilities
 
+			vim.lsp.config(server, config)
 			vim.lsp.enable(server)
 		end
 	end,

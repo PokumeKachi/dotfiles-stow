@@ -1,10 +1,12 @@
 local map = vim.keymap.set
+-- local map = require("nvim-mapper").map_keymap
 
 local silent = {
 	silent = true,
 }
 
 local snacks = require("snacks")
+local blink_cmp = require("blink.cmp")
 
 local function get_bufs()
 	return vim.tbl_filter(function(b)
@@ -146,11 +148,11 @@ map({ "n", "i", "v" }, "<C-s>", function()
 end, { desc = "Save file", silent = true })
 
 map("n", "<leader>zz", function()
-    snacks.zen.zen()
+	snacks.zen.zen()
 end, { desc = "zen mode", noremap = true, silent = true })
 
 map("n", "<leader>zf", function()
-    snacks.zen.zoom()
+	snacks.zen.zoom()
 end, { desc = "fullscreen (zoomed) mode", noremap = true, silent = true })
 
 map("n", "<leader>da", vim.lsp.buf.code_action, { desc = "Show code actions" })
@@ -303,3 +305,32 @@ map({ "n", "v", "x", "s", "o" }, "H", "zh")
 map({ "n", "v", "x", "s", "o" }, "L", "zl")
 map({ "n", "v", "x", "s", "o" }, "J", "<C-e>")
 map({ "n", "v", "x", "s", "o" }, "K", "<C-y>")
+
+local has_words_before = function()
+	local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+	return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+end
+
+-- map({ "i" }, "<Tab>", function()
+-- 	if blink_cmp.is_visible() then
+-- 		blink_cmp.select_next()
+-- 	elseif has_words_before() then
+-- 		blink_cmp.select_accept_and_enter()
+-- 	end
+-- end)
+--
+-- map({ "i" }, "<S-Tab>", function()
+-- 	if blink_cmp.is_visible() then
+-- 		blink_cmp.select_prev()
+-- 	end
+-- end)
+--
+-- map({ "i" }, "<CR>", function()
+-- 	blink_cmp.accept()
+-- 	if blink_cmp.is_visible() then
+-- 		blink_cmp.accept()
+-- 		print("yea")
+-- 	else
+-- 		return "<CR>"
+-- 	end
+-- end, { expr = true })
