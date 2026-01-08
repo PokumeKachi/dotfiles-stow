@@ -77,13 +77,9 @@ local function get_word_under_cursor()
 	return line:sub(s + 1, e)
 end
 
-map("n", "<leader>ww", "<C-w>w", { desc = "cycle windows" })
-map("n", "<leader>wv", "<C-w>v", { desc = "split vertically" })
-map("n", "<leader>ws", "<C-w>s", { desc = "split horizontally" })
-map("n", "<leader>wh", "<C-w>h", { desc = "move left" })
-map("n", "<leader>wl", "<C-w>l", { desc = "move right" })
-map("n", "<leader>wk", "<C-w>k", { desc = "move up" })
-map("n", "<leader>wj", "<C-w>j", { desc = "move down" })
+map("n", "<leader>w", function()
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w>", true, false, true), "m", true)
+end, { noremap = true, silent = true, desc = "window operations" })
 
 map("n", "<leader>ld", lsp.definition, { silent = true, desc = "go to definition" })
 map("n", "<leader>lh", lsp.hover, { silent = true, desc = "view documentation" })
