@@ -7,6 +7,7 @@ local silent = {
 
 local snacks = require("snacks")
 local blink_cmp = require("blink.cmp")
+local lsp = vim.lsp.buf
 
 local function is_buf_in_other_win(buf)
 	local current_win = vim.api.nvim_get_current_win()
@@ -84,7 +85,6 @@ map("n", "<leader>wl", "<C-w>l", { desc = "move right" })
 map("n", "<leader>wk", "<C-w>k", { desc = "move up" })
 map("n", "<leader>wj", "<C-w>j", { desc = "move down" })
 
-local lsp = vim.lsp.buf
 map("n", "<leader>ld", lsp.definition, { silent = true, desc = "go to definition" })
 map("n", "<leader>lh", lsp.hover, { silent = true, desc = "view documentation" })
 map("n", "<leader>ln", lsp.rename, { silent = true, desc = "rename symbol" })
