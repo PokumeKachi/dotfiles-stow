@@ -48,4 +48,4 @@ fi
 
 eval "$(/nix/store/wpj4la1jgf0p8aimfzx49gfr3228vk8f-direnv-2.37.1/bin/direnv hook bash)"
 
-eval "$(/nix/store/5g10iizw7yacs5kr8s7l3v6hirjw9i15-zoxide-0.9.8/bin/zoxide init bash)"
+# eval "$(/nix/store/5g10iizw7yacs5kr8s7l3v6hirjw9i15-zoxide-0.9.8/bin/zoxide init bash)"
