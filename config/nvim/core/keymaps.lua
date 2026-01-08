@@ -201,7 +201,8 @@ map({ "n", "v" }, "<leader>mp", function()
 end, { desc = "view latex" })
 map("n", "<leader>mt", "<cmd>Mtoc<CR>", { desc = "create table of contents" })
 
-map("n", "<leader>tt", "<cmd>term<CR>", { desc = "terminal", noremap = true, silent = true })
+-- map("n", "<leader>tt", "<cmd>term<CR>", { desc = "terminal", noremap = true, silent = true })
+map("n", "<leader>tt", "<leader>ts", { desc = "terminal", noremap = true, silent = true })
 map("n", "<leader>ts", "<cmd>split | wincmd w | term<CR>", {
 	desc = "terminal (horizontal split)",
 	noremap = true,
