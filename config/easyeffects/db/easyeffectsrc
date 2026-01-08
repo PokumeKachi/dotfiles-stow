@@ -13,6 +13,6 @@ visiblePlugin=limiter#0
 
 [Window]
 enableServiceMode=false
-height=1008
+height=502
 showTrayIcon=false
 width=954
