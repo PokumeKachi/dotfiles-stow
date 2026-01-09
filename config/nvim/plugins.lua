@@ -30,6 +30,7 @@ local NonTerm = {
 	require("lazy.nvim-notify"),
 	require("lazy.nvim-ufo"),
 	require("lazy.oil"),
+	require("lazy.oil-git-status"),
 	require("lazy.outline"),
 	require("lazy.telescope"),
 	require("lazy.template"),

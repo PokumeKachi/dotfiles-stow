@@ -26,7 +26,7 @@ return {
 		},
 		win_options = {
 			wrap = true,
-			signcolumn = "yes",
+			signcolumn = "yes:2",
 			cursorcolumn = true,
 			foldcolumn = "0",
 			spell = false,
