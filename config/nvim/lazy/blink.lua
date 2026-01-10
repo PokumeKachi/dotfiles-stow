@@ -1,8 +1,7 @@
-
-
 return {
 	"saghen/blink.cmp",
-	dependencies = { "rafamadriz/friendly-snippets" },
+	-- dependencies = { "rafamadriz/friendly-snippets" },
+	dependencies = { "L3MON4D3/LuaSnip", version = "v2.*" },
 	version = "1.*",
 
 	opts = {
@@ -36,7 +35,10 @@ return {
 
 			ghost_text = { enabled = true },
 		},
-		sources = { default = { "lsp", "path", "snippets", "buffer" } },
+		snippets = { preset = "luasnip" },
+		sources = {
+			default = { "lsp", "path", "snippets", "buffer" },
+		},
 		fuzzy = { implementation = "prefer_rust_with_warning" },
 	},
 }

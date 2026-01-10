@@ -77,7 +77,18 @@ local function get_word_under_cursor()
 	return line:sub(s + 1, e)
 end
 
-map("i", "<C-k>", function()
+local ls = require("luasnip")
+
+vim.keymap.set({"i"}, "<C-k>", function() ls.expand() end, {silent = true})
+vim.keymap.set({"i", "s"}, "<C-l>", function() ls.jump( 1) end, {silent = true})
+vim.keymap.set({"i", "s"}, "<C-h>", function() ls.jump(-1) end, {silent = true})
+vim.keymap.set({"i", "s"}, "<C-e>", function()
+	if ls.choice_active() then
+		ls.change_choice(1)
+	end
+end, {silent = true})
+
+map("i", "<C-w>", function()
 	local wins = vim.api.nvim_tabpage_list_wins(0)
 	local filtered_wins = {}
 	for _, w in ipairs(wins) do
