@@ -79,14 +79,20 @@ end
 
 local ls = require("luasnip")
 
-vim.keymap.set({"i"}, "<C-k>", function() ls.expand() end, {silent = true})
-vim.keymap.set({"i", "s"}, "<C-l>", function() ls.jump( 1) end, {silent = true})
-vim.keymap.set({"i", "s"}, "<C-h>", function() ls.jump(-1) end, {silent = true})
-vim.keymap.set({"i", "s"}, "<C-e>", function()
+vim.keymap.set({ "i" }, "<C-k>", function()
+	ls.expand()
+end, { silent = true })
+vim.keymap.set({ "i", "s" }, "<C-l>", function()
+	ls.jump(1)
+end, { silent = true })
+vim.keymap.set({ "i", "s" }, "<C-h>", function()
+	ls.jump(-1)
+end, { silent = true })
+vim.keymap.set({ "i", "s" }, "<C-e>", function()
 	if ls.choice_active() then
 		ls.change_choice(1)
 	end
-end, {silent = true})
+end, { silent = true })
 
 map("i", "<C-w>", function()
 	local wins = vim.api.nvim_tabpage_list_wins(0)
@@ -350,10 +356,10 @@ smart_move("<right>", function(cur, last, count)
 	return at_line_edge(false, cur, last, count)
 end, "j0", "l")
 
-map({ "n", "v", "x", "s", "o" }, "H", "zh")
-map({ "n", "v", "x", "s", "o" }, "L", "zl")
-map({ "n", "v", "x", "s", "o" }, "J", "<C-e>")
-map({ "n", "v", "x", "s", "o" }, "K", "<C-y>")
+-- map({ "n", "v", "x", "s", "o" }, "H", "zh", { noremap = true })
+-- map({ "n", "v", "x", "s", "o" }, "L", "zl", { noremap = true })
+-- map({ "n", "v", "x", "s", "o" }, "J", "<C-e>", { noremap = true })
+-- map({ "n", "v", "x", "s", "o" }, "K", "<C-y>", { noremap = true })
 
 local has_words_before = function()
 	local line, col = unpack(vim.api.nvim_win_get_cursor(0))
