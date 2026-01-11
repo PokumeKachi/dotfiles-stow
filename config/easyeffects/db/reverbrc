@@ -1,8 +1,8 @@
 [soe][Reverb#0]
 amount=-5
-decayTime=0.4
+decayTime=1
 diffusion=0.7
 hfDamp=4000
 predelay=30
-roomSize=0
+roomSize=4
 trebleCut=3000
