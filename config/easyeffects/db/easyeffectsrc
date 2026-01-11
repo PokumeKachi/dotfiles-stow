@@ -7,9 +7,9 @@ visiblePage=pluginsPage
 
 [StreamOutputs]
 outputDevice=alsa_output.pci-0000_00_1f.3.analog-stereo
-plugins=convolver#0,equalizer#1,compressor#0,exciter#0,deesser#0,reverb#0,expander#0,limiter#0,crossfeed#0
+plugins=convolver#0,equalizer#1,compressor#0,exciter#0,reverb#0,expander#0,limiter#0,deesser#0,crossfeed#0
 visiblePage=pluginsPage
-visiblePlugin=reverb#0
+visiblePlugin=crossfeed#0
 
 [Window]
 enableServiceMode=false

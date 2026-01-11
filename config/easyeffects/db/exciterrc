@@ -1,4 +1,5 @@
 [soe][Exciter#0]
 amount=1
-harmonics=10
+bypass=true
+harmonics=2
 scope=7000

@@ -1,6 +1,6 @@
 [soe][Reverb#0]
 amount=-5
-decayTime=1
+decayTime=0.4
 diffusion=0.7
 hfDamp=4000
 predelay=30
