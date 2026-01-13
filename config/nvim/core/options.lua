@@ -1,5 +1,6 @@
 local opt = vim.opt
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
+opt.background = 'light'
 
 vim.g.mkdp_markdown_css = ''
 vim.g.mkdp_math = 1
