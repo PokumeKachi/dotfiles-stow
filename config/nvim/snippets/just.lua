@@ -28,7 +28,7 @@ return {
 		t(vim.list_extend(vim.deepcopy(base), {
 			"",
 			"develop:",
-			tab() .. "sh -c ' \\",
+			tab() .. "@sh -c ' \\",
 			tab(2) .. "h=$(nix hash path ./flake.nix); \\",
 			tab(2) .. 'old="$FLAKE_HASH"; \\',
 			tab(2) .. 'if [ "$old" != "$h" ]; then \\',
