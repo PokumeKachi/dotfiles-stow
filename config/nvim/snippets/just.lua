@@ -32,6 +32,7 @@ return {
 			tab(2) .. "h=$(nix hash path ./flake.nix); \\",
 			tab(2) .. 'old="$FLAKE_HASH"; \\',
 			tab(2) .. 'if [ "$old" != "$h" ]; then \\',
+			tab(3) .. "echo \"Entering flake shell...\"; \\",
 			tab(3) .. 'FLAKE_HASH="$h" exec nix develop; \\',
 			tab(2) .. "else \\",
 			tab(3) .. "echo \"Inside flake shell, skipping nix develop...\"; \\",
