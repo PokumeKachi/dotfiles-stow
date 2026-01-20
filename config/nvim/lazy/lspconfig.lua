@@ -28,7 +28,7 @@ return {
 							noDefaultFeatures = false,
 							allTargets = true,
 							extraArgs = { "-j", 8 },
-							targetDir = ".target-clippy",
+							-- targetDir = ".target-clippy",
 						},
 
 						noDefaultFeatures = false,
