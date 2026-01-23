@@ -3,6 +3,7 @@ return {
 	dependencies = { "saghen/blink.cmp" },
 	config = function()
 		local servers = {
+            astro_language_server = {},
 			texlab = {
 				filetypes = { "tex", "markdown" },
 			},
