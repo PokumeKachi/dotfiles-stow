@@ -36,16 +36,14 @@ return {
 				"lua",
 				"python",
 
-                "make",
-                "just",
+				"make",
+				"just",
 
+				"bash",
 
-                "bash",
-
-                "kdl",
-                "toml",
-                "yaml",
-
+				"kdl",
+				"toml",
+				"yaml",
 
 				"html",
 				"css",
@@ -53,9 +51,12 @@ return {
 				"typescript",
 				"json",
 
+				"astro",
+				"tsx",
+
 				"latex",
-                "markdown",
-                "markdown_inline",
+				"markdown",
+				"markdown_inline",
 			},
 		})
 
