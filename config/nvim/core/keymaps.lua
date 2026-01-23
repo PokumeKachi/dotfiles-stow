@@ -94,29 +94,29 @@ vim.keymap.set({ "i", "s" }, "<C-e>", function()
 	end
 end, { silent = true })
 
-map("i", "<C-w>", function()
-	local wins = vim.api.nvim_tabpage_list_wins(0)
-	local filtered_wins = {}
-	for _, w in ipairs(wins) do
-		local cfg = vim.api.nvim_win_get_config(w)
-		local width = vim.api.nvim_win_get_width(w)
-		local height = vim.api.nvim_win_get_height(w)
-		if width > 2 and height > 2 then -- ignore tiny windows like scrollbars
-			table.insert(filtered_wins, w)
-		end
-	end
-	wins = filtered_wins
-	local cur = vim.api.nvim_get_current_win()
-	local next_win = wins[1]
-	for i, w in ipairs(wins) do
-		if w == cur then
-			next_win = wins[i % #wins + 1]
-			break
-		end
-	end
-	vim.api.nvim_set_current_win(next_win)
-	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
-end, { noremap = true, silent = true, desc = "window operations" })
+-- map("i", "<C-w>", function()
+-- 	local wins = vim.api.nvim_tabpage_list_wins(0)
+-- 	local filtered_wins = {}
+-- 	for _, w in ipairs(wins) do
+-- 		local cfg = vim.api.nvim_win_get_config(w)
+-- 		local width = vim.api.nvim_win_get_width(w)
+-- 		local height = vim.api.nvim_win_get_height(w)
+-- 		if width > 2 and height > 2 then -- ignore tiny windows like scrollbars
+-- 			table.insert(filtered_wins, w)
+-- 		end
+-- 	end
+-- 	wins = filtered_wins
+-- 	local cur = vim.api.nvim_get_current_win()
+-- 	local next_win = wins[1]
+-- 	for i, w in ipairs(wins) do
+-- 		if w == cur then
+-- 			next_win = wins[i % #wins + 1]
+-- 			break
+-- 		end
+-- 	end
+-- 	vim.api.nvim_set_current_win(next_win)
+-- 	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
+-- end, { noremap = true, silent = true, desc = "window operations" })
 
 map("n", "<leader>w", function()
 	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w>", true, false, true), "m", true)
