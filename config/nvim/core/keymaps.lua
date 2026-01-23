@@ -389,3 +389,25 @@ end
 -- 		return "<CR>"
 -- 	end
 -- end, { expr = true })
+
+map("n", "<F9>", function()
+	require("dap").toggle_breakpoint()
+end)
+map("n", "<F5>", function()
+	local buf = vim.api.nvim_create_buf(false, true)
+	local win = vim.api.nvim_open_win(buf, true, {
+		relative = "editor",
+		width = math.floor(vim.o.columns * 0.7),
+		height = math.floor(vim.o.lines * 0.6),
+		row = math.floor(vim.o.lines * 0.2),
+		col = math.floor(vim.o.columns * 0.15),
+		style = "minimal",
+		border = "rounded",
+	})
+
+	vim.fn.termopen("just run", {
+		on_exit = function()
+			vim.api.nvim_win_close(win, true)
+		end,
+	})
+end)
