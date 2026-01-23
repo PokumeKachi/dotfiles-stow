@@ -3,7 +3,7 @@ return {
 	dependencies = { "saghen/blink.cmp" },
 	config = function()
 		local servers = {
-            astro_language_server = {},
+            astro = {},
 			texlab = {
 				filetypes = { "tex", "markdown" },
 			},
@@ -74,7 +74,7 @@ return {
 			}, -- CSS
 			ts_ls = {}, -- JS/TS
 			svelte = {}, -- Svelte/SvelteKit
-			htmx = {}, -- if available, custom setup below
+			-- htmx = {}, -- if available, custom setup below
 			jsonls = {},
 			html = {
 				cmd = { "vscode-html-language-server", "--stdio" },
@@ -168,15 +168,15 @@ return {
 			}
 		end
 
-		if not configs.htmx then
-			configs.htmx = {
-				default_config = {
-					cmd = { "htmx-lsp" },
-					filetypes = { "html" },
-					root_dir = vim.fs.root(0, { ".git", "." }),
-				},
-			}
-		end
+		-- if not configs.htmx then
+		-- 	configs.htmx = {
+		-- 		default_config = {
+		-- 			cmd = { "htmx-lsp" },
+		-- 			filetypes = { "html" },
+		-- 			root_dir = vim.fs.root(0, { ".git", "." }),
+		-- 		},
+		-- 	}
+		-- end
 
 		for server, config in pairs(servers) do
             config.capabilities = capabilities
