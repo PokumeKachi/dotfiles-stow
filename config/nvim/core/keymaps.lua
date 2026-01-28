@@ -297,7 +297,7 @@ map("n", "<leader>gP", "<cmd>Git pull<CR>", { desc = "pull", silent = true })
 
 map("n", "<leader>gs", function()
 	require("gitsigns").stage_hunk()
-end, { expr = true, desc = "stage/unstage hunk" })
+end, { desc = "stage/unstage hunk" })
 map("v", "<leader>gs", function()
 	require("gitsigns").stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
 end, { desc = "stage/unstage selected lines" })
