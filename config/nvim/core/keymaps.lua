@@ -177,7 +177,6 @@ map("n", "<leader>ff", ":Telescope find_files<CR>", { silent = true, desc = "fin
 map("n", "<leader>fw", ":Telescope live_grep<CR>", { silent = true, desc = "find word" })
 map("n", "<leader>fm", function()
 	require("conform").format({ async = true })
-	-- vim.lsp.buf.format({ async = true })
 end, { silent = true, desc = "format code" })
 
 map("n", "<leader>b", ":enew<CR>", {
