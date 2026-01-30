@@ -1,14 +1,11 @@
 local map = vim.keymap.set
--- local map = require("nvim-mapper").map_keymap
-
+ 
 local silent = {
 	silent = true,
 }
-
 local snacks = require("snacks")
 local blink_cmp = require("blink.cmp")
 local lsp = vim.lsp.buf
-
 local function is_buf_in_other_win(buf)
 	local current_win = vim.api.nvim_get_current_win()
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -122,6 +119,10 @@ map("n", "<leader>w", function()
 	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w>", true, false, true), "m", true)
 end, { noremap = true, silent = true, desc = "window operations" })
 
+map("n", "<leader>qq", ":quit<CR>", { silent = true, desc = "quit window" })
+map("n", "<leader>qa", ":qa<CR>",   { silent = true, desc = "quit all windows" })
+map("n", "<leader>qo", ":only<CR>", { silent = true, desc = "quit other windows" })
+
 map("n", "<leader>ld", lsp.definition, { silent = true, desc = "go to definition" })
 map("n", "<leader>lh", lsp.hover, { silent = true, desc = "view documentation" })
 map("n", "<leader>ln", lsp.rename, { silent = true, desc = "rename symbol" })
@@ -141,7 +142,6 @@ map("n", "<Tab>", ":bnext<CR>", silent)
 map("n", "<S-tab>", ":bprev<CR>", silent)
 map("n", "<C-Tab>", "<C-^>", silent)
 
-map("n", "<leader>ca", ":bufdo bd<CR>", { silent = true, desc = "close all buffers" })
 map("n", "<leader>cc", function()
 	local bufs = get_bufs()
 	local current_buf = vim.api.nvim_get_current_buf()
@@ -154,12 +154,12 @@ map("n", "<leader>cc", function()
 
 	if #bufs == 1 and bufs[1] == current_buf then
 		require("oil").open()
-		-- vim.cmd("confirm bd " .. current_buf)
 		require("bufdelete").bufdelete(current_buf)
 	else
 		require("bufdelete").bufdelete(0)
 	end
 end, { silent = true, desc = "close buffer" })
+map("n", "<leader>ca", ":bufdo bd<CR>", { silent = true, desc = "close all buffers" })
 map("n", "<leader>co", function()
 	local bufs = get_bufs()
 
