@@ -45,6 +45,7 @@ local NonTerm = {
 	require("lazy.unicode"),
 	require("lazy.vimtex"),
 	require("lazy.vim-fugitive"),
+	require("lazy.vim-visual-multi"),
 	require("lazy.rainbow-delimiters"),
 	require("lazy.render-markdown"),
 	require("lazy.snacks"),
