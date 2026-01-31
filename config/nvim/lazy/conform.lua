@@ -43,6 +43,7 @@ return {
 				cpp = { "clang_format" },
 				rust = { "rustfmt" },
 				nix = { "nixfmt" },
+                toml = { "taplo" },
 			},
 		})
 	end,
