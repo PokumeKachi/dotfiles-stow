@@ -1,4 +1,8 @@
 local opt = vim.opt
+
+vim.opt.splitbelow = true
+vim.opt.splitright = true
+
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
 opt.background = 'light'
 
