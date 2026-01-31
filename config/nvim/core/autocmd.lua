@@ -14,8 +14,6 @@ autocmd("BufWinEnter", {
 
 		local bufname = opened_buf
 
-		print(vim.api.nvim_buf_get_name(opened_buf))
-
 		local cached_win = buf_win_cache[bufname]
 
 		if not cached_win then
