@@ -14,15 +14,24 @@ autocmd("BufWinEnter", {
 
 		local bufname = opened_buf
 
-		local winid = buf_win_cache[bufname]
+		print(vim.api.nvim_buf_get_name(opened_buf))
 
-		if winid and winid ~= opened_win and vim.api.nvim_win_is_valid(winid) then
+		local cached_win = buf_win_cache[bufname]
+
+		if not cached_win then
+			buf_win_cache[bufname] = opened_win
+			vim.g.__buf_dedupe_in_progress = false
+			return
+		end
+
+		if cached_win ~= opened_win and vim.api.nvim_win_is_valid(cached_win) then
 			local prev_buf
 			vim.api.nvim_win_call(opened_win, function()
 				prev_buf = vim.fn.bufnr("#")
 			end)
 
-			vim.api.nvim_set_current_win(winid)
+			vim.api.nvim_set_current_win(cached_win)
+			vim.api.nvim_win_set_buf(cached_win, opened_buf)
 
 			if
 				prev_buf
@@ -38,8 +47,6 @@ autocmd("BufWinEnter", {
 				vim.api.nvim_win_close(opened_win, true)
 			end
 		end
-
-		buf_win_cache[bufname] = opened_win
 
 		vim.g.__buf_dedupe_in_progress = false
 	end,
