@@ -1,38 +1,48 @@
 local autocmd = vim.api.nvim_create_autocmd
 
-vim.api.nvim_create_autocmd("BufWinEnter", {
-  callback = function()
-    if vim.g.__buf_dedupe_in_progress then return end
-    vim.g.__buf_dedupe_in_progress = true
+local buf_win_cache = {}
 
-    local opened_buf = vim.api.nvim_get_current_buf()
-    local opened_win = vim.api.nvim_get_current_win()
+autocmd("BufWinEnter", {
+	callback = function()
+		if vim.g.__buf_dedupe_in_progress then
+			return
+		end
+		vim.g.__buf_dedupe_in_progress = true
 
-    for _, win in ipairs(vim.api.nvim_list_wins()) do
-      if win ~= opened_win and vim.api.nvim_win_get_buf(win) == opened_buf then
-        -- get the alternate buffer *for the opened window*
-        local alt_buf
-        vim.api.nvim_win_call(opened_win, function()
-          alt_buf = vim.fn.bufnr("#")
-        end)
+		local opened_buf = vim.api.nvim_get_current_buf()
+		local opened_win = vim.api.nvim_get_current_win()
 
-        -- focus the already-visible window
-        vim.api.nvim_set_current_win(win)
+		local bufname = opened_buf
 
-        -- if the opened window has a usable alternate, show it; otherwise close it
-        if alt_buf and alt_buf > 0 and vim.api.nvim_buf_is_valid(alt_buf) and vim.api.nvim_buf_is_loaded(alt_buf) then
-          vim.api.nvim_win_set_buf(opened_win, alt_buf)
-        else
-          vim.api.nvim_win_close(opened_win, true)
-        end
+		local winid = buf_win_cache[bufname]
 
-        vim.g.__buf_dedupe_in_progress = false
-        return
-      end
-    end
+		if winid and winid ~= opened_win and vim.api.nvim_win_is_valid(winid) then
+			local prev_buf
+			vim.api.nvim_win_call(opened_win, function()
+				prev_buf = vim.fn.bufnr("#")
+			end)
 
-    vim.g.__buf_dedupe_in_progress = false
-  end,
+			vim.api.nvim_set_current_win(winid)
+
+			if
+				prev_buf
+				and prev_buf > 0
+				and prev_buf ~= opened_buf
+				and vim.api.nvim_buf_is_valid(prev_buf)
+				and vim.api.nvim_buf_is_loaded(prev_buf)
+			then
+				print("check 1")
+				vim.api.nvim_win_set_buf(opened_win, prev_buf)
+			else
+				print("check 2")
+				vim.api.nvim_win_close(opened_win, true)
+			end
+		end
+
+		buf_win_cache[bufname] = opened_win
+
+		vim.g.__buf_dedupe_in_progress = false
+	end,
 })
 
 autocmd("TermOpen", {
