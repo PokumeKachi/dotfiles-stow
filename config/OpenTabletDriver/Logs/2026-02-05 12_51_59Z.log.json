@@ -16871,3 +16871,195 @@
   "Level": 1,
   "Notification": false
 },
+{
+  "Time": "2026-02-05T20:57:40.2316462+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Output mode: Absolute Mode",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T20:57:40.2318578+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Display area: [1920x1080@<960, 540>:0°],",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T20:57:40.2319604+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Tablet area: [254x158.75@<127, 79.375>:0°],",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T20:57:40.2320409+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Clipping: Enabled",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T20:57:40.2321147+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Ignoring reports outside area: Disabled",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T20:57:40.2325104+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Tip Binding: [Mouse Button Binding: Left]@30%",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T20:57:40.2341359+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Pen Bindings: Mouse Button Binding: Right, Mouse Button Binding: Left",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T20:57:40.2407913+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Express Key Bindings: monitor_toggle.monitor_toggle_binding, Key Binding: F9, Multi-Key Binding: Control+Shift+P, Multi-Key Binding: Control+Shift+E, Multi-Key Binding: Control+Z, Multi-Key Binding: Control+Shift+Z, Multi-Key Binding: Control+Minus, Multi-Key Binding: Control+Shift+Equal, ScrollBinding.NewBulletproofScrollBinding, ScrollBinding.NewBulletproofScrollBinding, ScrollBinding.NewBulletproofScrollBinding, ScrollBinding.NewBulletproofScrollBinding",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T20:57:40.2413004+07:00",
+  "Group": "Plugin",
+  "Message": "Unable to find plugin matching name 'Chatter_Generator.Chatter_Generator_Match_Rate'",
+  "StackTrace": null,
+  "Level": 3,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T20:57:40.2414234+07:00",
+  "Group": "Plugin",
+  "Message": "Unable to find plugin matching name 'Chatter_Generator.Chatter_Generator_Variable_Rate'",
+  "StackTrace": null,
+  "Level": 3,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T20:57:40.2418093+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Filters: monitor_toggle.monitor_toggle",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T20:57:40.2420225+07:00",
+  "Group": "Settings",
+  "Message": "Driver is enabled.",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T21:01:04.5019892+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Output mode: Absolute Mode",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T21:01:04.5021783+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Display area: [1920x1080@<960, 540>:0°],",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T21:01:04.5024071+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Tablet area: [254x158.75@<127, 79.375>:0°],",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T21:01:04.502495+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Clipping: Enabled",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T21:01:04.5025771+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Ignoring reports outside area: Disabled",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T21:01:04.5028736+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Tip Binding: [Mouse Button Binding: Left]@30%",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T21:01:04.5032457+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Pen Bindings: Mouse Button Binding: Right, Mouse Button Binding: Left",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T21:01:04.5055614+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Express Key Bindings: monitor_toggle.monitor_toggle_binding, Key Binding: F9, Multi-Key Binding: Control+Shift+P, Multi-Key Binding: Control+Shift+E, Multi-Key Binding: Control+Z, Multi-Key Binding: Control+Shift+Z, Multi-Key Binding: Control+Minus, Multi-Key Binding: Control+Equal, ScrollBinding.NewBulletproofScrollBinding, ScrollBinding.NewBulletproofScrollBinding, ScrollBinding.NewBulletproofScrollBinding, ScrollBinding.NewBulletproofScrollBinding",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T21:01:04.5057873+07:00",
+  "Group": "Plugin",
+  "Message": "Unable to find plugin matching name 'Chatter_Generator.Chatter_Generator_Match_Rate'",
+  "StackTrace": null,
+  "Level": 3,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T21:01:04.5059162+07:00",
+  "Group": "Plugin",
+  "Message": "Unable to find plugin matching name 'Chatter_Generator.Chatter_Generator_Variable_Rate'",
+  "StackTrace": null,
+  "Level": 3,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T21:01:04.5062564+07:00",
+  "Group": "Gaomon 1060 Pro",
+  "Message": "Filters: monitor_toggle.monitor_toggle",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
+{
+  "Time": "2026-02-05T21:01:04.5063381+07:00",
+  "Group": "Settings",
+  "Message": "Driver is enabled.",
+  "StackTrace": null,
+  "Level": 1,
+  "Notification": false
+},
