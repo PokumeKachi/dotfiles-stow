@@ -1,4 +1,4 @@
-ARGS := "--dotfiles --no-folding"
+ARGS := "--dotfiles --no-folding --adopt"
 
 _default:
     @just --choose
