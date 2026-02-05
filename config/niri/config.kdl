@@ -1,5 +1,4 @@
 // This config is in the KDL format: https://kdl.dev
-// "/-" comments out the following node.
 // Check the wiki for a full description of the configuration:
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Introduction
 
@@ -310,7 +309,7 @@ window-rule {
 window-rule {
     match is-floating=true
 
-    baba-is-float true
+    baba-is-float false
 }
 
 // Open the Firefox picture-in-picture player as floating by default.
