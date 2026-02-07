@@ -392,7 +392,8 @@ end
 map("n", "<F9>", function()
 	require("dap").toggle_breakpoint()
 end)
-map("n", "<F5>", function()
+
+local function floatWin()
 	local buf = vim.api.nvim_create_buf(false, true)
 	local win = vim.api.nvim_open_win(buf, true, {
 		relative = "editor",
@@ -403,6 +404,22 @@ map("n", "<F5>", function()
 		style = "minimal",
 		border = "rounded",
 	})
+
+    return win
+end
+
+map("n", "<F5>", function()
+    local win = floatWin()
+
+	vim.fn.termopen("just", {
+		on_exit = function()
+			vim.api.nvim_win_close(win, true)
+		end,
+	})
+end)
+
+map("n", "<F6>", function()
+    local win = floatWin()
 
 	vim.fn.termopen("just run", {
 		on_exit = function()
