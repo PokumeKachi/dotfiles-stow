@@ -28,6 +28,7 @@ local NonTerm = {
 	require("lazy.none-ls"),
 	require("lazy.nvim-colorizer"),
 	require("lazy.nvim-dap"),
+    require("lazy.nvim-lint"),
     require("lazy.nvim-lsp-notify"),
 	require("lazy.nvim-mapper"),
 	require("lazy.nvim-notify"),
