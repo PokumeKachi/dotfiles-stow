@@ -8,13 +8,13 @@ visiblePage=pluginsPage
 visiblePlugin=delay#2
 
 [StreamOutputs]
-outputDevice=alsa_output.pci-0000_00_1f.3.analog-stereo
+outputDevice=bluez_output.41_42_D0_C9_C4_4B.1
 plugins=convolver#0,equalizer#1,compressor#0,exciter#0,reverb#0,expander#0,limiter#0,deesser#0,crossfeed#0
 visiblePage=pluginsPage
 visiblePlugin=convolver#0
 
 [Window]
 enableServiceMode=false
-height=518
+height=1040
 showTrayIcon=false
 width=954

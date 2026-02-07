@@ -38,10 +38,8 @@ autocmd("BufWinEnter", {
 				and vim.api.nvim_buf_is_valid(prev_buf)
 				and vim.api.nvim_buf_is_loaded(prev_buf)
 			then
-				print("check 1")
 				vim.api.nvim_win_set_buf(opened_win, prev_buf)
 			else
-				print("check 2")
 				vim.api.nvim_win_close(opened_win, true)
 			end
 		end
