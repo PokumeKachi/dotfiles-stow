@@ -1,5 +1,11 @@
 local opt = vim.opt
 
+vim.opt.autoread = true
+vim.api.nvim_create_autocmd(
+  { "FocusGained", "BufEnter", "CursorHold" },
+  { command = "checktime" }
+)
+
 vim.opt.splitbelow = true
 vim.opt.splitright = true
 
