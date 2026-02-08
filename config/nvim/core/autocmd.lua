@@ -22,7 +22,11 @@ autocmd("BufWinEnter", {
 			return
 		end
 
-		if cached_win ~= opened_win and vim.api.nvim_win_is_valid(cached_win) then
+		if
+			cached_win ~= opened_win
+			and vim.api.nvim_win_is_valid(cached_win)
+			and vim.api.nvim_win_get_buf(win) == bufname
+		then
 			local prev_buf
 			vim.api.nvim_win_call(opened_win, function()
 				prev_buf = vim.fn.bufnr("#")
