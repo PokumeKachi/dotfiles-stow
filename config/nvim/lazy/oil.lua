@@ -21,8 +21,8 @@ return {
 			"icon",
 		},
 		buf_options = {
-			buflisted = true,
-			bufhidden = "hide",
+			buflisted = false,
+			bufhidden = "wipe",
 		},
 		win_options = {
 			wrap = true,
