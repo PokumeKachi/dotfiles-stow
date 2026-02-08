@@ -34,6 +34,8 @@ autocmd("BufWinEnter", {
 			end)
 
 			vim.api.nvim_set_current_win(cached_win)
+			vim.api.nvim_exec_autocmds("WinEnter", { modeline = false })
+			-- require("focus").resize()
 			vim.api.nvim_win_set_buf(cached_win, opened_buf)
 
 			if
