@@ -1,0 +1,15 @@
+[default applications]
+x-scheme-handler/http=firefox.desktop
+x-scheme-handler/https=firefox.desktop
+text/html=firefox.desktop
+x-scheme-handler/about=firefox.desktop
+x-scheme-handler/unknown=firefox.desktop
+
+image/webp=imv.desktop
+
+
+x-scheme-handler/roblox-studio=org.vinegarhq.Vinegar.studio.desktop
+x-scheme-handler/roblox-studio-auth=org.vinegarhq.Vinegar.studio.desktop
+
+application/x-roblox-rbxl=org.vinegarhq.Vinegar.studio.desktop
+application/x-roblox-rbxlx=org.vinegarhq.Vinegar.studio.desktop
