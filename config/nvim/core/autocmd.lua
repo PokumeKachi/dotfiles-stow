@@ -12,6 +12,11 @@ autocmd("BufWinEnter", {
 		local opened_buf = vim.api.nvim_get_current_buf()
 		local opened_win = vim.api.nvim_get_current_win()
 
+		if vim.bo[opened_buf].filetype == "oil" then
+			vim.g.__buf_dedupe_in_progress = false
+			return
+		end
+
 		local bufname = opened_buf
 
 		local cached_win = buf_win_cache[bufname]
