@@ -404,26 +404,16 @@ local function floatWin()
 		style = "minimal",
 		border = "rounded",
 	})
-
-    return win
 end
 
 map("n", "<F5>", function()
-    local win = floatWin()
+    floatWin()
 
-	vim.fn.termopen("just", {
-		on_exit = function()
-			vim.api.nvim_win_close(win, true)
-		end,
-	})
+	vim.fn.termopen("just")
 end)
 
 map("n", "<F6>", function()
-    local win = floatWin()
+    floatWin()
 
-	vim.fn.termopen("just run", {
-		on_exit = function()
-			vim.api.nvim_win_close(win, true)
-		end,
-	})
+	vim.fn.termopen("just run")
 end)
