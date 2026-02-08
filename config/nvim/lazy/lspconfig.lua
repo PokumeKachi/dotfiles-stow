@@ -9,7 +9,6 @@ return {
 			},
 			clangd = {},
 			nixd = {},
-			luau_lsp = {},
 			rust_analyzer = {
 				settings = {
 					["rust-analyzer"] = {
