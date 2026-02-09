@@ -1,1 +1,2 @@
 pfetch
+. "$HOME/.rokit/env"
