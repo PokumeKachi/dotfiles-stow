@@ -4,12 +4,28 @@ local buf_win_cache = {}
 local win_buf_cache = {}
 
 local function dedupSuccess(buf, win)
-	buf_win_cache[buf] = win
-	win_buf_cache[win] = buf
+	if buf and win then
+		buf_win_cache[buf] = win
+		win_buf_cache[win] = buf
+	end
+
 	vim.g.__buf_dedupe_in_progress = false
 end
 
-autocmd("BufWinEnter", {
+local function dedupCallback(buf, win)
+	if not vim.api.nvim_win_is_valid(win) then
+		return
+	end
+	if not vim.api.nvim_buf_is_valid(buf) then
+		return
+	end
+
+	vim.api.nvim_set_current_win(win)
+	vim.api.nvim_win_set_buf(win, buf)
+	dedupSuccess(buf, win)
+end
+
+autocmd({ "BufWinEnter", "WinEnter" }, {
 	callback = function()
 		if vim.g.__buf_dedupe_in_progress then
 			return
@@ -34,14 +50,19 @@ autocmd("BufWinEnter", {
 
 		local cached_buf = win_buf_cache[opened_win]
 
-		vim.api.nvim_win_set_buf(opened_win, cached_buf)
+		if cached_buf then
+			vim.api.nvim_win_set_buf(opened_win, cached_buf)
 
-		vim.api.nvim_set_current_win(cached_win)
-		vim.api.nvim_exec_autocmds("WinEnter", { modeline = false })
-		-- require("focus").resize()
-		vim.api.nvim_win_set_buf(cached_win, opened_buf)
+			dedupCallback(opened_buf, cached_win)
+		else
+			vim.schedule(function()
+				require("oil").open()
 
-		dedupSuccess(opened_buf, cached_win)
+				dedupCallback(cached_win, opened_buf)
+			end)
+		end
+
+		dedupSuccess(nil, nil)
 	end,
 })
 
