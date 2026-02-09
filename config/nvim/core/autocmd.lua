@@ -14,6 +14,10 @@ end
 
 local function dedupCallback(buf, win)
 	vim.schedule(function()
+        if not buf or not win then
+            return
+        end
+
 		if not vim.api.nvim_win_is_valid(win) then
 --			vim.notify("fail 1")
 			return
@@ -61,7 +65,7 @@ autocmd({ "BufWinEnter", "WinEnter" }, {
 				not cached_win
 				or vim.bo[opened_buf].filetype == "oil"
 				or vim.bo[opened_buf].buftype == "terminal"
-                or vim.w[win].snacks_main
+                or vim.w[cached_win].snacks_main
 				or cached_win == opened_win
 				or not vim.api.nvim_win_is_valid(cached_win)
 			then
@@ -73,7 +77,7 @@ autocmd({ "BufWinEnter", "WinEnter" }, {
 --			vim.notify("handling")
 			local cached_buf = win_buf_cache[opened_win]
 
-			if cached_buf and vim.api.nvim_buf_is_valid(cached_buf) then
+			if cached_buf and vim.api.nvim_buf_is_valid(cached_buf) and vim.api.nvim_win_is_valid(opened_win) then
 				vim.api.nvim_win_set_buf(opened_win, cached_buf)
 --				vim.notify("check 1")
 
