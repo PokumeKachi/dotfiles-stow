@@ -67,14 +67,14 @@ autocmd({ "BufWinEnter", "WinEnter" }, {
 				or cached_win == opened_win
 				or vim.bo[opened_buf].filetype == "oil"
 				or vim.bo[opened_buf].buftype == "terminal"
-                or vim.w[cached_win].snacks_main
+                or vim.w[opened_win].snacks_main
 			then
---				vim.notify("nahh")
+				-- vim.notify("nahh")
 				dedupSuccess(opened_buf, opened_win)
 				return
 			end
 
---			vim.notify("handling")
+			-- vim.notify("handling")
 			local cached_buf = win_buf_cache[opened_win]
 
 			if cached_buf and vim.api.nvim_buf_is_valid(cached_buf) and vim.api.nvim_win_is_valid(opened_win) then
