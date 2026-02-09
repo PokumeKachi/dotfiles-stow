@@ -1,57 +1,47 @@
 local autocmd = vim.api.nvim_create_autocmd
 
 local buf_win_cache = {}
+local win_buf_cache = {}
+
+local function dedupSuccess(buf, win)
+	buf_win_cache[buf] = win
+	win_buf_cache[win] = buf
+	vim.g.__buf_dedupe_in_progress = false
+end
 
 autocmd("BufWinEnter", {
 	callback = function()
 		if vim.g.__buf_dedupe_in_progress then
 			return
 		end
+
 		vim.g.__buf_dedupe_in_progress = true
 
 		local opened_buf = vim.api.nvim_get_current_buf()
 		local opened_win = vim.api.nvim_get_current_win()
 
-		if vim.bo[opened_buf].filetype == "oil" then
-			vim.g.__buf_dedupe_in_progress = false
+		local cached_win = buf_win_cache[opened_buf]
+
+		if
+			not cached_win
+			or vim.bo[opened_buf].filetype == "oil"
+			or cached_win == opened_win
+			or not vim.api.nvim_win_is_valid(cached_win)
+		then
+			dedupSuccess(opened_buf, opened_win)
 			return
 		end
 
-		local bufname = opened_buf
+		local cached_buf = win_buf_cache[opened_win]
 
-		local cached_win = buf_win_cache[bufname]
+		vim.api.nvim_win_set_buf(opened_win, cached_buf)
 
-		if not cached_win then
-			buf_win_cache[bufname] = opened_win
-			vim.g.__buf_dedupe_in_progress = false
-			return
-		end
+		vim.api.nvim_set_current_win(cached_win)
+		vim.api.nvim_exec_autocmds("WinEnter", { modeline = false })
+		-- require("focus").resize()
+		vim.api.nvim_win_set_buf(cached_win, opened_buf)
 
-		if cached_win ~= opened_win and vim.api.nvim_win_is_valid(cached_win) then
-			local prev_buf
-			vim.api.nvim_win_call(opened_win, function()
-				prev_buf = vim.fn.bufnr("#")
-			end)
-
-			vim.api.nvim_set_current_win(cached_win)
-			vim.api.nvim_exec_autocmds("WinEnter", { modeline = false })
-			-- require("focus").resize()
-			vim.api.nvim_win_set_buf(cached_win, opened_buf)
-
-			if
-				prev_buf
-				and prev_buf > 0
-				and prev_buf ~= opened_buf
-				and vim.api.nvim_buf_is_valid(prev_buf)
-				and vim.api.nvim_buf_is_loaded(prev_buf)
-			then
-				vim.api.nvim_win_set_buf(opened_win, prev_buf)
-			else
-				vim.api.nvim_win_close(opened_win, true)
-			end
-		end
-
-		vim.g.__buf_dedupe_in_progress = false
+		dedupSuccess(opened_buf, cached_win)
 	end,
 })
 
