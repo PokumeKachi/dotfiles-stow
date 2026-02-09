@@ -4,7 +4,7 @@ local buf_win_cache = {}
 local win_buf_cache = {}
 
 local function dedupSuccess(buf, win)
-	if buf and win then
+	if buf and win and vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_win_is_valid(win) then
 		buf_win_cache[buf] = win
 		win_buf_cache[win] = buf
 	end
@@ -13,17 +13,35 @@ local function dedupSuccess(buf, win)
 end
 
 local function dedupCallback(buf, win)
-	if not vim.api.nvim_win_is_valid(win) then
-		return
-	end
-	if not vim.api.nvim_buf_is_valid(buf) then
-		return
-	end
+	vim.schedule(function()
+		if not vim.api.nvim_win_is_valid(win) then
+			vim.notify("fail 1")
+			return
+		end
 
-	vim.api.nvim_set_current_win(win)
-	vim.api.nvim_win_set_buf(win, buf)
-	dedupSuccess(buf, win)
+		if not vim.api.nvim_buf_is_valid(buf) then
+			vim.notify("fail 2")
+			return
+		end
+
+		vim.api.nvim_set_current_win(win)
+		vim.api.nvim_win_set_buf(win, buf)
+		dedupSuccess(buf, win)
+	end)
 end
+
+autocmd({ "BufDelete", "BufWipeout" }, {
+	callback = function(ev)
+		local buf = ev.buf
+		local opened_win = vim.api.nvim_get_current_win()
+
+		buf_win_cache[buf] = nil
+
+		if win_buf_cache[opened_win] == buf then
+			win_buf_cache[opened_win] = nil
+		end
+	end,
+})
 
 autocmd({ "BufWinEnter", "WinEnter" }, {
 	callback = function()
@@ -44,21 +62,26 @@ autocmd({ "BufWinEnter", "WinEnter" }, {
 			or cached_win == opened_win
 			or not vim.api.nvim_win_is_valid(cached_win)
 		then
+			vim.notify("nahh")
 			dedupSuccess(opened_buf, opened_win)
 			return
 		end
 
+		vim.notify("handling")
 		local cached_buf = win_buf_cache[opened_win]
 
-		if cached_buf then
+		if cached_buf and vim.api.nvim_buf_is_valid(cached_buf) then
 			vim.api.nvim_win_set_buf(opened_win, cached_buf)
+			vim.notify("check 1")
 
 			dedupCallback(opened_buf, cached_win)
 		else
+            print(cached_buf)
 			vim.schedule(function()
 				require("oil").open()
+				vim.notify("check 2")
 
-				dedupCallback(cached_win, opened_buf)
+				-- dedupCallback(opened_buf, cached_win)
 			end)
 		end
 
