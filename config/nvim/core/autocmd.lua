@@ -83,7 +83,6 @@ autocmd({ "BufWinEnter", "WinEnter" }, {
 
 				dedupCallback(opened_buf, cached_win)
 			else
-				print(cached_buf)
 				vim.schedule(function()
 					require("oil").open()
 --					vim.notify("check 2")
