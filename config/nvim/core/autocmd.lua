@@ -15,12 +15,12 @@ end
 local function dedupCallback(buf, win)
 	vim.schedule(function()
 		if not vim.api.nvim_win_is_valid(win) then
-			vim.notify("fail 1")
+--			vim.notify("fail 1")
 			return
 		end
 
 		if not vim.api.nvim_buf_is_valid(buf) then
-			vim.notify("fail 2")
+--			vim.notify("fail 2")
 			return
 		end
 
@@ -61,27 +61,28 @@ autocmd({ "BufWinEnter", "WinEnter" }, {
 				not cached_win
 				or vim.bo[opened_buf].filetype == "oil"
 				or vim.bo[opened_buf].buftype == "terminal"
+                or vim.w[win].snacks_main
 				or cached_win == opened_win
 				or not vim.api.nvim_win_is_valid(cached_win)
 			then
-				vim.notify("nahh")
+--				vim.notify("nahh")
 				dedupSuccess(opened_buf, opened_win)
 				return
 			end
 
-			vim.notify("handling")
+--			vim.notify("handling")
 			local cached_buf = win_buf_cache[opened_win]
 
 			if cached_buf and vim.api.nvim_buf_is_valid(cached_buf) then
 				vim.api.nvim_win_set_buf(opened_win, cached_buf)
-				vim.notify("check 1")
+--				vim.notify("check 1")
 
 				dedupCallback(opened_buf, cached_win)
 			else
 				print(cached_buf)
 				vim.schedule(function()
 					require("oil").open()
-					vim.notify("check 2")
+--					vim.notify("check 2")
 
 					-- dedupCallback(opened_buf, cached_win)
 				end)
@@ -158,13 +159,13 @@ autocmd("BufEnter", {
 		-- local bufname = vim.api.nvim_buf_get_name(buf)
 
 		-- if vim.fn.isdirectory(bufname) == 1 then
-		-- 	vim.notify("check 1")
+--		-- 	vim.notify("check 1")
 		--
 		-- 	vim.schedule(function()
 		-- 		require("oil").open(bufname)
 		-- 	end)
 		-- elseif vim.bo.filetype == "" and bufname == "" and vim.bo.buflisted then
-		-- 	vim.notify("check 2")
+--		-- 	vim.notify("check 2")
 		--
 		-- 	local opts = { "buftype", "filetype", "buflisted", "bufhidden", "modified" }
 		-- 	local prev_dir = vim.fn.expand("#:p:h")
