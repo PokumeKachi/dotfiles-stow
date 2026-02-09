@@ -45,47 +45,50 @@ autocmd({ "BufDelete", "BufWipeout" }, {
 
 autocmd({ "BufWinEnter", "WinEnter" }, {
 	callback = function()
-		if vim.g.__buf_dedupe_in_progress then
-			return
-		end
+		vim.schedule(function()
+			if vim.g.__buf_dedupe_in_progress then
+				return
+			end
 
-		vim.g.__buf_dedupe_in_progress = true
+			vim.g.__buf_dedupe_in_progress = true
 
-		local opened_buf = vim.api.nvim_get_current_buf()
-		local opened_win = vim.api.nvim_get_current_win()
+			local opened_buf = vim.api.nvim_get_current_buf()
+			local opened_win = vim.api.nvim_get_current_win()
 
-		local cached_win = buf_win_cache[opened_buf]
+			local cached_win = buf_win_cache[opened_buf]
 
-		if
-			not cached_win
-			or vim.bo[opened_buf].filetype == "oil"
-			or cached_win == opened_win
-			or not vim.api.nvim_win_is_valid(cached_win)
-		then
-			vim.notify("nahh")
-			dedupSuccess(opened_buf, opened_win)
-			return
-		end
+			if
+				not cached_win
+				or vim.bo[opened_buf].filetype == "oil"
+				or vim.bo[opened_buf].buftype == "terminal"
+				or cached_win == opened_win
+				or not vim.api.nvim_win_is_valid(cached_win)
+			then
+				vim.notify("nahh")
+				dedupSuccess(opened_buf, opened_win)
+				return
+			end
 
-		vim.notify("handling")
-		local cached_buf = win_buf_cache[opened_win]
+			vim.notify("handling")
+			local cached_buf = win_buf_cache[opened_win]
 
-		if cached_buf and vim.api.nvim_buf_is_valid(cached_buf) then
-			vim.api.nvim_win_set_buf(opened_win, cached_buf)
-			vim.notify("check 1")
+			if cached_buf and vim.api.nvim_buf_is_valid(cached_buf) then
+				vim.api.nvim_win_set_buf(opened_win, cached_buf)
+				vim.notify("check 1")
 
-			dedupCallback(opened_buf, cached_win)
-		else
-            print(cached_buf)
-			vim.schedule(function()
-				require("oil").open()
-				vim.notify("check 2")
+				dedupCallback(opened_buf, cached_win)
+			else
+				print(cached_buf)
+				vim.schedule(function()
+					require("oil").open()
+					vim.notify("check 2")
 
-				-- dedupCallback(opened_buf, cached_win)
-			end)
-		end
+					-- dedupCallback(opened_buf, cached_win)
+				end)
+			end
 
-		dedupSuccess(nil, nil)
+			dedupSuccess(nil, nil)
+		end)
 	end,
 })
 
