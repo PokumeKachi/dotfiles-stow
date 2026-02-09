@@ -13,3 +13,6 @@ x-scheme-handler/roblox-studio-auth=org.vinegarhq.Vinegar.studio.desktop
 
 application/x-roblox-rbxl=org.vinegarhq.Vinegar.studio.desktop
 application/x-roblox-rbxlx=org.vinegarhq.Vinegar.studio.desktop
+
+[Default Applications]
+x-scheme-handler/discord=vesktop.desktop
