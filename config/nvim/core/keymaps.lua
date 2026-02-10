@@ -1,5 +1,5 @@
 local map = vim.keymap.set
- 
+
 local silent = {
 	silent = true,
 }
@@ -120,7 +120,7 @@ map("n", "<leader>w", function()
 end, { noremap = true, silent = true, desc = "window operations" })
 
 map("n", "<leader>qq", ":quit<CR>", { silent = true, desc = "quit window" })
-map("n", "<leader>qa", ":qa<CR>",   { silent = true, desc = "quit all windows" })
+map("n", "<leader>qa", ":qa<CR>", { silent = true, desc = "quit all windows" })
 map("n", "<leader>qo", ":only<CR>", { silent = true, desc = "quit other windows" })
 
 map("n", "<leader>ld", lsp.definition, { silent = true, desc = "go to definition" })
@@ -173,8 +173,11 @@ map("n", "<leader>co", function()
 	end
 end, { silent = true, desc = "close other buffers" })
 
-map("n", "<leader>ff", ":Telescope find_files<CR>", { silent = true, desc = "find files" })
-map("n", "<leader>fw", ":Telescope live_grep<CR>", { silent = true, desc = "find word" })
+map("n", "<leader>ff", function()
+	vim.diagnostic.open_float(nil, { focus = true })
+end, { silent = true, desc = "focus floating window" })
+map("n", "<leader>fn", ":Telescope find_files<CR>", { silent = true, desc = "by file name" })
+map("n", "<leader>fw", ":Telescope live_grep<CR>", { silent = true, desc = "by word" })
 map("n", "<leader>fm", function()
 	require("conform").format({ async = true })
 end, { silent = true, desc = "format code" })
@@ -407,13 +410,13 @@ local function floatWin()
 end
 
 map("n", "<F5>", function()
-    floatWin()
+	floatWin()
 
 	vim.fn.termopen("just")
 end)
 
 map("n", "<F6>", function()
-    floatWin()
+	floatWin()
 
 	vim.fn.termopen("just run")
 end)
