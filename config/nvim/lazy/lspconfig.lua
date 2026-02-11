@@ -3,7 +3,7 @@ return {
 	dependencies = { "saghen/blink.cmp" },
 	config = function()
 		local servers = {
-            astro = {},
+			astro = {},
 			texlab = {
 				filetypes = { "tex", "markdown" },
 			},
@@ -75,21 +75,27 @@ return {
 			svelte = {}, -- Svelte/SvelteKit
 			-- htmx = {}, -- if available, custom setup below
 			jsonls = {},
-			html = {
-				cmd = { "vscode-html-language-server", "--stdio" },
+			superhtml = {
 				filetypes = { "html" },
-				init_options = {
-					-- configurationSection = { "html", "css", "javascript" },
-					embeddedLanguages = {
-						css = true,
-						javascript = true,
-					},
-				},
 				root_dir = function(_)
 					return vim.fs.root(0, { "package.json", ".git" }) or vim.loop.cwd()
 				end,
-				settings = {},
 			},
+			-- html = {
+			-- 	cmd = { "vscode-html-language-server", "--stdio" },
+			-- 	filetypes = { "html" },
+			-- 	init_options = {
+			-- 		-- configurationSection = { "html", "css", "javascript" },
+			-- 		embeddedLanguages = {
+			-- 			css = true,
+			-- 			javascript = true,
+			-- 		},
+			-- 	},
+			-- 	root_dir = function(_)
+			-- 		return vim.fs.root(0, { "package.json", ".git" }) or vim.loop.cwd()
+			-- 	end,
+			-- 	settings = {},
+			-- },
 			lua_ls = {
 				settings = {
 					Lua = {
@@ -178,7 +184,7 @@ return {
 		-- end
 
 		for server, config in pairs(servers) do
-            config.capabilities = capabilities
+			config.capabilities = capabilities
 
 			vim.lsp.config(server, config)
 			vim.lsp.enable(server)
