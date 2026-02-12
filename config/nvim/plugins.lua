@@ -44,6 +44,7 @@ local NonTerm = {
 	require("lazy.treesitter"),
 	require("lazy.treesitter-astro"),
 	-- require("lazy.treesitter-context"),
+	require("lazy.typst-preview"),
 	require("lazy.unicode"),
 	require("lazy.vimtex"),
 	require("lazy.vim-fugitive"),
