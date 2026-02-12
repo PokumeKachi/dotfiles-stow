@@ -174,7 +174,11 @@ map("n", "<leader>co", function()
 end, { silent = true, desc = "close other buffers" })
 
 map("n", "<leader>ff", function()
-	vim.diagnostic.open_float(nil, { focus = true })
+for _, win in ipairs(vim.api.nvim_list_wins()) do
+  if vim.api.nvim_win_get_config(win).relative ~= "" then
+    vim.api.nvim_set_current_win(win)
+  end
+end
 end, { silent = true, desc = "focus floating window" })
 map("n", "<leader>fn", ":Telescope find_files<CR>", { silent = true, desc = "by file name" })
 map("n", "<leader>fw", ":Telescope live_grep<CR>", { silent = true, desc = "by word" })
