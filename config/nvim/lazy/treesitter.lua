@@ -49,6 +49,7 @@ return {
 				"css",
 				"javascript",
 				"typescript",
+                "typst",
 				"json",
 
 				"astro",
