@@ -232,10 +232,16 @@ end, { desc = "Show diagnostics in location list", silent = true })
 -- 	vim.wo.relativenumber = vim.wo.number
 -- end, { desc = "line numbers" })
 
-map("n", "<leader>r", function()
+
+map("n", "<leader>rn", function()
+  local new = vim.fn.input("new name: ", vim.fn.expand("%"), "file")
+  vim.cmd("saveas " .. new)
+  vim.fn.delete(vim.fn.expand("#"))
+end, { desc = "(re)name" })
+map("n", "<leader>rr", function()
 	local keys = vim.api.nvim_replace_termcodes(":%s///gc<Left><Left><Left>", true, false, true)
 	vim.api.nvim_feedkeys(keys, "t", false)
-end, { desc = "replace (after search)" })
+end, { desc = "(replace) search" })
 
 map({ "n", "v", "s", "o" }, "<leader>a", "ggVG", { desc = "select whole buffer", silent = true })
 
