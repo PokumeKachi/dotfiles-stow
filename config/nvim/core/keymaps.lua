@@ -174,11 +174,11 @@ map("n", "<leader>co", function()
 end, { silent = true, desc = "close other buffers" })
 
 map("n", "<leader>ff", function()
-for _, win in ipairs(vim.api.nvim_list_wins()) do
-  if vim.api.nvim_win_get_config(win).relative ~= "" then
-    vim.api.nvim_set_current_win(win)
-  end
-end
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		if vim.api.nvim_win_get_config(win).relative ~= "" then
+			vim.api.nvim_set_current_win(win)
+		end
+	end
 end, { silent = true, desc = "focus floating window" })
 map("n", "<leader>fn", ":Telescope find_files<CR>", { silent = true, desc = "by file name" })
 map("n", "<leader>fw", ":Telescope live_grep<CR>", { silent = true, desc = "by word" })
@@ -232,11 +232,20 @@ end, { desc = "Show diagnostics in location list", silent = true })
 -- 	vim.wo.relativenumber = vim.wo.number
 -- end, { desc = "line numbers" })
 
-
 map("n", "<leader>rn", function()
-  local new = vim.fn.input("new name: ", vim.fn.expand("%"), "file")
-  vim.cmd("saveas " .. new)
-  vim.fn.delete(vim.fn.expand("#"))
+	local old = vim.api.nvim_get_current_buf()
+	local old_name = vim.api.nvim_buf_get_name(old)
+
+	local new_name = vim.fn.input("new name: ", old_name, "file")
+
+    if new_name == old_name then
+        return
+    end
+
+	vim.cmd("saveas " .. new_name)
+
+	vim.cmd("bdelete " .. old)
+	vim.fn.delete(old_name)
 end, { desc = "(re)name" })
 map("n", "<leader>rr", function()
 	local keys = vim.api.nvim_replace_termcodes(":%s///gc<Left><Left><Left>", true, false, true)
