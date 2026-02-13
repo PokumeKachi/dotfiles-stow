@@ -2,7 +2,7 @@ local servers = {
 	astro = {},
 	tinymist = {
 		settings = {
-			exportPdf = "onType",
+			exportPdf = "never",
 			semanticTokens = "disable",
 
 			formatterMode = "typstyle",
