@@ -288,7 +288,7 @@ autocmd("BufNewFile", {
 })
 
 autocmd("FileType", {
-	pattern = { "text", "markdown" },
+	pattern = { "text", "markdown", "typst" },
 	callback = function()
 		vim.opt_local.wrap = true
 		vim.opt_local.linebreak = true
