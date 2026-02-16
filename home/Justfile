@@ -52,8 +52,8 @@ chat:
                echo "[ $name ]: $line"; \
            done | ncat $server $port'
 
-freeze:
-    read -p "PID to pause: " pid && kill -STOP "$pid" && read -p "paused. press enter to resume" && kill -CONT "$pid"
+freeze pid="":
+    pid="{{pid}}"; [ -z "$pid" ] && read -p "PID to pause: " pid; kill -STOP "$pid" && read -p "paused. press enter to resume" && kill -CONT "$pid"
 
 todo:
 	taskwarrior-tui --taskdata .task
