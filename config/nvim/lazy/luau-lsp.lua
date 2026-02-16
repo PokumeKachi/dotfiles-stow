@@ -10,9 +10,9 @@ return {
 		sourcemap = {
 			enabled = true,
 			autogenerate = true,
-			generator_cmd = { "argon", "sourcemap", "--watch", "--non-scripts" },
-			-- rojo_project_file = "default.project.json",
-			-- sourcemap_file = "sourcemap.json",
+			generator_cmd = { "argon", "sourcemap", "-w", "-n", "-o", "sourcemap.json" },
+			rojo_project_file = "default.project.json",
+			sourcemap_file = "sourcemap.json",
 		},
 		plugin = {
 			enabled = true,
