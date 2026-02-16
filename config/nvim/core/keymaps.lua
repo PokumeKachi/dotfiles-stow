@@ -446,3 +446,39 @@ map("n", "<F6>", function()
 
 	vim.fn.termopen("just run")
 end)
+
+map("n", "<leader>pt", function()
+	local file = vim.fn.expand("%:p")
+	local out = "/tmp/" .. vim.fn.expand("%:t:r") .. ".pdf"
+
+	vim.fn.jobstart({ "typst", "watch", file, out }, {
+		stderr_buffered = false,
+		on_stderr = function(_, data)
+			if not data then
+				return
+			end
+
+			local errors = {}
+			for _, line in ipairs(data) do
+				if line:match("^error:") then
+					table.insert(errors, line)
+				end
+			end
+
+			if #errors == 0 then
+				return
+			end
+
+			local tmp = "/tmp/typst_error.typ"
+			local lines = { "= Compilation failed", "" }
+
+			for _, line in ipairs(errors) do
+				table.insert(lines, "`" .. line .. "`")
+			end
+
+			vim.fn.writefile(lines, tmp)
+			vim.fn.system({ "typst", "compile", tmp, out })
+		end,
+	})
+	vim.fn.jobstart({ "zathura", out }, { detach = true })
+end, { silent = true, desc = "preview typst" })
