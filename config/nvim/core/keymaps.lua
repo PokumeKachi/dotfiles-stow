@@ -447,11 +447,25 @@ map("n", "<F6>", function()
 	vim.fn.termopen("just run")
 end)
 
+local typstJob
+local zathuraJob
+
+function killTypstPreview()
+	if typstJob then
+		vim.fn.jobstop(typstJob)
+	end
+	if zathuraJob then
+		vim.fn.jobstop(zathuraJob)
+	end
+end
+
 map("n", "<leader>pt", function()
 	local file = vim.fn.expand("%:p")
 	local out = "/tmp/" .. vim.fn.expand("%:t:r") .. ".pdf"
 
-	vim.fn.jobstart({ "typst", "watch", file, out }, {
+	killTypstPreview()
+
+	typstJob = vim.fn.jobstart({ "typst", "watch", file, out }, {
 		stderr_buffered = false,
 		on_stderr = function(_, data)
 			if not data then
@@ -459,13 +473,17 @@ map("n", "<leader>pt", function()
 			end
 
 			local errors = {}
+
+			local isError = false
+
 			for _, line in ipairs(data) do
+				table.insert(errors, line)
 				if line:match("^error:") then
-					table.insert(errors, line)
+					isError = true
 				end
 			end
 
-			if #errors == 0 then
+			if not isError then
 				return
 			end
 
@@ -473,12 +491,16 @@ map("n", "<leader>pt", function()
 			local lines = { "= Compilation failed", "" }
 
 			for _, line in ipairs(errors) do
-				table.insert(lines, "`" .. line .. "`")
+				table.insert(lines, "=== `" .. line .. "`")
 			end
 
 			vim.fn.writefile(lines, tmp)
 			vim.fn.system({ "typst", "compile", tmp, out })
 		end,
 	})
-	vim.fn.jobstart({ "zathura", out }, { detach = true })
+	zathuraJob = vim.fn.jobstart({ "zathura", out }, { detach = true })
 end, { silent = true, desc = "preview typst" })
+
+vim.api.nvim_create_autocmd("VimLeavePre", {
+	callback = killTypstPreview,
+})
