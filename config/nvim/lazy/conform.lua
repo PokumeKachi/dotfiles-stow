@@ -38,7 +38,7 @@ return {
 				css = { "prettier" },
 				typescript = { "prettier" },
 				json = { "prettier" },
-				typst = { { lsp_format = true } },
+				-- typst = { "lsp" },
 				markdown = { "prettier" },
 				sh = { "shfmt" },
 				c = { "clang_format" },
