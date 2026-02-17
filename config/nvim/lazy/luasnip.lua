@@ -3,9 +3,14 @@ return {
 	version = "v2.*",
 	build = "make install_jsregexp",
 	event = "InsertEnter",
-	config = function()
-		require("luasnip").setup({})
+	opts = {},
+	config = function(_, opts)
+		local ls = require("luasnip")
+		ls.setup(opts)
+
 		require("luasnip.loaders.from_vscode").lazy_load()
-		require("luasnip.loaders.from_lua").lazy_load({ paths = "~/.config/nvim/snippets" })
+		require("luasnip.loaders.from_lua").lazy_load({
+			paths = vim.fn.stdpath("config") .. "/snippets",
+		})
 	end,
 }
