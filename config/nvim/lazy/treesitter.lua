@@ -1,6 +1,7 @@
 return {
 	"nvim-treesitter/nvim-treesitter",
 	build = ":TSUpdate",
+	event = { "BufReadPost", "BufNewFile" },
 	dependencies = {
 		-- "hiphish/rainbow-delimiters.nvim",
 	},
@@ -49,7 +50,7 @@ return {
 				"css",
 				"javascript",
 				"typescript",
-                "typst",
+				"typst",
 				"json",
 
 				"astro",
