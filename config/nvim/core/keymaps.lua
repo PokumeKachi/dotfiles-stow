@@ -235,15 +235,20 @@ end, { desc = "Show diagnostics in location list", silent = true })
 map("n", "<leader>rn", function()
 	local old_buf = vim.api.nvim_get_current_buf()
 
-	local old_name = vim.api.nvim_buf_get_name(0)
-	local new_name = vim.fn.input("new name: ", old_name, "file")
+	local fullName = vim.api.nvim_buf_get_name(0)
 
-	if new_name == "" or new_name == old_name then
+	local dir = vim.fn.fnamemodify(fullName, ":h")
+	local filename = vim.fn.fnamemodify(fullName, ":t")
+	local new_name = vim.fn.input("new name: ", filename, "file")
+
+	if new_name == "" or new_name == fullName then
 		return
 	end
 
-	if vim.loop.fs_stat(old_name) then
-		local ok, err = vim.loop.fs_rename(old_name, new_name)
+	new_name = dir .. "/" .. new_name
+
+	if vim.uv.fs_stat(fullName) then
+		local ok, err = vim.uv.fs_rename(fullName, new_name)
 
 		if not ok then
 			print(err)
