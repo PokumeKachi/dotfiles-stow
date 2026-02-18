@@ -153,6 +153,7 @@ return {
 		require("mini.surround").setup({
 			search_method = "cover_or_nearest",
 			n_lines = 20,
+            silent = true,
 		})
 		require("mini.pairs").setup({
 			-- In which modes mappings from this `config` should be created
