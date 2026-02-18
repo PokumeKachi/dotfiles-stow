@@ -343,7 +343,7 @@ end, { desc = "stage entire file" })
 map("n", "<leader>o", function()
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
 		local buf = vim.api.nvim_win_get_buf(win)
-		local ft = vim.api.nvim_get_option_value(buf, "filetype")
+		local ft = vim.bo[buf].filetype
 		if ft == "Outline" then
 			if win == vim.api.nvim_get_current_win() then
 				vim.cmd("Outline")

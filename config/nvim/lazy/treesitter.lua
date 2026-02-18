@@ -1,7 +1,7 @@
 return {
 	"nvim-treesitter/nvim-treesitter",
 	build = ":TSUpdate",
-	event = { "BufReadPost", "BufNewFile" },
+	event = { "BufReadPre", "BufNewFile" },
 	dependencies = {
 		-- "hiphish/rainbow-delimiters.nvim",
 	},
@@ -61,7 +61,9 @@ return {
 			"markdown_inline",
 		},
 	},
-	config = function()
+	config = function(_, opts)
+		require("nvim-treesitter.configs").setup(opts)
+
 		vim.api.nvim_create_autocmd("ColorScheme", {
 			callback = function()
 				vim.api.nvim_set_hl(0, "@variable", { link = "Identifier" })

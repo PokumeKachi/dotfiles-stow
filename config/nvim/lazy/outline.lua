@@ -1,7 +1,7 @@
 return {
-  "hedyhli/outline.nvim",
-  config = function()
-    require("outline").setup {
-    }
-  end,
+	"hedyhli/outline.nvim",
+    opts = {},
+	-- config = function()
+	-- 	require("outline").setup({})
+	-- end,
 }

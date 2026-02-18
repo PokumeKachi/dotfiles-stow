@@ -14,17 +14,17 @@ end
 
 local function dedupCallback(buf, win)
 	vim.schedule(function()
-        if not buf or not win then
-            return
-        end
+		if not buf or not win then
+			return
+		end
 
 		if not vim.api.nvim_win_is_valid(win) then
---			vim.notify("fail 1")
+			--			vim.notify("fail 1")
 			return
 		end
 
 		if not vim.api.nvim_buf_is_valid(buf) then
---			vim.notify("fail 2")
+			--			vim.notify("fail 2")
 			return
 		end
 
@@ -67,7 +67,7 @@ autocmd({ "BufWinEnter", "WinEnter" }, {
 				or cached_win == opened_win
 				or vim.bo[opened_buf].filetype == "oil"
 				or vim.bo[opened_buf].buftype == "terminal"
-                or vim.w[opened_win].snacks_main
+				or vim.w[opened_win].snacks_main
 			then
 				-- vim.notify("nahh")
 				dedupSuccess(opened_buf, opened_win)
@@ -79,13 +79,13 @@ autocmd({ "BufWinEnter", "WinEnter" }, {
 
 			if cached_buf and vim.api.nvim_buf_is_valid(cached_buf) and vim.api.nvim_win_is_valid(opened_win) then
 				vim.api.nvim_win_set_buf(opened_win, cached_buf)
---				vim.notify("check 1")
+				--				vim.notify("check 1")
 
 				dedupCallback(opened_buf, cached_win)
 			else
 				vim.schedule(function()
 					require("oil").open()
---					vim.notify("check 2")
+					--					vim.notify("check 2")
 
 					-- dedupCallback(opened_buf, cached_win)
 				end)
@@ -139,7 +139,9 @@ autocmd("VimEnter", {
 
 		if #args == 0 then
 			vim.schedule(function()
-				require("oil").open(vim.loop.cwd())
+				if not vim.bo.modified then
+					require("oil").open(vim.fn.getcwd())
+				end
 			end)
 			return
 		end
@@ -162,13 +164,13 @@ autocmd("BufEnter", {
 		-- local bufname = vim.api.nvim_buf_get_name(buf)
 
 		-- if vim.fn.isdirectory(bufname) == 1 then
---		-- 	vim.notify("check 1")
+		--		-- 	vim.notify("check 1")
 		--
 		-- 	vim.schedule(function()
 		-- 		require("oil").open(bufname)
 		-- 	end)
 		-- elseif vim.bo.filetype == "" and bufname == "" and vim.bo.buflisted then
---		-- 	vim.notify("check 2")
+		--		-- 	vim.notify("check 2")
 		--
 		-- 	local opts = { "buftype", "filetype", "buflisted", "bufhidden", "modified" }
 		-- 	local prev_dir = vim.fn.expand("#:p:h")

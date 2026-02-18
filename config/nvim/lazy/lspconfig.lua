@@ -70,7 +70,7 @@ local servers = {
 			},
 		},
 		root_dir = function(_)
-			return vim.fs.root(0, { "package.json", ".git" }) or vim.loop.cwd()
+			return vim.fs.root(0, { "package.json", ".git" }) or vim.fn.getcwd()
 		end,
 		settings = {
 			css = { validate = true },
@@ -85,7 +85,7 @@ local servers = {
 	superhtml = {
 		filetypes = { "html" },
 		root_dir = function(_)
-			return vim.fs.root(0, { "package.json", ".git" }) or vim.loop.cwd()
+			return vim.fs.root(0, { "package.json", ".git" }) or vim.fn.getcwd()
 		end,
 	},
 	-- html = {
@@ -99,7 +99,7 @@ local servers = {
 	-- 		},
 	-- 	},
 	-- 	root_dir = function(_)
-	-- 		return vim.fs.root(0, { "package.json", ".git" }) or vim.loop.cwd()
+	-- 		return vim.fs.root(0, { "package.json", ".git" }) or vim.fn.getcwd()
 	-- 	end,
 	-- 	settings = {},
 	-- },
