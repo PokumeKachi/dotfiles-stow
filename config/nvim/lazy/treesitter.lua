@@ -34,6 +34,7 @@ return {
 			"rust",
 
 			"lua",
+			"luau",
 			"python",
 
 			"make",
@@ -61,6 +62,10 @@ return {
 		},
 	},
 	config = function()
-		vim.api.nvim_set_hl(0, "@variable", { link = "Identifier" })
+		vim.api.nvim_create_autocmd("ColorScheme", {
+			callback = function()
+				vim.api.nvim_set_hl(0, "@variable", { link = "Identifier" })
+			end,
+		})
 	end,
 }
