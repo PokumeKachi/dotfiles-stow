@@ -11,7 +11,7 @@ local NonTerm = {
 	require("lazy.conform"),
 	require("lazy.dropbar"),
 	require("lazy.flutter-tools"),
-	require("lazy.focus"),
+	-- require("lazy.focus"),
 	require("lazy.indent-blankline"),
 	require("lazy.gitsigns"),
     require("lazy.hardtime"),
