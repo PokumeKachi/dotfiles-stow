@@ -1,15 +1,16 @@
 local opt = vim.opt
 
-vim.opt.autoread = true
+opt.autoread = true
 vim.api.nvim_create_autocmd(
   { "FocusGained", "BufEnter", "CursorHold" },
   { command = "checktime" }
 )
+opt.updatetime = 200
 
-vim.opt.splitbelow = true
-vim.opt.splitright = true
+opt.splitbelow = true
+opt.splitright = true
 
-vim.opt.completeopt = { "menu", "menuone", "noselect" }
+opt.completeopt = { "menu", "menuone", "noselect" }
 opt.background = 'light'
 
 vim.g.mkdp_markdown_css = ''
