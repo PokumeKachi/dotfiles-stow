@@ -61,31 +61,44 @@ autocmd({ "BufWinEnter", "WinEnter" }, {
 
 			local cached_win = buf_win_cache[opened_buf]
 
-			if
-				not cached_win
-				or not vim.api.nvim_win_is_valid(cached_win)
-				or cached_win == opened_win
-				or vim.bo[opened_buf].filetype == "oil"
-				or vim.bo[opened_buf].buftype == "terminal"
-				or vim.w[opened_win].snacks_main
-			then
+			local no_cached = not cached_win
+			local invalid_cached = cached_win and not vim.api.nvim_win_is_valid(cached_win)
+			local same_win = cached_win == opened_win
+			local is_oil = vim.bo[opened_buf].filetype == "oil"
+			local is_term = vim.bo[opened_buf].buftype == "terminal"
+			local is_snacks = vim.w[opened_win].snacks_main == true
+
+			local should_skip = no_cached or invalid_cached or same_win or is_oil or is_term or is_snacks
+
+			if should_skip then
+				local msg = table.concat({
+					"no_cached=" .. tostring(no_cached),
+					"invalid_cached=" .. tostring(invalid_cached),
+					"same_win=" .. tostring(same_win),
+					"is_oil=" .. tostring(is_oil),
+					"is_term=" .. tostring(is_term),
+					"is_snacks=" .. tostring(is_snacks),
+				}, " | ")
+
+				-- vim.notify(msg)
 				-- vim.notify("nahh")
 				dedupSuccess(opened_buf, opened_win)
 				return
 			end
 
-			-- vim.notify("handling")
+			vim.notify("handling")
 			local cached_buf = win_buf_cache[opened_win]
 
 			if cached_buf and vim.api.nvim_buf_is_valid(cached_buf) and vim.api.nvim_win_is_valid(opened_win) then
 				vim.api.nvim_win_set_buf(opened_win, cached_buf)
-				--				vim.notify("check 1")
+				-- vim.notify("check 1")
 
 				dedupCallback(opened_buf, cached_win)
 			else
+				vim.notify("check 2")
 				vim.schedule(function()
 					require("oil").open()
-					--					vim.notify("check 2")
+					-- vim.notify("check 2")
 
 					-- dedupCallback(opened_buf, cached_win)
 				end)
@@ -134,6 +147,7 @@ autocmd("BufDelete", {
 })
 
 autocmd("VimEnter", {
+	-- open oil after launching nvim
 	callback = function()
 		local args = vim.fn.argv()
 
@@ -147,7 +161,7 @@ autocmd("VimEnter", {
 		end
 
 		for _, path in ipairs(args) do
-			local stat = vim.loop.fs_stat(path)
+			local stat = vim.uv.fs_stat(path)
 			if stat and stat.type == "directory" then
 				vim.schedule(function()
 					require("oil").open(path)
