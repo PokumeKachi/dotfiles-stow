@@ -1,158 +1,171 @@
 local autocmd = vim.api.nvim_create_autocmd
 
-local buf_win_cache = {}
-local win_buf_cache = {}
-
-local function dedupSuccess(buf, win)
-	if buf and win and vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_win_is_valid(win) then
-		buf_win_cache[buf] = win
-		win_buf_cache[win] = buf
-	end
-
-	vim.g.__buf_dedupe_in_progress = false
-end
-
-local function dedupCallback(buf, win)
-	vim.schedule(function()
-		if not buf or not win then
-			return
-		end
-
-		if not vim.api.nvim_win_is_valid(win) then
-			--			vim.notify("fail 1")
-			return
-		end
-
-		if not vim.api.nvim_buf_is_valid(buf) then
-			--			vim.notify("fail 2")
-			return
-		end
-
-		vim.api.nvim_set_current_win(win)
-		vim.api.nvim_win_set_buf(win, buf)
-		dedupSuccess(buf, win)
-	end)
-end
-
-autocmd({ "BufDelete", "BufWipeout" }, {
-	callback = function(ev)
-		local buf = ev.buf
-		local opened_win = vim.api.nvim_get_current_win()
-
-		buf_win_cache[buf] = nil
-
-		if win_buf_cache[opened_win] == buf then
-			win_buf_cache[opened_win] = nil
-		end
-	end,
-})
-
-autocmd({ "BufWinEnter", "WinEnter" }, {
-	callback = function()
-		vim.schedule(function()
-			if vim.g.__buf_dedupe_in_progress then
-				return
-			end
-
-			vim.g.__buf_dedupe_in_progress = true
-
-			local opened_buf = vim.api.nvim_get_current_buf()
-			local opened_win = vim.api.nvim_get_current_win()
-
-			local cached_win = buf_win_cache[opened_buf]
-
-			local no_cached = not cached_win
-			local invalid_cached = cached_win and not vim.api.nvim_win_is_valid(cached_win)
-			local same_win = cached_win == opened_win
-			local is_oil = vim.bo[opened_buf].filetype == "oil"
-			local is_term = vim.bo[opened_buf].buftype == "terminal"
-			local is_snacks = vim.w[opened_win].snacks_main == true
-
-			local should_skip = no_cached or invalid_cached or same_win or is_oil or is_term or is_snacks
-
-			if should_skip then
-				local msg = table.concat({
-					"no_cached=" .. tostring(no_cached),
-					"invalid_cached=" .. tostring(invalid_cached),
-					"same_win=" .. tostring(same_win),
-					"is_oil=" .. tostring(is_oil),
-					"is_term=" .. tostring(is_term),
-					"is_snacks=" .. tostring(is_snacks),
-				}, " | ")
-
-				-- vim.notify(msg)
-				-- vim.notify("nahh")
-				dedupSuccess(opened_buf, opened_win)
-				return
-			end
-
-			-- vim.notify("handling")
-			local cached_buf = win_buf_cache[opened_win]
-
-			if cached_buf and vim.api.nvim_buf_is_valid(cached_buf) and vim.api.nvim_win_is_valid(opened_win) then
-				vim.api.nvim_win_set_buf(opened_win, cached_buf)
-				-- vim.notify("check 1")
-
-				dedupCallback(opened_buf, cached_win)
-			else
-				-- vim.notify("check 2")
-				vim.schedule(function()
-					require("oil").open()
-					-- vim.notify("check 2")
-
-					-- dedupCallback(opened_buf, cached_win)
-				end)
-			end
-
-			dedupSuccess(nil, nil)
-		end)
-	end,
-})
-
-autocmd("TabNewEntered", {
-	callback = function()
-		if vim.bo.buftype == "" then
-			require("oil").open()
-		end
-	end,
-})
-
-autocmd("TermOpen", {
-	callback = function()
-		vim.opt_local.relativenumber = true
-		vim.schedule(function()
-			vim.cmd("startinsert")
-		end)
-	end,
-})
-
-autocmd("BufDelete", {
-	callback = function(args)
-		local deleted_buf = args.buf
-		local buf_name = vim.api.nvim_buf_get_name(deleted_buf)
-
-		if buf_name == "" then
-			return
-		end
-
-		local buf_dir = vim.fn.fnamemodify(buf_name, ":p:h")
-
-		if vim.fn.isdirectory(buf_dir) == 0 then
-			return
-		end
-
-		vim.schedule(function()
-			local listed = vim.tbl_filter(function(b)
-				return vim.api.nvim_buf_is_valid(b) and vim.bo[b].buflisted and vim.bo[b].buftype == ""
-			end, vim.api.nvim_list_bufs())
-
-			if #listed == 0 and buf_dir ~= "" then
-				vim.cmd("cd " .. vim.fn.fnameescape(buf_dir))
-			end
-		end)
-	end,
-	group = vim.api.nvim_create_augroup("OilOnLastBufDelete", { clear = true }),
-})
+-- local buf_win_cache = {}
+-- local win_buf_cache = {}
+--
+-- local function dedupSuccess(buf, win)
+-- 	if buf and win and vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_win_is_valid(win) then
+-- 		buf_win_cache[buf] = win
+-- 		win_buf_cache[win] = buf
+-- 	end
+--
+-- 	vim.g.__buf_dedupe_in_progress = false
+-- end
+--
+-- local function dedupCallback(buf, win)
+-- 	vim.schedule(function()
+-- 		if not buf or not win then
+-- 			return
+-- 		end
+--
+-- 		if not vim.api.nvim_win_is_valid(win) then
+-- 			--			vim.notify("fail 1")
+-- 			return
+-- 		end
+--
+-- 		if not vim.api.nvim_buf_is_valid(buf) then
+-- 			--			vim.notify("fail 2")
+-- 			return
+-- 		end
+--
+-- 		vim.api.nvim_set_current_win(win)
+-- 		vim.api.nvim_win_set_buf(win, buf)
+-- 		dedupSuccess(buf, win)
+-- 	end)
+-- end
+--
+-- vim.api.nvim_create_autocmd("BufWinLeave", {
+-- 	callback = function(args)
+-- 		if vim.fn.buflisted(args.buf) == 1 and #vim.fn.win_findbuf(args.buf) == 1 then
+-- 			vim.schedule(function()
+--                 print('yea')
+-- 				if #vim.fn.win_findbuf(args.buf) == 0 then
+-- 					require("bufdelete").bufdelete(args.buf)
+-- 				end
+-- 			end)
+-- 		end
+-- 	end,
+-- })
+--
+-- autocmd({ "BufDelete", "BufWipeout" }, {
+-- 	callback = function(ev)
+-- 		local buf = ev.buf
+-- 		local opened_win = vim.api.nvim_get_current_win()
+--
+-- 		buf_win_cache[buf] = nil
+--
+-- 		if win_buf_cache[opened_win] == buf then
+-- 			win_buf_cache[opened_win] = nil
+-- 		end
+-- 	end,
+-- })
+--
+-- autocmd({ "BufWinEnter", "WinEnter" }, {
+-- 	callback = function()
+-- 		vim.schedule(function()
+-- 			if vim.g.__buf_dedupe_in_progress then
+-- 				return
+-- 			end
+--
+-- 			vim.g.__buf_dedupe_in_progress = true
+--
+-- 			local opened_buf = vim.api.nvim_get_current_buf()
+-- 			local opened_win = vim.api.nvim_get_current_win()
+--
+-- 			local cached_win = buf_win_cache[opened_buf]
+--
+-- 			local no_cached = not cached_win
+-- 			local invalid_cached = cached_win and not vim.api.nvim_win_is_valid(cached_win)
+-- 			local same_win = cached_win == opened_win
+-- 			local is_oil = vim.bo[opened_buf].filetype == "oil"
+-- 			local is_term = vim.bo[opened_buf].buftype == "terminal"
+-- 			local is_snacks = vim.w[opened_win].snacks_main == true
+--
+-- 			local should_skip = no_cached or invalid_cached or same_win or is_oil or is_term or is_snacks
+--
+-- 			if should_skip then
+-- 				local msg = table.concat({
+-- 					"no_cached=" .. tostring(no_cached),
+-- 					"invalid_cached=" .. tostring(invalid_cached),
+-- 					"same_win=" .. tostring(same_win),
+-- 					"is_oil=" .. tostring(is_oil),
+-- 					"is_term=" .. tostring(is_term),
+-- 					"is_snacks=" .. tostring(is_snacks),
+-- 				}, " | ")
+--
+-- 				-- vim.notify(msg)
+-- 				-- vim.notify("nahh")
+-- 				dedupSuccess(opened_buf, opened_win)
+-- 				return
+-- 			end
+--
+-- 			-- vim.notify("handling")
+-- 			local cached_buf = win_buf_cache[opened_win]
+--
+-- 			if cached_buf and vim.api.nvim_buf_is_valid(cached_buf) and vim.api.nvim_win_is_valid(opened_win) then
+-- 				vim.api.nvim_win_set_buf(opened_win, cached_buf)
+-- 				-- vim.notify("check 1")
+--
+-- 				dedupCallback(opened_buf, cached_win)
+-- 			else
+-- 				-- vim.notify("check 2")
+-- 				vim.schedule(function()
+-- 					require("oil").open()
+-- 					-- vim.notify("check 2")
+--
+-- 					-- dedupCallback(opened_buf, cached_win)
+-- 				end)
+-- 			end
+--
+-- 			dedupSuccess(nil, nil)
+-- 		end)
+-- 	end,
+-- })
+--
+-- autocmd("TabNewEntered", {
+-- 	callback = function()
+-- 		if vim.bo.buftype == "" then
+-- 			require("oil").open()
+-- 		end
+-- 	end,
+-- })
+--
+-- autocmd("TermOpen", {
+-- 	callback = function()
+-- 		vim.opt_local.relativenumber = true
+-- 		vim.schedule(function()
+-- 			vim.cmd("startinsert")
+-- 		end)
+-- 	end,
+-- })
+--
+-- autocmd("BufDelete", {
+-- 	callback = function(args)
+-- 		local deleted_buf = args.buf
+-- 		local buf_name = vim.api.nvim_buf_get_name(deleted_buf)
+--
+-- 		if buf_name == "" then
+-- 			return
+-- 		end
+--
+-- 		local buf_dir = vim.fn.fnamemodify(buf_name, ":p:h")
+--
+-- 		if vim.fn.isdirectory(buf_dir) == 0 then
+-- 			return
+-- 		end
+--
+-- 		vim.schedule(function()
+-- 			local listed = vim.tbl_filter(function(b)
+-- 				return vim.api.nvim_buf_is_valid(b) and vim.bo[b].buflisted and vim.bo[b].buftype == ""
+-- 			end, vim.api.nvim_list_bufs())
+--
+-- 			if #listed == 0 and buf_dir ~= "" then
+-- 				vim.cmd("cd " .. vim.fn.fnameescape(buf_dir))
+-- 			end
+-- 		end)
+-- 	end,
+-- 	group = vim.api.nvim_create_augroup("OilOnLastBufDelete", { clear = true }),
+-- })
 
 autocmd("VimEnter", {
 	-- open oil after launching nvim
