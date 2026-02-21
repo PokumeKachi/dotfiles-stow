@@ -109,6 +109,14 @@ autocmd({ "BufWinEnter", "WinEnter" }, {
 	end,
 })
 
+autocmd("TabNewEntered", {
+	callback = function()
+		if vim.bo.buftype == "" then
+			require("oil").open()
+		end
+	end,
+})
+
 autocmd("TermOpen", {
 	callback = function()
 		vim.opt_local.relativenumber = true
