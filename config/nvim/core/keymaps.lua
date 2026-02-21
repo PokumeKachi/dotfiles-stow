@@ -152,14 +152,16 @@ map("n", "<leader>cc", function()
 		-- when the buffer is visible elsewhere, you open oil instead of deleting it
 		-- preventing accidental removal from another window.
 		require("oil").open()
-		print("yea opening oil")
+		-- print("yea opening oil")
 		return
 	end
 
 	if #bufs == 1 and bufs[1] == current_buf then
+		-- print("check here 2")
 		require("oil").open()
 		require("bufdelete").bufdelete(current_buf)
 	else
+		-- print("check here")
 		local idx
 		for i, b in ipairs(bufs) do
 			if b == current_buf then
@@ -167,6 +169,8 @@ map("n", "<leader>cc", function()
 				break
 			end
 		end
+
+		require("bufdelete").bufdelete(current_buf)
 
 		if not idx then
 			return
@@ -177,8 +181,6 @@ map("n", "<leader>cc", function()
 		if target then
 			vim.api.nvim_set_current_buf(target)
 		end
-
-		require("bufdelete").bufdelete(current_buf)
 	end
 end, { silent = true, desc = "close buffer" })
 map("n", "<leader>ca", ":bufdo bd<CR>", { silent = true, desc = "close all buffers" })

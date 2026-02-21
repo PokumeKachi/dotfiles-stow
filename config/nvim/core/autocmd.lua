@@ -86,7 +86,7 @@ autocmd({ "BufWinEnter", "WinEnter" }, {
 				return
 			end
 
-			vim.notify("handling")
+			-- vim.notify("handling")
 			local cached_buf = win_buf_cache[opened_win]
 
 			if cached_buf and vim.api.nvim_buf_is_valid(cached_buf) and vim.api.nvim_win_is_valid(opened_win) then
@@ -95,7 +95,7 @@ autocmd({ "BufWinEnter", "WinEnter" }, {
 
 				dedupCallback(opened_buf, cached_win)
 			else
-				vim.notify("check 2")
+				-- vim.notify("check 2")
 				vim.schedule(function()
 					require("oil").open()
 					-- vim.notify("check 2")
