@@ -12,7 +12,14 @@ return {
 			formatters = {
 				prettier = {
 					command = "prettier",
-					args = { "--stdin-filepath", "$FILENAME", "--tab-width", "4", "--use-tabs", "false" },
+					args = {
+						"--stdin-filepath",
+						"$FILENAME",
+						"--tab-width",
+						"4",
+						"--use-tabs",
+						"false",
+					},
 					stdin = true,
 				},
 				-- dart_format = {
@@ -21,11 +28,19 @@ return {
 				-- },
 				clang_format = {
 					command = "clang-format",
-					args = { "-style", "{BasedOnStyle: Google, IndentWidth: 4}" },
+					args = {
+						"-style",
+						"{BasedOnStyle: Google, IndentWidth: 4}",
+					},
 				},
 				nixfmt = {
 					command = "nixfmt",
 					args = { "--indent", "4" },
+				},
+				formatters = {
+					stylua = {
+						extra_args = { "--column-width", "80" },
+					},
 				},
 			},
 			formatters_by_ft = {
