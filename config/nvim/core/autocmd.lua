@@ -1,21 +1,5 @@
 local autocmd = vim.api.nvim_create_autocmd
 
-vim.api.nvim_create_autocmd("BufAdd", {
-	callback = function(args)
-		local name = vim.api.nvim_buf_get_name(args.buf)
-		if name == "" then
-			vim.schedule(function()
-				require("oil").open()
-				vim.schedule(function()
-					if vim.bo[args.buf].filetype ~= "oil" then
-						vim.api.nvim_buf_delete(args.buf, { force = true })
-					end
-				end)
-			end)
-		end
-	end,
-})
-
 autocmd("VimEnter", {
 	-- open oil after launching nvim
 	callback = function()
