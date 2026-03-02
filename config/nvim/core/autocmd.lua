@@ -1,5 +1,12 @@
 local autocmd = vim.api.nvim_create_autocmd
 
+-- autofocus terminals
+autocmd("TermOpen", {
+  callback = function()
+    vim.cmd("startinsert")
+  end,
+})
+
 autocmd("VimEnter", {
 	-- open oil after launching nvim
 	callback = function()
