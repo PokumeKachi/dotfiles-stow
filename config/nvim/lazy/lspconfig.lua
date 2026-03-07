@@ -122,7 +122,7 @@ local servers = {
 			},
 		},
 	},
-	marksman = {},
+	-- marksman = {},
 	dartls = {
 		cmd = { "dart", "language-server", "--protocol=lsp" },
 		settings = {
