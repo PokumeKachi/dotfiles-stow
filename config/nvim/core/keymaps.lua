@@ -271,8 +271,8 @@ map("n", "<leader>ff", function()
 		end
 	end
 end, { silent = true, desc = "focus floating window" })
-map("n", "<leader>fn", ":Telescope find_files<CR>", { silent = true, desc = "by file name" })
-map("n", "<leader>fw", ":Telescope live_grep<CR>", { silent = true, desc = "by word" })
+map("n", "<leader>fn", ":FzfLua files<CR>", { silent = true, desc = "by file name" })
+map("n", "<leader>fw", ":FzfLua live_grep<CR>", { silent = true, desc = "by word" })
 map("n", "<leader>fm", function()
 	require("conform").format({ lsp_fallback = true, async = true })
 end, { silent = true, desc = "format code" })

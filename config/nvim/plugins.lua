@@ -36,7 +36,7 @@ local NonTerm = {
 	require("lazy.nvim-ts-autotag"),
 	require("lazy.nvim-ufo"),
 	require("lazy.outline"),
-	require("lazy.telescope"),
+	-- require("lazy.telescope"),
 	require("lazy.template"),
 	require("lazy.tex2uni"),
 	require("lazy.tgpt"),
