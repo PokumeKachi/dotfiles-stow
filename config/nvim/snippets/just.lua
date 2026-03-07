@@ -14,10 +14,6 @@ local base = {
 	"",
 	"todo:",
 	tab() .. "taskwarrior-tui --taskdata .task",
-
-	"",
-	"git:",
-	tab() .. "gitui",
 }
 
 return {
