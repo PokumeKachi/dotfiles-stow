@@ -151,13 +151,15 @@ map("n", "<leader>qq", ":quit<CR>", { silent = true, desc = "quit window" })
 map("n", "<leader>qa", ":qa<CR>", { silent = true, desc = "quit all windows" })
 map("n", "<leader>qo", ":only<CR>", { silent = true, desc = "quit other windows" })
 
-map("n", "<leader>ld", lsp.definition, { silent = true, desc = "go to definition" })
+local fzf = require("fzf-lua")
+map("n", "<leader>ld", fzf.lsp_definitions, { desc = "definitions" })
+map("n", "<leader>lr", fzf.lsp_references, { desc = "references" })
+map("n", "<leader>li", fzf.lsp_implementations, { desc = "implementations" })
+map("n", "<leader>lt", fzf.lsp_typedefs, { desc = "type definitions" })
+map("n", "<leader>la", fzf.lsp_code_actions, { desc = "code actions" })
+
 map("n", "<leader>lh", lsp.hover, { silent = true, desc = "view documentation" })
 map("n", "<leader>ln", lsp.rename, { silent = true, desc = "rename symbol" })
-map("n", "<leader>la", lsp.code_action, { silent = true, desc = "code actions" })
-map("n", "<leader>lr", lsp.references, { silent = true, desc = "find references" })
-map("n", "<leader>li", lsp.implementation, { silent = true, desc = "go to implementation" })
-map("n", "<leader>lt", lsp.type_definition, { silent = true, desc = "go to type definition" })
 
 -- map("i", "jk", "<Esc>", { noremap = true })
 -- map("i", "jK", "<Esc>", { noremap = true })
@@ -271,13 +273,17 @@ map("n", "<leader>ff", function()
 		end
 	end
 end, { silent = true, desc = "focus floating window" })
-map("n", "<leader>fn", ":FzfLua files<CR>", { silent = true, desc = "by file name" })
-map("n", "<leader>fw", ":FzfLua live_grep<CR>", { silent = true, desc = "by word" })
+
+map("n", "<leader>fzq", function()
+	require("fzf-lua").quickfix()
+end)
+map("n", "<leader>fzf", ":FzfLua files<CR>", { silent = true, desc = "by file name" })
+map("n", "<leader>fzg", ":FzfLua live_grep<CR>", { silent = true, desc = "by word" })
 map("n", "<leader>fm", function()
 	require("conform").format({ lsp_fallback = true, async = true })
 end, { silent = true, desc = "format code" })
 
-map("n", "<leader>b", ":enew<CR>", {
+map("n", "<leader>bn", ":enew<CR>", {
 	desc = "new buffer",
 	silent = true,
 })
