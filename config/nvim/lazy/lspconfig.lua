@@ -122,7 +122,13 @@ local servers = {
 			},
 		},
 	},
-	-- marksman = {},
+	marksman = {
+		settings = {
+			marksman = {
+				diagnostics = { wikiLinks = false },
+			},
+		},
+	},
 	dartls = {
 		cmd = { "dart", "language-server", "--protocol=lsp" },
 		settings = {

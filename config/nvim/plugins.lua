@@ -4,6 +4,10 @@ local LazyList = {
 }
 
 local NonTerm = {
+    require('lazy.fzf-lua'),
+	require("lazy.oil"),
+	require("lazy.oil-git-status"),
+
 	require("lazy.blink"),
 	require("lazy.bufdelete"),
 	require("lazy.bullets"),
@@ -31,8 +35,6 @@ local NonTerm = {
 	require("lazy.nvim-notify"),
 	require("lazy.nvim-ts-autotag"),
 	require("lazy.nvim-ufo"),
-	require("lazy.oil"),
-	require("lazy.oil-git-status"),
 	require("lazy.outline"),
 	require("lazy.telescope"),
 	require("lazy.template"),

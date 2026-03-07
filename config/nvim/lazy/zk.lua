@@ -1,8 +1,5 @@
 return {
 	"zk-org/zk-nvim",
-	dependencies = {
-		"ibhagwan/fzf-lua",
-	},
 	config = function()
 		require("zk").setup({
 			picker = "fzf_lua",
