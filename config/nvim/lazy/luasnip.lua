@@ -7,6 +7,7 @@ return {
 	config = function(_, opts)
 		local ls = require("luasnip")
 		ls.setup(opts)
+
 		-- require("luasnip.loaders.from_vscode").lazy_load({
 		-- 	include = { "javascript", "typescript", "lua", "rust" },
 		-- })
