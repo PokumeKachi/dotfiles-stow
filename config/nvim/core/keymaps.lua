@@ -170,12 +170,43 @@ map("n", "<Tab>", ":bnext<CR>", silent)
 map("n", "<S-tab>", ":bprev<CR>", silent)
 map("n", "<C-Tab>", "<C-^>", silent)
 
+map("n", "<leader>fr", function()
+	local old_buf = vim.api.nvim_get_current_buf()
+
+	local fullName = vim.api.nvim_buf_get_name(0)
+
+	local dir = vim.fn.fnamemodify(fullName, ":h")
+	local filename = vim.fn.fnamemodify(fullName, ":t")
+	local new_name = vim.fn.input("new name: ", filename, "file")
+
+	if new_name == "" or new_name == fullName then
+		return
+	end
+
+	new_name = dir .. "/" .. new_name
+
+	if vim.uv.fs_stat(fullName) then
+		local ok, err = vim.uv.fs_rename(fullName, new_name)
+
+		if not ok then
+			print(err)
+			return
+		end
+	end
+
+	vim.cmd("edit " .. vim.fn.fnameescape(new_name))
+	require("bufdelete").bufdelete(old_buf)
+end, { desc = "[file] rename" })
+
 map("n", "<leader>fd", function()
 	local file = vim.api.nvim_buf_get_name(0)
 	if file ~= "" then
-		vim.fn.system({ "trash-put", file })
+		local ok = vim.fn.confirm("Delete file?\n" .. file, "&Yes\n&No", 2)
+		if ok == 1 then
+			vim.fn.system({ "trash-put", file })
+			vim.cmd("bdelete")
+		end
 	end
-	vim.cmd("bdelete")
 end, { desc = "(file) delete", silent = true })
 
 map("n", "<leader>bcc", function()
@@ -292,33 +323,6 @@ end, { desc = "Show diagnostics in location list", silent = true })
 -- 	vim.wo.relativenumber = vim.wo.number
 -- end, { desc = "line numbers" })
 
-map("n", "<leader>rn", function()
-	local old_buf = vim.api.nvim_get_current_buf()
-
-	local fullName = vim.api.nvim_buf_get_name(0)
-
-	local dir = vim.fn.fnamemodify(fullName, ":h")
-	local filename = vim.fn.fnamemodify(fullName, ":t")
-	local new_name = vim.fn.input("new name: ", filename, "file")
-
-	if new_name == "" or new_name == fullName then
-		return
-	end
-
-	new_name = dir .. "/" .. new_name
-
-	if vim.uv.fs_stat(fullName) then
-		local ok, err = vim.uv.fs_rename(fullName, new_name)
-
-		if not ok then
-			print(err)
-			return
-		end
-	end
-
-	vim.cmd("edit " .. vim.fn.fnameescape(new_name))
-	require("bufdelete").bufdelete(old_buf)
-end, { desc = "(re)name" })
 map("n", "<leader>rr", function()
 	local keys = vim.api.nvim_replace_termcodes(":%s///gc<Left><Left><Left>", true, false, true)
 	vim.api.nvim_feedkeys(keys, "t", false)
