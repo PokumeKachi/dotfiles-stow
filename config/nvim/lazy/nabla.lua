@@ -1,15 +1,15 @@
 return {
-    "jbyuki/nabla.nvim",
-    dependencies = {
-        "nvim-neo-tree/neo-tree.nvim",
-    },
-    lazy = true,
+	"jbyuki/nabla.nvim",
+	dependencies = {
+		"nvim-neo-tree/neo-tree.nvim",
+	},
+	lazy = true,
 
-    config = function()
-        -- require("nvim-treesitter.configs").setup({
-        --     ensure_installed = { "latex" },
-        --     auto_install = true,
-        --     sync_install = false,
-        -- })
-    end,
+	config = function()
+		require("nvim-treesitter.configs").setup({
+			ensure_installed = { "latex" },
+			auto_install = true,
+			sync_install = false,
+		})
+	end,
 }

@@ -87,7 +87,7 @@ local function float_win()
 	})
 end
 
-local function get_current_path()
+local function get_current_file()
 	local cwd = vim.loop.cwd()
 
 	if vim.bo.buftype == "terminal" or vim.bo.filetype == "oil" then
@@ -170,7 +170,15 @@ map("n", "<Tab>", ":bnext<CR>", silent)
 map("n", "<S-tab>", ":bprev<CR>", silent)
 map("n", "<C-Tab>", "<C-^>", silent)
 
-map("n", "<leader>cc", function()
+map("n", "<leader>fd", function()
+	local file = vim.api.nvim_buf_get_name(0)
+	if file ~= "" then
+		vim.fn.system({ "trash-put", file })
+	end
+	vim.cmd("bdelete")
+end, { desc = "(file) delete", silent = true })
+
+map("n", "<leader>bcc", function()
 	local bufs = get_bufs()
 	local current_buf = vim.api.nvim_get_current_buf()
 
@@ -210,9 +218,9 @@ map("n", "<leader>cc", function()
 			vim.api.nvim_set_current_buf(target)
 		end
 	end
-end, { silent = true, desc = "close buffer" })
-map("n", "<leader>ca", ":bufdo bd<CR>", { silent = true, desc = "close all buffers" })
-map("n", "<leader>co", function()
+end, { silent = true, desc = "(buffer) close" })
+map("n", "<leader>bca", ":bufdo bd<CR>", { silent = true, desc = "close all buffers" })
+map("n", "<leader>bco", function()
 	local bufs = get_bufs()
 
 	for _, buf in ipairs(bufs) do
@@ -480,14 +488,15 @@ map("n", "<F9>", function()
 end)
 
 map("n", "<F5>", function()
+	local current_file = get_current_file()
 	float_win()
-	vim.fn.termopen("just --choose -- "..get_current_path())
+	vim.fn.termopen("just --choose -- " .. current_file)
 end)
 
 map("n", "<F6>", function()
+	local current_file = get_current_file()
 	float_win()
-
-	vim.fn.termopen("just run "..get_current_path())
+	vim.fn.termopen("just run " .. current_file)
 end)
 
 local typstJob
