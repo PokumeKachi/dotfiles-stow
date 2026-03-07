@@ -511,6 +511,8 @@ function killTypstPreview()
 	end
 end
 
+map("n", "<leader>pm", ":MarkdownPreview<CR>", { silent = true, desc = "[preview] markdown" })
+
 map("n", "<leader>pt", function()
 	local file = vim.fn.expand("%:p")
 	local out = "/tmp/" .. vim.fn.expand("%:t:r") .. ".pdf"
