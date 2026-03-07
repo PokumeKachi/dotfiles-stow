@@ -74,20 +74,48 @@ local function get_word_under_cursor()
 	return line:sub(s + 1, e)
 end
 
-local ls = require("luasnip")
+local function float_win()
+	local buf = vim.api.nvim_create_buf(false, true)
+	local win = vim.api.nvim_open_win(buf, true, {
+		relative = "editor",
+		width = math.floor(vim.o.columns * 0.7),
+		height = math.floor(vim.o.lines * 0.6),
+		row = math.floor(vim.o.lines * 0.2),
+		col = math.floor(vim.o.columns * 0.15),
+		style = "minimal",
+		border = "rounded",
+	})
+end
+
+local function get_current_path()
+	local cwd = vim.loop.cwd()
+
+	if vim.bo.buftype == "terminal" or vim.bo.filetype == "oil" then
+		return "."
+	end
+
+	local name = vim.api.nvim_buf_get_name(0)
+	if name == "" then
+		return "."
+	end
+
+	return vim.fn.fnamemodify(name, ":.")
+end
+
+local luasnip = require("luasnip")
 
 vim.keymap.set({ "i" }, "<C-k>", function()
-	ls.expand()
+	luasnip.expand()
 end, { silent = true })
 vim.keymap.set({ "i", "s" }, "<C-l>", function()
-	ls.jump(1)
+	luasnip.jump(1)
 end, { silent = true })
 vim.keymap.set({ "i", "s" }, "<C-h>", function()
-	ls.jump(-1)
+	luasnip.jump(-1)
 end, { silent = true })
 vim.keymap.set({ "i", "s" }, "<C-e>", function()
-	if ls.choice_active() then
-		ls.change_choice(1)
+	if luasnip.choice_active() then
+		luasnip.change_choice(1)
 	end
 end, { silent = true })
 
@@ -135,7 +163,7 @@ map("n", "<leader>lt", lsp.type_definition, { silent = true, desc = "go to type 
 -- map("i", "jK", "<Esc>", { noremap = true })
 -- map("i", "Jk", "<Esc>", { noremap = true })
 -- map("i", "JK", "<Esc>", { noremap = true })
-all_case_map({ "i" }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
+all_case_map({ "i", "t" }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
 -- all_case_map({ "t", "i" }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
 
 map("n", "<Tab>", ":bnext<CR>", silent)
@@ -451,29 +479,15 @@ map("n", "<F9>", function()
 	require("dap").toggle_breakpoint()
 end)
 
-local function floatWin()
-	local buf = vim.api.nvim_create_buf(false, true)
-	local win = vim.api.nvim_open_win(buf, true, {
-		relative = "editor",
-		width = math.floor(vim.o.columns * 0.7),
-		height = math.floor(vim.o.lines * 0.6),
-		row = math.floor(vim.o.lines * 0.2),
-		col = math.floor(vim.o.columns * 0.15),
-		style = "minimal",
-		border = "rounded",
-	})
-end
-
 map("n", "<F5>", function()
-	floatWin()
-
-	vim.fn.termopen("just")
+	float_win()
+	vim.fn.termopen("just --choose -- "..get_current_path())
 end)
 
 map("n", "<F6>", function()
-	floatWin()
+	float_win()
 
-	vim.fn.termopen("just run")
+	vim.fn.termopen("just run "..get_current_path())
 end)
 
 local typstJob
