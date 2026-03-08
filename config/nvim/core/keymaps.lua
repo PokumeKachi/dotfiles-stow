@@ -334,9 +334,27 @@ map("n", "<leader>zf", function()
 	Snacks.zen.zoom()
 end, { desc = "fullscreen (zoomed) mode", noremap = true, silent = true })
 
-map("n", "<leader>zn", function()
+map("n", "<leader>zkn", function()
 	require("zk").new()
-end, { desc = "fullscreen (zoomed) mode", noremap = true, silent = true })
+end, { desc = "[zk] new", noremap = true, silent = true })
+map("n", "<leader>zkpn", function()
+	require("zk").pick_notes({}, {}, function(selection)
+		if not selection then
+			return
+		end
+
+		for _, note in ipairs(selection) do
+			local buf = vim.fn.bufadd(note.absPath)
+			vim.fn.bufload(buf)
+			vim.api.nvim_open_win(buf, true, {
+				split = "right",
+			})
+		end
+	end)
+end, { desc = "[z][k] [p]icker - notes", noremap = true, silent = true })
+map("n", "<leader>zkpt", function()
+	require("zk").pick_tags()
+end, { desc = "[z][k] [p]icker - tags", noremap = true, silent = true })
 
 map("n", "<leader>da", Lsp.code_action, { desc = "Show code actions" })
 map("n", "<leader>df", vim.diagnostic.open_float, { desc = "Show floating errors", silent = true })

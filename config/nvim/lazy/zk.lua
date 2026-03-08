@@ -2,7 +2,7 @@ return {
 	"zk-org/zk-nvim",
 	config = function()
 		require("zk").setup({
-			picker = "select",
+			picker = "snacks_picker",
 
 			lsp = {
 				config = {
