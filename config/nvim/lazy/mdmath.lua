@@ -1,5 +1,6 @@
 return {
 	"Thiago4532/mdmath.nvim",
+	event = { "BufReadPost *.md", "BufNewFile *.md" },
 	dependencies = {
 		"nvim-treesitter/nvim-treesitter",
 	},

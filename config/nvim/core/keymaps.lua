@@ -175,29 +175,30 @@ map("n", "<C-Tab>", "<C-^>", silent)
 map("n", "<leader>fr", function()
 	local old_buf = vim.api.nvim_get_current_buf()
 
-	local fullName = vim.api.nvim_buf_get_name(0)
+	local full_name = vim.api.nvim_buf_get_name(0)
 
-	local dir = vim.fn.fnamemodify(fullName, ":h")
-	local filename = vim.fn.fnamemodify(fullName, ":t")
-	local new_name = vim.fn.input("new name: ", filename, "file")
+	local dir = vim.fn.fnamemodify(full_name, ":h")
+	local filename = vim.fn.fnamemodify(full_name, ":t")
 
-	if new_name == "" or new_name == fullName then
-		return
-	end
-
-	new_name = dir .. "/" .. new_name
-
-	if vim.uv.fs_stat(fullName) then
-		local ok, err = vim.uv.fs_rename(fullName, new_name)
-
-		if not ok then
-			print(err)
+	vim.ui.input({ prompt = "new name: ", default = filename }, function(new_name)
+		if not new_name or new_name == "" or new_name == full_name then
 			return
 		end
-	end
 
-	vim.cmd("edit " .. vim.fn.fnameescape(new_name))
-	require("bufdelete").bufdelete(old_buf)
+		new_name = dir .. "/" .. new_name
+
+		if vim.uv.fs_stat(full_name) then
+			local ok, err = vim.uv.fs_rename(full_name, new_name)
+
+			if not ok then
+				print(err)
+				return
+			end
+		end
+
+		vim.cmd("edit " .. vim.fn.fnameescape(new_name))
+		snacks.bufdelete(old_buf)
+	end)
 end, { desc = "[file] rename" })
 
 map("n", "<leader>fd", function()
@@ -228,7 +229,7 @@ map("n", "<leader>bcc", function()
 	if #bufs == 1 and bufs[1] == current_buf then
 		-- print("check here 2")
 		require("oil").open()
-		require("bufdelete").bufdelete(current_buf)
+		snacks.bufdelete(current_buf)
 	else
 		-- print("check here")
 		local idx
@@ -239,7 +240,7 @@ map("n", "<leader>bcc", function()
 			end
 		end
 
-		require("bufdelete").bufdelete(current_buf)
+		snacks.bufdelete(current_buf)
 
 		if not idx then
 			return

@@ -4,12 +4,14 @@ local LazyList = {
 }
 
 local NonTerm = {
-    require('lazy.fzf-lua'),
+	require("lazy.fzf-lua"),
 	require("lazy.oil"),
 	require("lazy.oil-git-status"),
 
+	require("lazy.mini"),
+	require("lazy.snacks"),
+
 	require("lazy.blink"),
-	require("lazy.bufdelete"),
 	require("lazy.bullets"),
 	require("lazy.colorscheme"),
 	require("lazy.conform"),
@@ -23,7 +25,6 @@ local NonTerm = {
 	require("lazy.luasnip"),
 	require("lazy.luau-lsp"),
 	require("lazy.luau-tree"),
-	require("lazy.mini"),
 	require("lazy.neoscroll"),
 	require("lazy.noice"),
 	require("lazy.none-ls"),
@@ -36,7 +37,6 @@ local NonTerm = {
 	require("lazy.nvim-ts-autotag"),
 	require("lazy.nvim-ufo"),
 	require("lazy.outline"),
-	-- require("lazy.telescope"),
 	require("lazy.template"),
 	require("lazy.tex2uni"),
 	require("lazy.tgpt"),
@@ -48,7 +48,6 @@ local NonTerm = {
 	require("lazy.vim-fugitive"),
 	require("lazy.vim-visual-multi"),
 	require("lazy.rainbow-delimiters"),
-	require("lazy.snacks"),
 
 	require("lazy.typst-preview"),
 

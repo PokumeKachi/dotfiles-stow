@@ -1,4 +1,7 @@
 return {
-    "chrisbra/unicode.vim",
-    cmd = { "Unicode", "Digraphs" },
+	{
+		"chrisbra/unicode.vim",
+		cmd = { "UnicodeName", "UnicodeSearch" },
+		keys = {},
+	},
 }
