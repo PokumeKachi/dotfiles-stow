@@ -227,6 +227,7 @@ map("n", "<leader>fd", function()
 	end
 end, { desc = "(file) delete", silent = true })
 
+map({ "n", "v", "s", "o" }, "<leader>bs", "ggVG", { desc = "[buffer] select", silent = true })
 map("n", "<leader>bcc", function()
 	local bufs = get_bufs()
 	local current_buf = vim.api.nvim_get_current_buf()
@@ -333,6 +334,10 @@ map("n", "<leader>zf", function()
 	Snacks.zen.zoom()
 end, { desc = "fullscreen (zoomed) mode", noremap = true, silent = true })
 
+map("n", "<leader>zn", function()
+	require("zk").new()
+end, { desc = "fullscreen (zoomed) mode", noremap = true, silent = true })
+
 map("n", "<leader>da", Lsp.code_action, { desc = "Show code actions" })
 map("n", "<leader>df", vim.diagnostic.open_float, { desc = "Show floating errors", silent = true })
 map("n", "<leader>dl", function()
@@ -354,8 +359,6 @@ map("n", "<leader>rr", function()
 	local keys = vim.api.nvim_replace_termcodes(":%s///gc<Left><Left><Left>", true, false, true)
 	vim.api.nvim_feedkeys(keys, "t", false)
 end, { desc = "(replace) search" })
-
-map({ "n", "v", "s", "o" }, "<leader>sb", "ggVG", { desc = "[select] buffer", silent = true })
 
 map({ "n", "x" }, "/", "/\\V", { noremap = true })
 map("v", "/", "<Esc>/\\%V\\V", { desc = "search within visual selection" })
