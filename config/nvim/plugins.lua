@@ -4,6 +4,8 @@ local LazyList = {
 }
 
 local NonTerm = {
+	require("lazy.winmove"),
+
 	require("lazy.oil"),
 	require("lazy.oil-git-status"),
 

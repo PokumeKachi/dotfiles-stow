@@ -4,8 +4,10 @@ local silent = {
 	silent = true,
 }
 local Snacks = require("snacks")
+local Picker = require("snacks").picker
 local BlinkCmp = require("blink.cmp")
-local lsp = vim.lsp.buf
+local Lsp = vim.lsp.buf
+
 local function is_buf_in_other_win(buf)
 	local current_win = vim.api.nvim_get_current_win()
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -146,27 +148,28 @@ end, { silent = true })
 map("n", "<leader>w", function()
 	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w>", true, false, true), "m", true)
 end, { noremap = true, silent = true, desc = "window operations" })
+map("n", "<C-w>r", function()
+	require("winmove").start_mode("resize")
+end, {
+	noremap = true,
+	desc = "winmove",
+	silent = true,
+})
 
 map("n", "<leader>qq", ":quit<CR>", { silent = true, desc = "quit window" })
 map("n", "<leader>qa", ":qa<CR>", { silent = true, desc = "quit all windows" })
 map("n", "<leader>qo", ":only<CR>", { silent = true, desc = "quit other windows" })
 
-local fzf = require("fzf-lua")
-map("n", "<leader>ld", fzf.lsp_definitions, { desc = "definitions" })
-map("n", "<leader>lr", fzf.lsp_references, { desc = "references" })
-map("n", "<leader>li", fzf.lsp_implementations, { desc = "implementations" })
-map("n", "<leader>lt", fzf.lsp_typedefs, { desc = "type definitions" })
-map("n", "<leader>la", fzf.lsp_code_actions, { desc = "code actions" })
+map("n", "<leader>ld", Picker.lsp_definitions, { desc = "definitions" })
+map("n", "<leader>lr", Picker.lsp_references, { desc = "references" })
+map("n", "<leader>li", Picker.lsp_implementations, { desc = "implementations" })
+map("n", "<leader>lt", Picker.lsp_type_definitions, { desc = "type definitions" })
 
-map("n", "<leader>lh", lsp.hover, { silent = true, desc = "view documentation" })
-map("n", "<leader>ln", lsp.rename, { silent = true, desc = "rename symbol" })
+map("n", "<leader>la", Lsp.code_action, { desc = "code actions" })
+map("n", "<leader>lh", Lsp.hover, { silent = true, desc = "view documentation" })
+map("n", "<leader>ln", Lsp.rename, { silent = true, desc = "rename symbol" })
 
--- map("i", "jk", "<Esc>", { noremap = true })
--- map("i", "jK", "<Esc>", { noremap = true })
--- map("i", "Jk", "<Esc>", { noremap = true })
--- map("i", "JK", "<Esc>", { noremap = true })
 all_case_map({ "i", "t" }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
--- all_case_map({ "t", "i" }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
 
 map("n", "<Tab>", ":bnext<CR>", silent)
 map("n", "<S-tab>", ":bprev<CR>", silent)
@@ -288,14 +291,14 @@ map("n", "<leader>ff", function()
 end, { silent = true, desc = "focus floating window" })
 
 map("n", "<leader>fzq", function()
-	Snacks.picker.qflist()
-end)
+	Picker.qflist()
+end, { desc = "quickfix" })
 map("n", "<leader>fzf", function()
-	Snacks.picker.files()
+	Picker.files()
 end, { desc = "by file name" })
 
 map("n", "<leader>fzg", function()
-	Snacks.picker.grep()
+	Picker.grep()
 end, { desc = "by word" })
 map("n", "<leader>fm", function()
 	require("conform").format({ lsp_fallback = true, async = true })
@@ -330,7 +333,7 @@ map("n", "<leader>zf", function()
 	Snacks.zen.zoom()
 end, { desc = "fullscreen (zoomed) mode", noremap = true, silent = true })
 
-map("n", "<leader>da", lsp.code_action, { desc = "Show code actions" })
+map("n", "<leader>da", Lsp.code_action, { desc = "Show code actions" })
 map("n", "<leader>df", vim.diagnostic.open_float, { desc = "Show floating errors", silent = true })
 map("n", "<leader>dl", function()
 	vim.diagnostic.setloclist()
