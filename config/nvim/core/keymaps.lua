@@ -228,7 +228,7 @@ map("n", "<leader>fd", function()
 end, { desc = "(file) delete", silent = true })
 
 map({ "n", "v", "s", "o" }, "<leader>bs", "ggVG", { desc = "[buffer] select", silent = true })
-map("n", "<leader>bcc", function()
+map("n", "<leader>bqc", function()
 	local bufs = get_bufs()
 	local current_buf = vim.api.nvim_get_current_buf()
 
@@ -268,20 +268,21 @@ map("n", "<leader>bcc", function()
 			vim.api.nvim_set_current_buf(target)
 		end
 	end
-end, { silent = true, desc = "(buffer) close" })
-map("n", "<leader>bca", ":bufdo bd<CR>", { silent = true, desc = "close all buffers" })
-map("n", "<leader>bco", function()
+end, { silent = true, desc = "[b]uffer [q]uit [c]urrent" })
+map("n", "<leader>bqa", ":bufdo bd<CR>", { silent = true, desc = "[b]uffer [q]uit [a]ll" })
+map("n", "<leader>bqo", function()
 	local bufs = get_bufs()
 
 	for _, buf in ipairs(bufs) do
 		if
-			vim.fn.bufwinnr(buf) == -1
+			#vim.fn.win_findbuf(buf) == 0 and vim.bo[buf].buftype == ""
 			-- and vim.bo[buf].modified == false
 		then
-			vim.cmd(string.format("confirm bd %d", buf))
+			-- vim.cmd(string.format("confirm bd %d", buf))
+			vim.api.nvim_buf_delete(buf, { force = false })
 		end
 	end
-end, { silent = true, desc = "close other buffers" })
+end, { silent = true, desc = "[b]uffer [q]uit [o]thers" })
 
 map("n", "<leader>ff", function()
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -336,9 +337,10 @@ end, { desc = "fullscreen (zoomed) mode", noremap = true, silent = true })
 
 map("n", "<leader>zkn", function()
 	require("zk").new()
-end, { desc = "[zk] new", noremap = true, silent = true })
-map("n", "<leader>zkpn", function()
-	require("zk").pick_notes({}, {}, function(selection)
+end, { desc = "[z][k] [n]ew", noremap = true, silent = true })
+
+local function pickNotes(param1, param2)
+	require("zk").pick_notes(param1 or {}, param2 or {}, function(selection)
 		if not selection then
 			return
 		end
@@ -346,14 +348,32 @@ map("n", "<leader>zkpn", function()
 		for _, note in ipairs(selection) do
 			local buf = vim.fn.bufadd(note.absPath)
 			vim.fn.bufload(buf)
+			vim.bo[buf].buflisted = true
 			vim.api.nvim_open_win(buf, true, {
 				split = "right",
 			})
 		end
 	end)
+end
+
+map("n", "<leader>zkpn", function()
+	pickNotes()
 end, { desc = "[z][k] [p]icker - notes", noremap = true, silent = true })
+
 map("n", "<leader>zkpt", function()
-	require("zk").pick_tags()
+	require("zk").pick_tags({}, {}, function(selection)
+		if not selection then
+			return
+		end
+
+		local tags = {}
+
+		for _, tag in pairs(selection) do
+			table.insert(tags, tag.name)
+		end
+
+		pickNotes({ tags = tags })
+	end)
 end, { desc = "[z][k] [p]icker - tags", noremap = true, silent = true })
 
 map("n", "<leader>da", Lsp.code_action, { desc = "Show code actions" })
