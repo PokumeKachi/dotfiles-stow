@@ -3,8 +3,8 @@ local map = vim.keymap.set
 local silent = {
 	silent = true,
 }
-local snacks = require("snacks")
-local blink_cmp = require("blink.cmp")
+local Snacks = require("snacks")
+local BlinkCmp = require("blink.cmp")
 local lsp = vim.lsp.buf
 local function is_buf_in_other_win(buf)
 	local current_win = vim.api.nvim_get_current_win()
@@ -172,6 +172,18 @@ map("n", "<Tab>", ":bnext<CR>", silent)
 map("n", "<S-tab>", ":bprev<CR>", silent)
 map("n", "<C-Tab>", "<C-^>", silent)
 
+local dim = false
+
+map("n", "<leader>ad", function()
+	dim = not dim
+
+	if dim then
+		Snacks.dim.enable()
+	else
+		Snacks.dim.disable()
+	end
+end, { desc = "[appearance] dim" })
+
 map("n", "<leader>fr", function()
 	local old_buf = vim.api.nvim_get_current_buf()
 
@@ -197,7 +209,7 @@ map("n", "<leader>fr", function()
 		end
 
 		vim.cmd("edit " .. vim.fn.fnameescape(new_name))
-		snacks.bufdelete(old_buf)
+		Snacks.bufdelete(old_buf)
 	end)
 end, { desc = "[file] rename" })
 
@@ -229,7 +241,7 @@ map("n", "<leader>bcc", function()
 	if #bufs == 1 and bufs[1] == current_buf then
 		-- print("check here 2")
 		require("oil").open()
-		snacks.bufdelete(current_buf)
+		Snacks.bufdelete(current_buf)
 	else
 		-- print("check here")
 		local idx
@@ -240,7 +252,7 @@ map("n", "<leader>bcc", function()
 			end
 		end
 
-		snacks.bufdelete(current_buf)
+		Snacks.bufdelete(current_buf)
 
 		if not idx then
 			return
@@ -276,10 +288,15 @@ map("n", "<leader>ff", function()
 end, { silent = true, desc = "focus floating window" })
 
 map("n", "<leader>fzq", function()
-	require("fzf-lua").quickfix()
+	Snacks.picker.qflist()
 end)
-map("n", "<leader>fzf", ":FzfLua files<CR>", { silent = true, desc = "by file name" })
-map("n", "<leader>fzg", ":FzfLua live_grep<CR>", { silent = true, desc = "by word" })
+map("n", "<leader>fzf", function()
+	Snacks.picker.files()
+end, { desc = "by file name" })
+
+map("n", "<leader>fzg", function()
+	Snacks.picker.grep()
+end, { desc = "by word" })
 map("n", "<leader>fm", function()
 	require("conform").format({ lsp_fallback = true, async = true })
 end, { silent = true, desc = "format code" })
@@ -306,14 +323,14 @@ map({ "n", "i", "v" }, "<C-s>", function()
 end, { desc = "Save file", silent = true })
 
 map("n", "<leader>zz", function()
-	snacks.zen.zen()
+	Snacks.zen.zen()
 end, { desc = "zen mode", noremap = true, silent = true })
 
 map("n", "<leader>zf", function()
-	snacks.zen.zoom()
+	Snacks.zen.zoom()
 end, { desc = "fullscreen (zoomed) mode", noremap = true, silent = true })
 
-map("n", "<leader>da", vim.lsp.buf.code_action, { desc = "Show code actions" })
+map("n", "<leader>da", lsp.code_action, { desc = "Show code actions" })
 map("n", "<leader>df", vim.diagnostic.open_float, { desc = "Show floating errors", silent = true })
 map("n", "<leader>dl", function()
 	vim.diagnostic.setloclist()
@@ -335,7 +352,7 @@ map("n", "<leader>rr", function()
 	vim.api.nvim_feedkeys(keys, "t", false)
 end, { desc = "(replace) search" })
 
-map({ "n", "v", "s", "o" }, "<leader>a", "ggVG", { desc = "select whole buffer", silent = true })
+map({ "n", "v", "s", "o" }, "<leader>sb", "ggVG", { desc = "[select] buffer", silent = true })
 
 map({ "n", "x" }, "/", "/\\V", { noremap = true })
 map("v", "/", "<Esc>/\\%V\\V", { desc = "search within visual selection" })

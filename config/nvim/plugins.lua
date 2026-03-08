@@ -4,7 +4,6 @@ local LazyList = {
 }
 
 local NonTerm = {
-	require("lazy.fzf-lua"),
 	require("lazy.oil"),
 	require("lazy.oil-git-status"),
 
