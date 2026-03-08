@@ -639,9 +639,18 @@ function killTypstPreview()
 	end
 end
 
-map("n", "<leader>pm", ":MarkdownPreview<CR>", { silent = true, desc = "[preview] markdown" })
+map("n", "<leader>fp", function()
+	local ft = vim.bo.filetype
 
-map("n", "<leader>pt", function()
+	if ft == "markdown" then
+		vim.cmd("MarkdownPreview")
+		return
+	end
+
+	if ft ~= "typst" then
+		return
+	end
+
 	local file = vim.fn.expand("%:p")
 	local out = "/tmp/" .. vim.fn.expand("%:t:r") .. ".pdf"
 
@@ -655,7 +664,6 @@ map("n", "<leader>pt", function()
 			end
 
 			local errors = {}
-
 			local isError = false
 
 			for _, line in ipairs(data) do
@@ -680,8 +688,9 @@ map("n", "<leader>pt", function()
 			vim.fn.system({ "typst", "compile", tmp, out })
 		end,
 	})
+
 	zathuraJob = vim.fn.jobstart({ "zathura", out }, { detach = true })
-end, { silent = true, desc = "preview typst" })
+end, { silent = true, desc = "[f]ile [p]review" })
 
 vim.api.nvim_create_autocmd("VimLeavePre", {
 	callback = killTypstPreview,
