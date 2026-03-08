@@ -148,7 +148,7 @@ end, { silent = true })
 map("n", "<leader>w", function()
 	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w>", true, false, true), "m", true)
 end, { noremap = true, silent = true, desc = "window operations" })
-map("n", "<C-w>r", function()
+map("n", "<C-w>m", function()
 	require("winmove").start_mode("resize")
 end, {
 	noremap = true,
