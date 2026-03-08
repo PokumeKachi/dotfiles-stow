@@ -18,6 +18,57 @@ local function is_buf_in_other_win(buf)
 	return false
 end
 
+local function get_visual_selection_txt()
+	vim.cmd('normal! "vy')
+	return vim.fn.getreg("v")
+end
+
+-- local function get_visual_selection_txt()
+-- 	local s = vim.fn.getpos("'<")
+-- 	local e = vim.fn.getpos("'>")
+-- 	if s[2] == 0 and e[2] == 0 then
+-- 		return ""
+-- 	end
+--
+-- 	-- ensure start <= end
+-- 	if s[2] > e[2] or (s[2] == e[2] and (s[3] or 0) > (e[3] or 0)) then
+-- 		s, e = e, s
+-- 	end
+--
+-- 	local function clamp_pos(p)
+-- 		p[2] = math.max(1, math.min(vim.api.nvim_buf_line_count(0), p[2]))
+-- 		local ln = vim.fn.getline(p[2]) or ""
+-- 		p[3] = math.max(1, math.min(#ln + 1, p[3] or 1))
+-- 	end
+-- 	clamp_pos(s)
+-- 	clamp_pos(e)
+--
+-- 	local t = vim.fn.visualmode() or "v"
+-- 	if t ~= "v" and t ~= "V" and t ~= string.char(22) then
+-- 		t = "v"
+-- 	end
+--
+-- 	if t == "V" then
+-- 		local lines = vim.api.nvim_buf_get_lines(0, s[2] - 1, e[2], true)
+-- 		return table.concat(lines, "\n")
+-- 	elseif t == "v" then
+-- 		local parts = vim.api.nvim_buf_get_text(0, s[2] - 1, s[3] - 1, e[2] - 1, e[3], {})
+-- 		return table.concat(parts, "\n")
+-- 	else -- blockwise
+-- 		local cs = math.min(s[3], e[3]) - 1
+-- 		local ce = math.max(s[3], e[3]) -- end is exclusive for nvim_buf_get_text
+-- 		local out = {}
+-- 		for ln = s[2] - 1, e[2] - 1 do
+-- 			local line = vim.api.nvim_buf_get_lines(0, ln, ln + 1, true)[1] or ""
+-- 			local maxc = #line
+-- 			local a = math.max(0, math.min(maxc, cs))
+-- 			local b = math.max(0, math.min(maxc, ce))
+-- 			out[#out + 1] = (vim.api.nvim_buf_get_text(0, ln, a, ln, b, {})[1] or "")
+-- 		end
+-- 		return table.concat(out, "\n")
+-- 	end
+-- end
+
 local function get_bufs()
 	return vim.tbl_filter(function(b)
 		local name = vim.api.nvim_buf_get_name(b)
@@ -338,6 +389,11 @@ end, { desc = "fullscreen (zoomed) mode", noremap = true, silent = true })
 map("n", "<leader>zkn", function()
 	require("zk").new()
 end, { desc = "[z][k] [n]ew", noremap = true, silent = true })
+
+map("x", "<leader>zkn", function()
+	vim.notify(get_visual_selection_txt())
+	require("zk").new({ title = get_visual_selection_txt() })
+end, { desc = "[z][k] [n]ew from selection", silent = true })
 
 local function pickNotes(param1, param2)
 	require("zk").pick_notes(param1 or {}, param2 or {}, function(selection)
