@@ -554,6 +554,14 @@ map("x", "<leader>zknl", ":'<,'>ZkInsertLinkAtSelection<CR>", {
 	silent = true,
 })
 
+map("n", "<leader>zkl", function()
+	vim.cmd("ZkLinks")
+end, { desc = "[z][k] [l]inks view", noremap = true, silent = true })
+
+map("n", "<leader>zkb", function()
+	vim.cmd("ZkLinks")
+end, { desc = "[z][k] [b]acklinks view", noremap = true, silent = true })
+
 local function pickNotes(param1, param2)
 	Zk.pick_notes(param1 or {}, param2 or {}, function(selection)
 		if not selection then
