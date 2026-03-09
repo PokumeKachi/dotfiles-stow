@@ -220,7 +220,8 @@ map("n", "<leader>la", Lsp.code_action, { desc = "code actions" })
 map("n", "<leader>lh", Lsp.hover, { silent = true, desc = "view documentation" })
 map("n", "<leader>ln", Lsp.rename, { silent = true, desc = "rename symbol" })
 
-all_case_map({ "i", "t" }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
+all_case_map({ "i", }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
+-- all_case_map({ "i", "t" }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
 
 map("n", "<Tab>", ":bnext<CR>", silent)
 map("n", "<S-tab>", ":bprev<CR>", silent)
@@ -273,10 +274,10 @@ map("n", "<leader>fd", function()
 		local ok = vim.fn.confirm("Delete file?\n" .. file, "&Yes\n&No", 2)
 		if ok == 1 then
 			vim.fn.system({ "trash-put", file })
-			vim.cmd("bdelete")
+			Snacks.bufdelete()
 		end
 	end
-end, { desc = "(file) delete", silent = true })
+end, { desc = "[f]ile delete", silent = true })
 
 map({ "n", "v", "s", "o" }, "<leader>bs", "ggVG", { desc = "[buffer] select", silent = true })
 map("n", "<leader>bqc", function()
@@ -386,14 +387,21 @@ map("n", "<leader>zf", function()
 	Snacks.zen.zoom()
 end, { desc = "fullscreen (zoomed) mode", noremap = true, silent = true })
 
-map("n", "<leader>zkn", function()
-	require("zk").new()
-end, { desc = "[z][k] [n]ew", noremap = true, silent = true })
+map({ "n", "x" }, "<leader>zknn", function()
+	if vim.fn.mode() == "n" then
+		vim.cmd("ZkNew")
+	else
+		vim.cmd("ZkNewFromTitleSelection")
+	end
+end, { desc = "[z][k] [n]ew [n]ote", noremap = true, silent = true })
 
-map("x", "<leader>zkn", function()
-	vim.notify(get_visual_selection_txt())
-	require("zk").new({ title = get_visual_selection_txt() })
-end, { desc = "[z][k] [n]ew from selection", silent = true })
+map({ "n", "x" }, "<leader>zknl", function()
+	if vim.fn.mode() == "n" then
+		vim.cmd("ZkInsertLink")
+	else
+		vim.cmd("ZkInsertLinkAtSelection")
+	end
+end, { desc = "[z][k] [n]ew [l]ink", noremap = true, silent = true })
 
 local function pickNotes(param1, param2)
 	require("zk").pick_notes(param1 or {}, param2 or {}, function(selection)
@@ -695,3 +703,8 @@ end, { silent = true, desc = "[f]ile [p]review" })
 vim.api.nvim_create_autocmd("VimLeavePre", {
 	callback = killTypstPreview,
 })
+
+vim.keymap.set("i", "<C-h>", "<Left>", { noremap = true })
+vim.keymap.set("i", "<C-l>", "<Right>", { noremap = true })
+vim.keymap.set("i", "<C-j>", "<Down>")
+vim.keymap.set("i", "<C-k>", "<Up>")
