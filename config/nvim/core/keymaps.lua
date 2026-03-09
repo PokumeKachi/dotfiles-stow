@@ -220,7 +220,7 @@ map("n", "<leader>la", Lsp.code_action, { desc = "code actions" })
 map("n", "<leader>lh", Lsp.hover, { silent = true, desc = "view documentation" })
 map("n", "<leader>ln", Lsp.rename, { silent = true, desc = "rename symbol" })
 
-all_case_map({ "i", }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
+all_case_map({ "i" }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
 -- all_case_map({ "i", "t" }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
 
 map("n", "<Tab>", ":bnext<CR>", silent)
@@ -402,6 +402,14 @@ map({ "n", "x" }, "<leader>zknl", function()
 		vim.cmd("ZkInsertLinkAtSelection")
 	end
 end, { desc = "[z][k] [n]ew [l]ink", noremap = true, silent = true })
+
+map("n", "<leader>zkl", function()
+	vim.cmd("ZkLinks")
+end, { desc = "[z][k] [l]inks view", noremap = true, silent = true })
+
+map("n", "<leader>zkb", function()
+	vim.cmd("ZkLinks")
+end, { desc = "[z][k] [b]acklinks view", noremap = true, silent = true })
 
 local function pickNotes(param1, param2)
 	require("zk").pick_notes(param1 or {}, param2 or {}, function(selection)
