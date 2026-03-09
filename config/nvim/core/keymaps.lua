@@ -603,6 +603,18 @@ end, {
 	silent = true,
 })
 
+map("n", "<leader>zkl", ":ZkLinks<CR>", {
+	desc = "[z][k] [l]inks view",
+	noremap = true,
+	silent = true,
+})
+
+map("n", "<leader>zkb", ":ZkBacklinks<CR>", {
+	desc = "[z][k] [back]links view",
+	noremap = true,
+	silent = true,
+})
+
 map("n", "<leader>da", Lsp.code_action, {
 	desc = "Show code actions",
 })
