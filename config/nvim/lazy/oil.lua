@@ -35,7 +35,7 @@ return {
 			concealcursor = "nvic",
 			winbar = "%!v:lua.get_oil_winbar()",
 		},
-		view_options = { show_hidden = true, show_parent_dir = false },
+		view_options = { show_hidden = false, show_parent_dir = false },
 		delete_to_trash = true,
 	},
 	dependencies = { "nvim-tree/nvim-web-devicons" },
