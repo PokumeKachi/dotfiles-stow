@@ -172,29 +172,6 @@ vim.keymap.set({ "i", "s" }, "<C-e>", function()
 	end
 end, { silent = true })
 
--- map("i", "<C-w>", function()
--- 	local wins = vim.api.nvim_tabpage_list_wins(0)
--- 	local filtered_wins = {}
--- 	for _, w in ipairs(wins) do
--- 		local cfg = vim.api.nvim_win_get_config(w)
--- 		local width = vim.api.nvim_win_get_width(w)
--- 		local height = vim.api.nvim_win_get_height(w)
--- 		if width > 2 and height > 2 then -- ignore tiny windows like scrollbars
--- 			table.insert(filtered_wins, w)
--- 		end
--- 	end
--- 	wins = filtered_wins
--- 	local cur = vim.api.nvim_get_current_win()
--- 	local next_win = wins[1]
--- 	for i, w in ipairs(wins) do
--- 		if w == cur then
--- 			next_win = wins[i % #wins + 1]
--- 			break
--- 		end
--- 	end
--- 	vim.api.nvim_set_current_win(next_win)
--- 	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
--- end, { noremap = true, silent = true, desc = "window operations" })
 
 map("n", "<leader>w", function()
 	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w>", true, false, true), "m", true)
@@ -220,7 +197,7 @@ map("n", "<leader>la", Lsp.code_action, { desc = "code actions" })
 map("n", "<leader>lh", Lsp.hover, { silent = true, desc = "view documentation" })
 map("n", "<leader>ln", Lsp.rename, { silent = true, desc = "rename symbol" })
 
-all_case_map({ "i", }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
+all_case_map({ "i" }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
 -- all_case_map({ "i", "t" }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
 
 map("n", "<Tab>", ":bnext<CR>", silent)
@@ -336,6 +313,35 @@ map("n", "<leader>bqo", function()
 	end
 end, { silent = true, desc = "[b]uffer [q]uit [o]thers" })
 
+map("i", "<C-w>", function()
+	-- local wins = vim.api.nvim_tabpage_list_wins(0)
+	-- local filtered_wins = {}
+	-- for _, w in ipairs(wins) do
+	-- 	local cfg = vim.api.nvim_win_get_config(w)
+	-- 	local width = vim.api.nvim_win_get_width(w)
+	-- 	local height = vim.api.nvim_win_get_height(w)
+	-- 	if width > 2 and height > 2 then -- ignore tiny windows like scrollbars
+	-- 		table.insert(filtered_wins, w)
+	-- 	end
+	-- end
+	-- wins = filtered_wins
+	-- local cur = vim.api.nvim_get_current_win()
+	-- local next_win = wins[1]
+	-- for i, w in ipairs(wins) do
+	-- 	if w == cur then
+	-- 		next_win = wins[i % #wins + 1]
+	-- 		break
+	-- 	end
+	-- end
+	-- vim.api.nvim_set_current_win(next_win)
+	-- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		if vim.api.nvim_win_get_config(win).relative ~= "" then
+			vim.api.nvim_set_current_win(win)
+		end
+	end
+end, { noremap = true, silent = true, desc = "window operations" })
+
 map("n", "<leader>ff", function()
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
 		if vim.api.nvim_win_get_config(win).relative ~= "" then
@@ -402,6 +408,14 @@ map({ "n", "x" }, "<leader>zknl", function()
 		vim.cmd("ZkInsertLinkAtSelection")
 	end
 end, { desc = "[z][k] [n]ew [l]ink", noremap = true, silent = true })
+
+map("n", "<leader>zkl", function()
+	vim.cmd("ZkLinks")
+end, { desc = "[z][k] [l]inks view", noremap = true, silent = true })
+
+map("n", "<leader>zkb", function()
+	vim.cmd("ZkLinks")
+end, { desc = "[z][k] [b]acklinks view", noremap = true, silent = true })
 
 local function pickNotes(param1, param2)
 	require("zk").pick_notes(param1 or {}, param2 or {}, function(selection)
@@ -703,8 +717,3 @@ end, { silent = true, desc = "[f]ile [p]review" })
 vim.api.nvim_create_autocmd("VimLeavePre", {
 	callback = killTypstPreview,
 })
-
-vim.keymap.set("i", "<C-h>", "<Left>", { noremap = true })
-vim.keymap.set("i", "<C-l>", "<Right>", { noremap = true })
-vim.keymap.set("i", "<C-j>", "<Down>")
-vim.keymap.set("i", "<C-k>", "<Up>")
