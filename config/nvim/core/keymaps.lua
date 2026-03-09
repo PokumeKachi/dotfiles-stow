@@ -6,6 +6,8 @@ local silent = {
 local Snacks = require("snacks")
 local Picker = require("snacks").picker
 local BlinkCmp = require("blink.cmp")
+local Zk = require("zk")
+local ZkApi = require("zk.api")
 local Lsp = vim.lsp.buf
 
 local function is_buf_in_other_win(buf)
@@ -75,17 +77,16 @@ local function get_bufs()
 		local buftype = vim.bo[b].buftype
 		local filetype = vim.bo[b].filetype
 
-		return vim.api.nvim_buf_is_loaded(b)
-			and name ~= "" -- ignore unnamed buffers
-			and buftype == "" -- skip special buffers (help, terminal, mininotify, etc.)
-			and filetype ~= "mininotify" -- skip mininotify explicitly
+		return vim.api.nvim_buf_is_loaded(b) and name ~= "" -- ignore unnamed buffers and buftype == "" -- skip special buffers (help, terminal, mininotify, etc.) and filetype ~= "mininotify" -- skip mininotify explicitly
 	end, vim.api.nvim_list_bufs())
 end
 
 local function all_case_map(modes, keys, action, opts)
 	local function case_combinations(str)
 		if #str == 0 then
-			return { "" }
+			return {
+				"",
+			}
 		end
 		local rest = case_combinations(str:sub(2))
 		local c = str:sub(1, 1)
@@ -97,10 +98,15 @@ local function all_case_map(modes, keys, action, opts)
 		return t
 	end
 
-	opts = opts or { noremap = true, silent = true }
+	opts = opts or {
+		noremap = true,
+		silent = true,
+	}
 
 	if type(modes) ~= "table" then
-		modes = { modes }
+		modes = {
+			modes,
+		}
 	end
 	-- map(modes, variant, action, opts)
 	for _, mode in ipairs(modes) do
@@ -159,23 +165,34 @@ local luasnip = require("luasnip")
 
 vim.keymap.set({ "i" }, "<C-k>", function()
 	luasnip.expand()
-end, { silent = true })
+end, {
+	silent = true,
+})
 vim.keymap.set({ "i", "s" }, "<C-l>", function()
 	luasnip.jump(1)
-end, { silent = true })
+end, {
+	silent = true,
+})
 vim.keymap.set({ "i", "s" }, "<C-h>", function()
 	luasnip.jump(-1)
-end, { silent = true })
+end, {
+	silent = true,
+})
 vim.keymap.set({ "i", "s" }, "<C-e>", function()
 	if luasnip.choice_active() then
 		luasnip.change_choice(1)
 	end
-end, { silent = true })
-
+end, {
+	silent = true,
+})
 
 map("n", "<leader>w", function()
 	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w>", true, false, true), "m", true)
-end, { noremap = true, silent = true, desc = "window operations" })
+end, {
+	noremap = true,
+	silent = true,
+	desc = "window operations",
+})
 map("n", "<C-w>m", function()
 	require("winmove").start_mode("resize")
 end, {
@@ -184,20 +201,48 @@ end, {
 	silent = true,
 })
 
-map("n", "<leader>qq", ":quit<CR>", { silent = true, desc = "quit window" })
-map("n", "<leader>qa", ":qa<CR>", { silent = true, desc = "quit all windows" })
-map("n", "<leader>qo", ":only<CR>", { silent = true, desc = "quit other windows" })
+map("n", "<leader>qq", ":quit<CR>", {
+	silent = true,
+	desc = "quit window",
+})
+map("n", "<leader>qa", ":qa<CR>", {
+	silent = true,
+	desc = "quit all windows",
+})
+map("n", "<leader>qo", ":only<CR>", {
+	silent = true,
+	desc = "quit other windows",
+})
 
-map("n", "<leader>ld", Picker.lsp_definitions, { desc = "definitions" })
-map("n", "<leader>lr", Picker.lsp_references, { desc = "references" })
-map("n", "<leader>li", Picker.lsp_implementations, { desc = "implementations" })
-map("n", "<leader>lt", Picker.lsp_type_definitions, { desc = "type definitions" })
+map("n", "<leader>ld", Picker.lsp_definitions, {
+	desc = "definitions",
+})
+map("n", "<leader>lr", Picker.lsp_references, {
+	desc = "references",
+})
+map("n", "<leader>li", Picker.lsp_implementations, {
+	desc = "implementations",
+})
+map("n", "<leader>lt", Picker.lsp_type_definitions, {
+	desc = "type definitions",
+})
 
-map("n", "<leader>la", Lsp.code_action, { desc = "code actions" })
-map("n", "<leader>lh", Lsp.hover, { silent = true, desc = "view documentation" })
-map("n", "<leader>ln", Lsp.rename, { silent = true, desc = "rename symbol" })
+map("n", "<leader>la", Lsp.code_action, {
+	desc = "code actions",
+})
+map("n", "<leader>lh", Lsp.hover, {
+	silent = true,
+	desc = "view documentation",
+})
+map("n", "<leader>ln", Lsp.rename, {
+	silent = true,
+	desc = "rename symbol",
+})
 
-all_case_map({ "i" }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
+all_case_map({ "i" }, "jk", "<C-\\><C-n>", {
+	noremap = true,
+	silent = true,
+})
 -- all_case_map({ "i", "t" }, "jk", "<C-\\><C-n>", { noremap = true, silent = true })
 
 map("n", "<Tab>", ":bnext<CR>", silent)
@@ -214,7 +259,9 @@ map("n", "<leader>ad", function()
 	else
 		Snacks.dim.disable()
 	end
-end, { desc = "[appearance] dim" })
+end, {
+	desc = "[appearance] dim",
+})
 
 map("n", "<leader>fr", function()
 	local old_buf = vim.api.nvim_get_current_buf()
@@ -224,7 +271,10 @@ map("n", "<leader>fr", function()
 	local dir = vim.fn.fnamemodify(full_name, ":h")
 	local filename = vim.fn.fnamemodify(full_name, ":t")
 
-	vim.ui.input({ prompt = "new name: ", default = filename }, function(new_name)
+	vim.ui.input({
+		prompt = "new name: ",
+		default = filename,
+	}, function(new_name)
 		if not new_name or new_name == "" or new_name == full_name then
 			return
 		end
@@ -243,20 +293,41 @@ map("n", "<leader>fr", function()
 		vim.cmd("edit " .. vim.fn.fnameescape(new_name))
 		Snacks.bufdelete(old_buf)
 	end)
-end, { desc = "[file] rename" })
+end, {
+	desc = "[file] rename",
+})
 
 map("n", "<leader>fd", function()
 	local file = vim.api.nvim_buf_get_name(0)
 	if file ~= "" then
 		local ok = vim.fn.confirm("Delete file?\n" .. file, "&Yes\n&No", 2)
 		if ok == 1 then
-			vim.fn.system({ "trash-put", file })
+			vim.fn.system({
+				"trash-put",
+				file,
+			})
 			Snacks.bufdelete()
 		end
 	end
-end, { desc = "[f]ile delete", silent = true })
+end, {
+	desc = "[f]ile delete",
+	silent = true,
+})
 
-map({ "n", "v", "s", "o" }, "<leader>bs", "ggVG", { desc = "[buffer] select", silent = true })
+map(
+	{
+		"n",
+		"v",
+		"s",
+		"o",
+	},
+	"<leader>bs",
+	"ggVG",
+	{
+		desc = "[buffer] select",
+		silent = true,
+	}
+)
 map("n", "<leader>bqc", function()
 	local bufs = get_bufs()
 	local current_buf = vim.api.nvim_get_current_buf()
@@ -297,8 +368,14 @@ map("n", "<leader>bqc", function()
 			vim.api.nvim_set_current_buf(target)
 		end
 	end
-end, { silent = true, desc = "[b]uffer [q]uit [c]urrent" })
-map("n", "<leader>bqa", ":bufdo bd<CR>", { silent = true, desc = "[b]uffer [q]uit [a]ll" })
+end, {
+	silent = true,
+	desc = "[b]uffer [q]uit [c]urrent",
+})
+map("n", "<leader>bqa", ":bufdo bd<CR>", {
+	silent = true,
+	desc = "[b]uffer [q]uit [a]ll",
+})
 map("n", "<leader>bqo", function()
 	local bufs = get_bufs()
 
@@ -308,10 +385,15 @@ map("n", "<leader>bqo", function()
 			-- and vim.bo[buf].modified == false
 		then
 			-- vim.cmd(string.format("confirm bd %d", buf))
-			vim.api.nvim_buf_delete(buf, { force = false })
+			vim.api.nvim_buf_delete(buf, {
+				force = false,
+			})
 		end
 	end
-end, { silent = true, desc = "[b]uffer [q]uit [o]thers" })
+end, {
+	silent = true,
+	desc = "[b]uffer [q]uit [o]thers",
+})
 
 map("i", "<C-w>", function()
 	-- local wins = vim.api.nvim_tabpage_list_wins(0)
@@ -340,7 +422,11 @@ map("i", "<C-w>", function()
 			vim.api.nvim_set_current_win(win)
 		end
 	end
-end, { noremap = true, silent = true, desc = "window operations" })
+end, {
+	noremap = true,
+	silent = true,
+	desc = "window operations",
+})
 
 map("n", "<leader>ff", function()
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -348,21 +434,36 @@ map("n", "<leader>ff", function()
 			vim.api.nvim_set_current_win(win)
 		end
 	end
-end, { silent = true, desc = "focus floating window" })
+end, {
+	silent = true,
+	desc = "focus floating window",
+})
 
 map("n", "<leader>fzq", function()
 	Picker.qflist()
-end, { desc = "quickfix" })
+end, {
+	desc = "quickfix",
+})
 map("n", "<leader>fzf", function()
 	Picker.files()
-end, { desc = "by file name" })
+end, {
+	desc = "by file name",
+})
 
 map("n", "<leader>fzg", function()
 	Picker.grep()
-end, { desc = "by word" })
+end, {
+	desc = "by word",
+})
 map("n", "<leader>fm", function()
-	require("conform").format({ lsp_fallback = true, async = true })
-end, { silent = true, desc = "format code" })
+	require("conform").format({
+		lsp_fallback = true,
+		async = true,
+	})
+end, {
+	silent = true,
+	desc = "format code",
+})
 
 map("n", "<leader>bn", ":enew<CR>", {
 	desc = "new buffer",
@@ -374,51 +475,87 @@ map("n", "<leader>bn", ":enew<CR>", {
 --   require("noice").cmd("last")
 -- end, { desc = "noice: focus last message" })
 
-map("n", "<C-d>", "<C-d>zz", { noremap = true, silent = true })
-map("n", "<C-u>", "<C-u>zz", { noremap = true, silent = true })
-map("n", "<esc>", "<cmd>nohlsearch<cr>", { noremap = true, silent = true })
+map("n", "<C-d>", "<C-d>zz", {
+	noremap = true,
+	silent = true,
+})
+map("n", "<C-u>", "<C-u>zz", {
+	noremap = true,
+	silent = true,
+})
+map("n", "<esc>", "<cmd>nohlsearch<cr>", {
+	noremap = true,
+	silent = true,
+})
 -- map('n', 'jk', '<cmd>nohlsearch<cr>', { noremap = true, silent = true })
 
 -- show diagnostics in a floating window under the cursor
 
-map({ "n", "i", "v" }, "<C-s>", function()
-	vim.cmd("write")
-end, { desc = "Save file", silent = true })
+map(
+	{
+		"n",
+		"i",
+		"v",
+	},
+	"<C-s>",
+	function()
+		vim.cmd("write")
+	end,
+	{
+		desc = "Save file",
+		silent = true,
+	}
+)
 
 map("n", "<leader>zz", function()
 	Snacks.zen.zen()
-end, { desc = "zen mode", noremap = true, silent = true })
+end, {
+	desc = "zen mode",
+	noremap = true,
+	silent = true,
+})
 
 map("n", "<leader>zf", function()
 	Snacks.zen.zoom()
-end, { desc = "fullscreen (zoomed) mode", noremap = true, silent = true })
+end, {
+	desc = "fullscreen (zoomed) mode",
+	noremap = true,
+	silent = true,
+})
 
-map({ "n", "x" }, "<leader>zknn", function()
-	if vim.fn.mode() == "n" then
-		vim.cmd("ZkNew")
-	else
-		vim.cmd("ZkNewFromTitleSelection")
-	end
-end, { desc = "[z][k] [n]ew [n]ote", noremap = true, silent = true })
+map("n", "<leader>zknn", function()
+	Zk.new()
+end, {
+	desc = "[z][k] [n]ew [n]ote",
+	noremap = true,
+	silent = true,
+})
 
-map({ "n", "x" }, "<leader>zknl", function()
-	if vim.fn.mode() == "n" then
-		vim.cmd("ZkInsertLink")
-	else
-		vim.cmd("ZkInsertLinkAtSelection")
-	end
-end, { desc = "[z][k] [n]ew [l]ink", noremap = true, silent = true })
+map("x", "<leader>zknn", function()
+	Zk.new({
+		title = get_visual_selection_txt(),
+	})
+end, {
+	desc = "[z][k] [n]ew [n]ote",
+	silent = true,
+})
 
-map("n", "<leader>zkl", function()
-	vim.cmd("ZkLinks")
-end, { desc = "[z][k] [l]inks view", noremap = true, silent = true })
+map("n", "<leader>zknl", function()
+	ZkApi.index()
+	vim.cmd("ZkInsertLink")
+end, {
+	desc = "[z][k] [n]ew [l]ink",
+	noremap = true,
+	silent = true,
+})
 
-map("n", "<leader>zkb", function()
-	vim.cmd("ZkLinks")
-end, { desc = "[z][k] [b]acklinks view", noremap = true, silent = true })
+map("x", "<leader>zknl", ":'<,'>ZkInsertLinkAtSelection<CR>", {
+	desc = "[z][k] new link",
+	silent = true,
+})
 
 local function pickNotes(param1, param2)
-	require("zk").pick_notes(param1 or {}, param2 or {}, function(selection)
+	Zk.pick_notes(param1 or {}, param2 or {}, function(selection)
 		if not selection then
 			return
 		end
@@ -435,11 +572,17 @@ local function pickNotes(param1, param2)
 end
 
 map("n", "<leader>zkpn", function()
+	Zk.index()
 	pickNotes()
-end, { desc = "[z][k] [p]icker - notes", noremap = true, silent = true })
+end, {
+	desc = "[z][k] [p]icker - notes",
+	noremap = true,
+	silent = true,
+})
 
 map("n", "<leader>zkpt", function()
-	require("zk").pick_tags({}, {}, function(selection)
+	Zk.index()
+	Zk.pick_tags({}, {}, function(selection)
 		if not selection then
 			return
 		end
@@ -450,15 +593,29 @@ map("n", "<leader>zkpt", function()
 			table.insert(tags, tag.name)
 		end
 
-		pickNotes({ tags = tags })
+		pickNotes({
+			tags = tags,
+		})
 	end)
-end, { desc = "[z][k] [p]icker - tags", noremap = true, silent = true })
+end, {
+	desc = "[z][k] [p]icker - tags",
+	noremap = true,
+	silent = true,
+})
 
-map("n", "<leader>da", Lsp.code_action, { desc = "Show code actions" })
-map("n", "<leader>df", vim.diagnostic.open_float, { desc = "Show floating errors", silent = true })
+map("n", "<leader>da", Lsp.code_action, {
+	desc = "Show code actions",
+})
+map("n", "<leader>df", vim.diagnostic.open_float, {
+	desc = "Show floating errors",
+	silent = true,
+})
 map("n", "<leader>dl", function()
 	vim.diagnostic.setloclist()
-end, { desc = "Show diagnostics in location list", silent = true })
+end, {
+	desc = "Show diagnostics in location list",
+	silent = true,
+})
 
 -- map("n", "<leader>n", function()
 -- 	if not vim.wo.number then
@@ -474,19 +631,35 @@ end, { desc = "Show diagnostics in location list", silent = true })
 map("n", "<leader>rr", function()
 	local keys = vim.api.nvim_replace_termcodes(":%s///gc<Left><Left><Left>", true, false, true)
 	vim.api.nvim_feedkeys(keys, "t", false)
-end, { desc = "(replace) search" })
+end, {
+	desc = "(replace) search",
+})
 
-map({ "n", "x" }, "/", "/\\V", { noremap = true })
-map("v", "/", "<Esc>/\\%V\\V", { desc = "search within visual selection" })
+map({ "n", "x" }, "/", "/\\V", {
+	noremap = true,
+})
+map("v", "/", "<Esc>/\\%V\\V", {
+	desc = "search within visual selection",
+})
 
-map("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<cr>", { desc = "Toggle Markdown Preview" })
+map("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<cr>", {
+	desc = "Toggle Markdown Preview",
+})
 map({ "n", "v" }, "<leader>mp", function()
 	require("nabla").popup()
-end, { desc = "view latex" })
-map("n", "<leader>mt", "<cmd>Mtoc<CR>", { desc = "create table of contents" })
+end, {
+	desc = "view latex",
+})
+map("n", "<leader>mt", "<cmd>Mtoc<CR>", {
+	desc = "create table of contents",
+})
 
 -- map("n", "<leader>tt", "<cmd>term<CR>", { desc = "terminal", noremap = true, silent = true })
-map("n", "<leader>tt", "<leader>ts", { desc = "terminal", noremap = true, silent = true })
+map("n", "<leader>tt", "<leader>ts", {
+	desc = "terminal",
+	noremap = true,
+	silent = true,
+})
 map("n", "<leader>ts", "<cmd>split | term<CR>", {
 	desc = "terminal (horizontal split)",
 	noremap = true,
@@ -515,7 +688,10 @@ end, {
 	silent = true,
 })
 
-map("n", "<leader>gc", "<cmd>Git commit<CR>", { desc = "commit", silent = true })
+map("n", "<leader>gc", "<cmd>Git commit<CR>", {
+	desc = "commit",
+	silent = true,
+})
 map("n", "<leader>gu", function()
 	local buf = vim.api.nvim_create_buf(false, true)
 	local win = vim.api.nvim_open_win(buf, true, {
@@ -535,19 +711,36 @@ map("n", "<leader>gu", function()
 	vim.wo[win].signcolumn = "no"
 	vim.wo[win].winbar = ""
 	vim.wo[win].statusline = ""
-end, { desc = "gitui fullscreen" })
-map("n", "<leader>gp", "<cmd>Git push<CR>", { desc = "push", silent = true })
-map("n", "<leader>gP", "<cmd>Git pull<CR>", { desc = "pull", silent = true })
+end, {
+	desc = "gitui fullscreen",
+})
+map("n", "<leader>gp", "<cmd>Git push<CR>", {
+	desc = "push",
+	silent = true,
+})
+map("n", "<leader>gP", "<cmd>Git pull<CR>", {
+	desc = "pull",
+	silent = true,
+})
 
 map("n", "<leader>gs", function()
 	require("gitsigns").stage_hunk()
-end, { desc = "stage/unstage hunk" })
+end, {
+	desc = "stage/unstage hunk",
+})
 map("v", "<leader>gs", function()
-	require("gitsigns").stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
-end, { desc = "stage/unstage selected lines" })
+	require("gitsigns").stage_hunk({
+		vim.fn.line("."),
+		vim.fn.line("v"),
+	})
+end, {
+	desc = "stage/unstage selected lines",
+})
 map("n", "<leader>gS", function()
 	require("gitsigns").stage_buffer()
-end, { desc = "stage entire file" })
+end, {
+	desc = "stage entire file",
+})
 
 -- map("n", "<leader>o", "<cmd>Outline<CR>", { desc = "see outline", silent = true })
 map("n", "<leader>o", function()
@@ -564,7 +757,10 @@ map("n", "<leader>o", function()
 		end
 	end
 	vim.cmd("Outline")
-end, { desc = "file outline", silent = true })
+end, {
+	desc = "file outline",
+	silent = true,
+})
 
 local function at_line_edge(is_left, cur, last, count)
 	if last == 1 then
@@ -583,7 +779,9 @@ local function smart_move(key, edge_check, edge_cmd, move_cmd)
 		else
 			vim.cmd(("normal! %d%s"):format(count, move_cmd))
 		end
-	end, { noremap = true })
+	end, {
+		noremap = true,
+	})
 end
 
 smart_move("h", function(cur, last, count)
@@ -606,7 +804,9 @@ end, "j0", "l")
 
 local has_words_before = function()
 	local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-	return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+	return col ~= 0
+		and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s")
+			== nil
 end
 
 -- map({ "i" }, "<Tab>", function()
@@ -678,7 +878,12 @@ map("n", "<leader>fp", function()
 
 	killTypstPreview()
 
-	typstJob = vim.fn.jobstart({ "typst", "watch", file, out }, {
+	typstJob = vim.fn.jobstart({
+		"typst",
+		"watch",
+		file,
+		out,
+	}, {
 		stderr_buffered = false,
 		on_stderr = function(_, data)
 			if not data then
@@ -700,19 +905,35 @@ map("n", "<leader>fp", function()
 			end
 
 			local tmp = "/tmp/typst_error.typ"
-			local lines = { "= Compilation failed", "" }
+			local lines = {
+				"= Compilation failed",
+				"",
+			}
 
 			for _, line in ipairs(errors) do
 				table.insert(lines, "=== `" .. line .. "`")
 			end
 
 			vim.fn.writefile(lines, tmp)
-			vim.fn.system({ "typst", "compile", tmp, out })
+			vim.fn.system({
+				"typst",
+				"compile",
+				tmp,
+				out,
+			})
 		end,
 	})
 
-	zathuraJob = vim.fn.jobstart({ "zathura", out }, { detach = true })
-end, { silent = true, desc = "[f]ile [p]review" })
+	zathuraJob = vim.fn.jobstart({
+		"zathura",
+		out,
+	}, {
+		detach = true,
+	})
+end, {
+	silent = true,
+	desc = "[f]ile [p]review",
+})
 
 vim.api.nvim_create_autocmd("VimLeavePre", {
 	callback = killTypstPreview,
