@@ -37,10 +37,10 @@ return {
 					command = "nixfmt",
 					args = { "--indent", "4" },
 				},
-				formatters = {
-					stylua = {
-						extra_args = { "--column-width", "80" },
-					},
+				stylua = {
+					command = "stylua",
+					args = { "--column-width", "100", "-" },
+					stdin = true,
 				},
 			},
 			formatters_by_ft = {
