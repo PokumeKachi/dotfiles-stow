@@ -574,7 +574,7 @@ end, {
 	silent = true,
 })
 
-map("x", "<leader>zknn", function()
+map("x", "zknn", function()
 	vim.cmd("vsplit")
 	Zk.new({
 		title = get_visual_selection_txt(),
@@ -593,7 +593,7 @@ end, {
 	silent = true,
 })
 
-map("x", "<leader>zknl", ":'<,'>ZkInsertLinkAtSelection<CR>", {
+map("x", "zknl", ":'<,'>ZkInsertLinkAtSelection<CR>", {
 	desc = "[z][k] new link",
 	silent = true,
 })
