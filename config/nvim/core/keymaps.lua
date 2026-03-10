@@ -248,17 +248,23 @@ map("n", "<leader>qo", ":only<CR>", {
 	desc = "quit other windows",
 })
 
-map("n", "<leader>ld", Picker.lsp_definitions, {
-	desc = "definitions",
-})
+map("n", "<leader>ld", function()
+	Picker.lsp_definitions({ auto_confirm = false })
+end, { desc = "definitions" })
+
 map("n", "<leader>lr", Picker.lsp_references, {
 	desc = "references",
+	auto_confirm = false,
 })
+
 map("n", "<leader>li", Picker.lsp_implementations, {
 	desc = "implementations",
+	auto_confirm = false,
 })
+
 map("n", "<leader>lt", Picker.lsp_type_definitions, {
 	desc = "type definitions",
+	auto_confirm = false,
 })
 
 map("n", "<leader>la", Lsp.code_action, {
