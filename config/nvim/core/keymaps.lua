@@ -248,24 +248,26 @@ map("n", "<leader>qo", ":only<CR>", {
 	desc = "quit other windows",
 })
 
-map("n", "<leader>ld", function()
-	Picker.lsp_definitions({ auto_confirm = false })
-end, { desc = "definitions" })
+local function noAutoConfirmWrapper(fn)
+	return function()
+		fn({ auto_confirm = false })
+	end
+end
 
-map("n", "<leader>lr", Picker.lsp_references, {
-	desc = "references",
-	auto_confirm = false,
-})
-
-map("n", "<leader>li", Picker.lsp_implementations, {
-	desc = "implementations",
-	auto_confirm = false,
-})
-
-map("n", "<leader>lt", Picker.lsp_type_definitions, {
-	desc = "type definitions",
-	auto_confirm = false,
-})
+map("n", "<leader>ld", noAutoConfirmWrapper(Picker.lsp_definitions), { desc = "definitions" })
+map("n", "<leader>lr", noAutoConfirmWrapper(Picker.lsp_references), { desc = "references" })
+map(
+	"n",
+	"<leader>li",
+	noAutoConfirmWrapper(Picker.lsp_implementations),
+	{ desc = "implementations" }
+)
+map(
+	"n",
+	"<leader>lt",
+	noAutoConfirmWrapper(Picker.lsp_type_definitions),
+	{ desc = "type definitions" }
+)
 
 map("n", "<leader>la", Lsp.code_action, {
 	desc = "code actions",
