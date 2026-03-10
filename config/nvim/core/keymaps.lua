@@ -524,6 +524,7 @@ end, {
 })
 
 map("n", "<leader>zknn", function()
+	vim.cmd("vsplit")
 	Zk.new()
 end, {
 	desc = "[z][k] [n]ew [n]ote",
@@ -532,6 +533,7 @@ end, {
 })
 
 map("x", "<leader>zknn", function()
+	vim.cmd("vsplit")
 	Zk.new({
 		title = get_visual_selection_txt(),
 	})
