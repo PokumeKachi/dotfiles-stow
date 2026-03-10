@@ -250,7 +250,7 @@ map("n", "<leader>qo", ":only<CR>", {
 
 local function noAutoConfirmWrapper(fn)
 	return function()
-		fn({ auto_confirm = false })
+		fn({ auto_confirm = true })
 	end
 end
 
