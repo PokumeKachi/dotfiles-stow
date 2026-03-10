@@ -214,10 +214,10 @@ end, {
 -- 	silent = true,
 -- })
 
-local function split(dir)
+local function split(split_direction, no_oil)
 	local ft = vim.bo.filetype
-	vim.api.nvim_open_win(0, true, { split = dir })
-	if ft ~= "oil" then
+	vim.api.nvim_open_win(0, true, { split = split_direction })
+	if ft ~= "oil" and not no_oil then
 		require("oil").open()
 	end
 end
@@ -718,12 +718,26 @@ map("n", "<leader>mt", "<cmd>Mtoc<CR>", {
 	desc = "create table of contents",
 })
 
--- map("n", "<leader>tt", "<cmd>term<CR>", { desc = "terminal", noremap = true, silent = true })
-map("n", "<leader>tt", "<leader>ts", {
-	desc = "terminal",
-	noremap = true,
-	silent = true,
-})
+map("n", "<leader>th", function()
+	split("left")
+	vim.cmd("term")
+end, { desc = "[t]erminal open left", noremap = true, silent = true })
+
+map("n", "<leader>tj", function()
+	split("down")
+	vim.cmd("term")
+end, { desc = "[t]erminal open down", noremap = true, silent = true })
+
+map("n", "<leader>tk", function()
+	split("up")
+	vim.cmd("term")
+end, { desc = "[t]erminal open up", noremap = true, silent = true })
+
+map("n", "<leader>tl", function()
+	split("right")
+	vim.cmd("term")
+end, { desc = "[t]erminal open right", noremap = true, silent = true })
+
 map("n", "<leader>ts", "<cmd>split | term<CR>", {
 	desc = "terminal (horizontal split)",
 	noremap = true,
