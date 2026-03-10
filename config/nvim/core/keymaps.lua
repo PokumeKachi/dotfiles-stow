@@ -193,6 +193,7 @@ end, {
 	silent = true,
 	desc = "window operations",
 })
+
 map("n", "<C-w>m", function()
 	require("winmove").start_mode("resize")
 end, {
@@ -200,6 +201,39 @@ end, {
 	desc = "winmove",
 	silent = true,
 })
+
+-- map("n", "<C-w>v", function()
+-- 	vim.api.nvim_open_win(0, true, { split = "right" })
+--
+-- 	if vim.bo.filetype ~= "oil" then
+-- 		require("oil").open()
+-- 	end
+-- end, {
+-- 	noremap = true,
+-- 	desc = "vsplit",
+-- 	silent = true,
+-- })
+
+local function split(dir)
+	local ft = vim.bo.filetype
+	vim.api.nvim_open_win(0, true, { split = dir })
+	if ft ~= "oil" then
+		require("oil").open()
+	end
+end
+
+map("n", "<C-w>nh", function()
+	split("left")
+end, { noremap = true, silent = true, desc = "split left" })
+map("n", "<C-w>nj", function()
+	split("below")
+end, { noremap = true, silent = true, desc = "split below" })
+map("n", "<C-w>nk", function()
+	split("above")
+end, { noremap = true, silent = true, desc = "split above" })
+map("n", "<C-w>nl", function()
+	split("right")
+end, { noremap = true, silent = true, desc = "split right" })
 
 map("n", "<leader>qq", ":quit<CR>", {
 	silent = true,
