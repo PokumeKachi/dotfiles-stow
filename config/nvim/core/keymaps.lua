@@ -20,11 +20,6 @@ local function is_buf_in_other_win(buf)
 	return false
 end
 
-local function get_visual_selection_txt()
-	vim.cmd('normal! "vy')
-	return vim.fn.getreg("v")
-end
-
 -- local function get_visual_selection_txt()
 -- 	local s = vim.fn.getpos("'<")
 -- 	local e = vim.fn.getpos("'>")
@@ -565,21 +560,13 @@ end, {
 	silent = true,
 })
 
-map("n", "<leader>zknn", function()
-	vim.cmd("vsplit")
-	Zk.new()
-end, {
+map("n", "<leader>zknn", ":ZkNew<CR>", {
 	desc = "[z][k] [n]ew [n]ote",
 	noremap = true,
 	silent = true,
 })
 
-map("x", "zknn", function()
-	vim.cmd("vsplit")
-	Zk.new({
-		title = get_visual_selection_txt(),
-	})
-end, {
+map("x", "zknn", ":ZkNewFromTitleSelection<CR>", {
 	desc = "[z][k] [n]ew [n]ote",
 	silent = true,
 })
