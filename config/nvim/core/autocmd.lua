@@ -2,9 +2,9 @@ local autocmd = vim.api.nvim_create_autocmd
 
 -- autofocus terminals
 autocmd("TermOpen", {
-  callback = function()
-    vim.cmd("startinsert")
-  end,
+	callback = function()
+		vim.cmd("startinsert")
+	end,
 })
 
 autocmd("VimEnter", {
@@ -87,6 +87,14 @@ autocmd("FileType", {
 
 		local pairs = require("mini.pairs")
 		pairs.map_buf(0, "i", "*", { action = "open", pair = "**" })
+		pairs.map_buf(0, "i", "$", { action = "open", pair = "$$" })
+
+		vim.opt_local.conceallevel = 2
+		vim.opt_local.concealcursor = "nc"
+
+		vim.fn.matchadd("Conceal", "->", 10, -1, { conceal = "→" })
+		vim.fn.matchadd("Conceal", "=>", 10, -1, { conceal = "⇒" })
+		vim.fn.matchadd("Conceal", "\\.\\.\\.", 10, -1, { conceal = "…" })
 	end,
 })
 
