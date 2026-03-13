@@ -1,0 +1,93 @@
+/* macOS-style transparent bar */
+* {
+    border: none;
+    border-radius: 0;
+    font-family:
+        "Inter",
+        -apple-system,
+        system-ui,
+        sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    min-height: 0;
+}
+
+window#waybar {
+    background: transparent;
+    border-radius: 0px;
+    border: 0px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+#workspaces {
+    background: transparent;
+    margin: 0;
+    padding: 0;
+}
+
+#workspaces button {
+    padding: 4px 6px;
+    margin: 0 2px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+#workspaces button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+#workspaces button.active {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+#window {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 400;
+    margin-left: 12px;
+}
+
+#clock {
+    background: transparent;
+    color: white;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+#network,
+#pulseaudio,
+#battery,
+#tray {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    padding: 0 8px;
+    margin: 0 2px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+#network:hover,
+#pulseaudio:hover,
+#battery:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#tray {
+    padding: 0 4px;
+}
+
+tooltip {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+tooltip label {
+    color: white;
+    padding: 8px 12px;
+}
