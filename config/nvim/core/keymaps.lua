@@ -711,12 +711,12 @@ map("n", "<leader>th", function()
 end, { desc = "[t]erminal open left", noremap = true, silent = true })
 
 map("n", "<leader>tj", function()
-	split("down")
+	split("below")
 	vim.cmd("term")
 end, { desc = "[t]erminal open down", noremap = true, silent = true })
 
 map("n", "<leader>tk", function()
-	split("up")
+	split("above")
 	vim.cmd("term")
 end, { desc = "[t]erminal open up", noremap = true, silent = true })
 
