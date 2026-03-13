@@ -15,7 +15,6 @@ visiblePlugin=reverb#0
 
 [Window]
 enableServiceMode=false
-height=1040
+height=518
 showTrayIcon=false
-visiblePage=inputPage
 width=954
