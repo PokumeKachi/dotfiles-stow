@@ -56,7 +56,7 @@ local NonTerm = {
 	require("lazy.markdown-preview"),
 	require("lazy.render-markdown"),
 	require("lazy.zk"),
-	-- require("lazy.mdmath"), markdown preview works so much better
+	-- require("lazy.mdmath"), --markdown preview works so much better
 }
 
 function setup_lazy(List)

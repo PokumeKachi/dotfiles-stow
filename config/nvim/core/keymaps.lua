@@ -372,10 +372,7 @@ map("n", "<leader>bqc", function()
 	local is_in_other_win = is_buf_in_other_win(current_buf)
 
 	if is_in_other_win then
-		-- when the buffer is visible elsewhere, you open oil instead of deleting it
-		-- preventing accidental removal from another window.
 		require("oil").open()
-		-- print("yea opening oil")
 		return
 	end
 
@@ -394,16 +391,16 @@ map("n", "<leader>bqc", function()
 		end
 
 		Snacks.bufdelete(current_buf)
+		--
+		-- if not idx then
+		-- 	return
+		-- end
 
-		if not idx then
-			return
-		end
-
-		local target = bufs[idx - 1] or bufs[idx + 1]
-
-		if target then
-			vim.api.nvim_set_current_buf(target)
-		end
+		-- local target = bufs[idx - 1] or bufs[idx + 1]
+		--
+		-- if target then
+		-- 	vim.api.nvim_set_current_buf(target)
+		-- end
 	end
 end, {
 	silent = true,

@@ -13,7 +13,6 @@ opt.splitright = true
 opt.completeopt = { "menu", "menuone", "noselect" }
 opt.background = 'light'
 
-vim.g.mkdp_markdown_css = ''
 vim.g.mkdp_math = 1
 
 vim.g.loaded_netrw = 1
