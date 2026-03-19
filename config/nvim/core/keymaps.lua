@@ -361,10 +361,90 @@ map(
 	"<leader>bs",
 	"ggVG",
 	{
-		desc = "[buffer] select",
+		desc = "[b]uffer select",
 		silent = true,
 	}
 )
+
+map("n", "<leader>bp", function()
+	local ft = vim.bo.filetype
+
+	if ft == "markdown" then
+		vim.cmd("MarkdownPreview")
+		return
+	end
+
+	if ft ~= "typst" then
+		return
+	end
+
+	local file = vim.fn.expand("%:p")
+	local out = "/tmp/" .. vim.fn.expand("%:t:r") .. ".pdf"
+
+	killTypstPreview()
+
+	typstJob = vim.fn.jobstart({
+		"typst",
+		"watch",
+		file,
+		out,
+	}, {
+		stderr_buffered = false,
+		on_stderr = function(_, data)
+			if not data then
+				return
+			end
+
+			local errors = {}
+			local isError = false
+
+			for _, line in ipairs(data) do
+				table.insert(errors, line)
+				if line:match("^error:") then
+					isError = true
+				end
+			end
+
+			if not isError then
+				return
+			end
+
+			local tmp = "/tmp/typst_error.typ"
+			local lines = {
+				"= Compilation failed",
+				"",
+			}
+
+			for _, line in ipairs(errors) do
+				table.insert(lines, "=== `" .. line .. "`")
+			end
+
+			vim.fn.writefile(lines, tmp)
+			vim.fn.system({
+				"typst",
+				"compile",
+				tmp,
+				out,
+			})
+		end,
+	})
+
+	zathuraJob = vim.fn.jobstart({
+		"zathura",
+		out,
+	}, {
+		detach = true,
+	})
+end, {
+	silent = true,
+	desc = "[b]uffer [p]review",
+})
+
+map({ "n", "v", "s", "o" }, "<leader>btr", ":RenderMarkdown buf_toggle<CR>", {
+	desc = "[b]uffer [t]oggle [r]ender",
+	silent = true,
+})
+
 map("n", "<leader>bqc", function()
 	local bufs = get_bufs()
 	local current_buf = vim.api.nvim_get_current_buf()
@@ -922,80 +1002,6 @@ function killTypstPreview()
 		vim.fn.jobstop(zathuraJob)
 	end
 end
-
-map("n", "<leader>fp", function()
-	local ft = vim.bo.filetype
-
-	if ft == "markdown" then
-		vim.cmd("MarkdownPreview")
-		return
-	end
-
-	if ft ~= "typst" then
-		return
-	end
-
-	local file = vim.fn.expand("%:p")
-	local out = "/tmp/" .. vim.fn.expand("%:t:r") .. ".pdf"
-
-	killTypstPreview()
-
-	typstJob = vim.fn.jobstart({
-		"typst",
-		"watch",
-		file,
-		out,
-	}, {
-		stderr_buffered = false,
-		on_stderr = function(_, data)
-			if not data then
-				return
-			end
-
-			local errors = {}
-			local isError = false
-
-			for _, line in ipairs(data) do
-				table.insert(errors, line)
-				if line:match("^error:") then
-					isError = true
-				end
-			end
-
-			if not isError then
-				return
-			end
-
-			local tmp = "/tmp/typst_error.typ"
-			local lines = {
-				"= Compilation failed",
-				"",
-			}
-
-			for _, line in ipairs(errors) do
-				table.insert(lines, "=== `" .. line .. "`")
-			end
-
-			vim.fn.writefile(lines, tmp)
-			vim.fn.system({
-				"typst",
-				"compile",
-				tmp,
-				out,
-			})
-		end,
-	})
-
-	zathuraJob = vim.fn.jobstart({
-		"zathura",
-		out,
-	}, {
-		detach = true,
-	})
-end, {
-	silent = true,
-	desc = "[f]ile [p]review",
-})
 
 vim.api.nvim_create_autocmd("VimLeavePre", {
 	callback = killTypstPreview,
