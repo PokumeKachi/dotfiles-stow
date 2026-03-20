@@ -375,8 +375,8 @@ map("n", "<leader>bp", function()
 	end
 
 	if ft == "markdown" then
-		local browser = os.getenv("BROWSER") or "firefox"
-		os.execute(browser .. " --new-window")
+		-- local browser = os.getenv("BROWSER") or "firefox"
+		-- os.execute(browser .. " --new-window")
 		vim.cmd("Vivify")
 		return
 	end
