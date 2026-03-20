@@ -6,10 +6,11 @@ return {
 		-- VimTeX configuration goes here, e.g.
 		vim.g.vimtex_view_method = "general"
 		vim.g.vimtex_view_general_viewer = "zathura"
+		-- vim.g.vimtex_view_general_options = "./build/%s"
 
 		vim.g.vimtex_compiler_method = "latexmk"
 		vim.g.vimtex_compiler_latexmk = {
-			build_dir = "build",
+			out_dir = ".artifacts",
 			continuous = 1,
 			executable = "latexmk",
 			options = {

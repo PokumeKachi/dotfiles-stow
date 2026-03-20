@@ -957,23 +957,23 @@ local has_words_before = function()
 end
 
 -- map({ "i" }, "<Tab>", function()
--- 	if blink_cmp.is_visible() then
--- 		blink_cmp.select_next()
+-- 	if BlinkCmp.is_visible() then
+-- 		BlinkCmp.select_next()
 -- 	elseif has_words_before() then
--- 		blink_cmp.select_accept_and_enter()
+-- 		BlinkCmp.select_accept_and_enter()
 -- 	end
 -- end)
 --
 -- map({ "i" }, "<S-Tab>", function()
--- 	if blink_cmp.is_visible() then
--- 		blink_cmp.select_prev()
+-- 	if BlinkCmp.is_visible() then
+-- 		BlinkCmp.select_prev()
 -- 	end
 -- end)
 --
 -- map({ "i" }, "<CR>", function()
--- 	blink_cmp.accept()
--- 	if blink_cmp.is_visible() then
--- 		blink_cmp.accept()
+-- 	BlinkCmp.accept()
+-- 	if BlinkCmp.is_visible() then
+-- 		BlinkCmp.accept()
 -- 		print("yea")
 -- 	else
 -- 		return "<CR>"
