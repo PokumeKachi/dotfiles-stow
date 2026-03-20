@@ -369,6 +369,11 @@ map(
 map("n", "<leader>bp", function()
 	local ft = vim.bo.filetype
 
+    if ft == "tex" then
+        vim.cmd("VimtexCompile")
+        return
+    end
+
 	if ft == "markdown" then
 		vim.cmd("Vivify")
 		return

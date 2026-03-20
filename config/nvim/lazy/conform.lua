@@ -47,6 +47,7 @@ return {
 				dart = { "dart_format" },
 				lua = { "stylua" },
 				luau = { "stylua" },
+				tex = { "latexindent" },
 				python = { "black" },
 				javascript = { "prettier" },
 				html = { "prettier" },
