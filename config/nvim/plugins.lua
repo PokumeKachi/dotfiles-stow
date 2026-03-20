@@ -55,6 +55,7 @@ local NonTerm = {
 	require("lazy.markdown-toc"),
 	require("lazy.markdown-preview"),
 	require("lazy.render-markdown"),
+	require("lazy.vivify"),
 	require("lazy.zk"),
 	-- require("lazy.mdmath"), --markdown preview works so much better
 }

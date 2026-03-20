@@ -370,7 +370,7 @@ map("n", "<leader>bp", function()
 	local ft = vim.bo.filetype
 
 	if ft == "markdown" then
-		vim.cmd("MarkdownPreview")
+		vim.cmd("Vivify")
 		return
 	end
 
