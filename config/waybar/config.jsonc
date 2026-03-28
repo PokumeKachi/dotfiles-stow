@@ -31,8 +31,8 @@
             "clock"
         ],
         "modules-left": [
-            "hyprland/workspaces",
-            "hyprland/window"
+            "niri/workspaces",
+            "niri/window"
         ],
         "modules-right": [
             "network",

@@ -346,7 +346,10 @@ binds {
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Mod+Return hotkey-overlay-title="Open a Terminal: kitty" { spawn "kitty" "--single-instance"; }
     // Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
-    Muhenkan hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel" "--no-icons"; }
+    // Muhenkan hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel" "--no-icons"; }
+    Muhenkan hotkey-overlay-title="Run an Application: fuzzel" {
+        spawn "sh" "-c" "tofi-drun --width 100% --height 100% --anchor top --hint-font false --num-results 10 --ascii-input true --late-keyboard-init | sh"
+   }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
 
     // You can also use a shell. Do this if you need pipes, multiple commands, etc.
@@ -529,12 +532,12 @@ binds {
     Mod+Ctrl+R { reset-window-height; }
     Mod+F { maximize-column; }
     // Mod+Shift+F { fullscreen-window; }
-    Mod+Muhenkan { fullscreen-window; }
+    Mod+Henkan { fullscreen-window; }
 
     // Expand the focused column to space not taken up by other fully visible columns.
     // Makes the column "fill the rest of the space".
     // Mod+Ctrl+F { expand-column-to-available-width; }
-    Mod+Henkan { expand-column-to-available-width; }
+    Mod+Muhenkan { expand-column-to-available-width; }
 
     Mod+C { center-column; }
 
