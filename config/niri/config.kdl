@@ -348,7 +348,11 @@ binds {
     // Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
     // Muhenkan hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel" "--no-icons"; }
     Muhenkan hotkey-overlay-title="Run an Application: fuzzel" {
-        spawn "sh" "-c" "tofi-drun --width 100% --height 100% --anchor top --hint-font false --num-results 10 --ascii-input true --late-keyboard-init | sh"
+        spawn "sh" "-c" "tofi-drun --width 100% --height 100% --anchor top --hint-font false --num-results 10 --ascii-input true --late-keyboard-init | sh";
+   }
+
+    Henkan hotkey-overlay-title="Run an Application: fuzzel" {
+        spawn "sh" "-c" "tofi-run --width 100% --height 100% --anchor top --hint-font false --num-results 10 --ascii-input true --late-keyboard-init | sh";
    }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
 
