@@ -33,6 +33,7 @@ local NonTerm = {
 	require("lazy.nvim-dap"),
 	require("lazy.nvim-lint"),
 	require("lazy.nvim-lsp-notify"),
+	require("lazy.nvim-lsp-file-operations"),
 	require("lazy.nvim-mapper"),
 	require("lazy.nvim-notify"),
 	require("lazy.nvim-ts-autotag"),
