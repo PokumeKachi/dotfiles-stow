@@ -995,7 +995,8 @@ end)
 map("n", "<F6>", function()
 	local current_file = get_current_file()
 	float_win()
-	vim.fn.termopen("just run " .. current_file)
+	-- vim.fn.termopen("just run " .. current_file)
+	vim.fn.termopen("just run")
 end)
 
 local typstJob
