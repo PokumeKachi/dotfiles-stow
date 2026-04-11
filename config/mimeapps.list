@@ -6,6 +6,7 @@ x-scheme-handler/about=firefox.desktop
 x-scheme-handler/unknown=firefox.desktop
 
 image/webp=imv.desktop
+image/png=imv.desktop
 
 
 x-scheme-handler/roblox-studio=org.vinegarhq.Vinegar.studio.desktop

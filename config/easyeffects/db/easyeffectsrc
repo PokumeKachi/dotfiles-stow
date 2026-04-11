@@ -10,12 +10,11 @@ visiblePlugin=limiter#0
 
 [StreamOutputs]
 outputDevice=alsa_output.usb-SPACETOUCH_USB_Audio_000000000-00.analog-stereo
-plugins=convolver#0,equalizer#1,compressor#0,exciter#0,reverb#0,expander#0,limiter#0,deesser#0,crossfeed#0,rnnoise#0
-visiblePage=pluginsPage
-visiblePlugin=reverb#0
+plugins=convolver#0,equalizer#1,compressor#0,exciter#0,reverb#0,expander#0,limiter#0,deesser#0,crossfeed#0
+visiblePlugin=crossfeed#0
 
 [Window]
 enableServiceMode=false
-height=1040
+height=518
 showTrayIcon=false
 width=954
