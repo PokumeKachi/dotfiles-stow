@@ -3,7 +3,7 @@
 git_branch() {
     local branch=$(git branch --show-current 2>/dev/null)
     if [[ -n $branch ]]; then
-        echo " ⎇ $branch"
+        echo "  $branch"
     else
         echo ""
     fi
@@ -11,10 +11,10 @@ git_branch() {
 
 if [[ $EUID -eq 0 ]]; then
     # Root prompt: user (blue on black), :path (yellow on black), branch (cyan), $ (red)
-    PS1='\[\e[1;40;94m\]\u\[\e[1;40;93m\]:\w\[\e[1;36m\]$(git_branch " (%s)")\[\e[1;91m\] \$\[\e[0m\] '
+    PS1='\[\e[1;40;94m\]\u\[\e[1;40;93m\]  \w\[\e[1;36m\]$(git_branch " (%s)")\[\e[0m\] \$ '
 else
     # Normal user: user (green), :path (blue), branch (cyan), $ (magenta)
-    PS1='\[\e[1;32m\]\u\[\e[0m\]:\[\e[1;34m\]\w\[\e[1;36m\]$(git_branch " (%s)")\[\e[1;35m\] \$\[\e[0m\] '
+    PS1='\[\e[1;32m\]\u\[\e[0m\]\[\e[1;34m\]  \w\[\e[1;36m\]$(git_branch " (%s)")\[\e[0m\] \$ '
 fi
 
 # if [[ -z "$TMUX" ]]; then
