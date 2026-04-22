@@ -120,7 +120,7 @@ output "eDP-1" {
 }
 
 layout {
-    gaps 4
+    gaps 16
 
     // - "never", default behavior, focusing an off-screen column will keep at the left
     //   or right edge of the screen.
@@ -163,10 +163,10 @@ layout {
         // - CSS-like notation: "rgb(255, 127, 0)", rgba(), hsl() and a few others.
 
         // Color of the ring on the active monitor.
-        // active-color "#7fc8ff"
+        active-color "#7fc8ff"
 
         // Color of the ring on inactive monitors.
-        // inactive-color "#505050"
+        inactive-color "#505050"
 
         // You can also use gradients. They take precedence over solid colors.
         // Gradients are rendered the same as CSS linear-gradient(angle, from, to).
@@ -175,13 +175,13 @@ layout {
         // You can use any CSS linear-gradient tool on the web to set these up.
         // Changing the color space is also supported, check the wiki for more info.
         //
-        active-gradient from="#bbddff" to="#ffaa55" angle=45
+        // active-gradient from="#bbddff" to="#ffaa55" angle=45
 
         // You can also color the gradient relative to the entire view
         // of the workspace, rather than relative to just the window itself.
         // To do that, set relative-to="workspace-view".
         //
-        inactive-gradient from="#505050" to="#808080" angle=45 relative-to="workspace-view"
+        // inactive-gradient from="#505050" to="#808080" angle=45 relative-to="workspace-view"
     }
 
     // You can also add a border. It's similar to the focus ring, but always visible.
@@ -298,6 +298,11 @@ animations {
 
 // Work around WezTerm's initial configure bug
 // by setting an empty default-column-width.
+// A global rule to dim all unfocused windows
+window-rule {
+    match is-focused=false
+    opacity 0.8 // Adjust this value to your preference (0.0 to 1.0)
+}
 window-rule {
     // This regular expression is intentionally made as specific as possible,
     // since this is the default config, and we want no false positives.
@@ -347,6 +352,10 @@ binds {
     Mod+Return hotkey-overlay-title="Open a Terminal: kitty" { spawn "kitty" "--single-instance"; }
     // Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
     // Muhenkan hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel" "--no-icons"; }
+
+    Mod+D hotkey-overlay-title="Run an Application: fuzzel" {
+        spawn "sh" "-c" "tofi-drun --width 100% --height 100% --anchor top --hint-font false --num-results 10 --ascii-input true --late-keyboard-init | sh";
+   }
     Muhenkan hotkey-overlay-title="Run an Application: fuzzel" {
         spawn "sh" "-c" "tofi-drun --width 100% --height 100% --anchor top --hint-font false --num-results 10 --ascii-input true --late-keyboard-init | sh";
    }
@@ -374,6 +383,8 @@ binds {
     Mod+O repeat=false { toggle-overview; }
 
     Mod+Shift+W { close-window; }
+
+    Mod+Tab { focus-monitor-next; }
 
     Mod+Left  { focus-column-or-monitor-left; }
     Mod+Down  { focus-window-or-workspace-down; }
@@ -513,9 +524,6 @@ binds {
 
     // Alternatively, there are commands to move just a single window:
     // Mod+Ctrl+1 { move-window-to-workspace 1; }
-
-    // Switches focus between the current and the previous workspace.
-    Mod+Tab { focus-workspace-previous; }
 
     // The following binds move the focused window in and out of a column.
     // If the window is alone, they will consume it into the nearby column to the side.
