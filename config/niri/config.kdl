@@ -543,6 +543,7 @@ binds {
     Mod+Shift+R { switch-preset-window-height; }
     Mod+Ctrl+R { reset-window-height; }
     Mod+F { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
     // Mod+Shift+F { fullscreen-window; }
     Mod+Henkan { fullscreen-window; }
 
