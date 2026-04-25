@@ -384,7 +384,8 @@ binds {
 
     Mod+Shift+W { close-window; }
 
-    Mod+Tab { focus-monitor-next; }
+    Mod+Shift+N { move-window-to-monitor-next; }
+    Mod+N { focus-monitor-next; }
 
     Mod+Left  { focus-column-or-monitor-left; }
     Mod+Down  { focus-window-or-workspace-down; }
