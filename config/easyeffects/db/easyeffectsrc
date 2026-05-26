@@ -12,10 +12,10 @@ visiblePlugin=limiter#0
 outputDevice=bluez_output.35_DE_F1_80_DA_41.1
 plugins=convolver#0,equalizer#1,compressor#0,exciter#0,reverb#0,expander#0,limiter#0,deesser#0,crossfeed#0,autogain#0
 visiblePage=pluginsPage
-visiblePlugin=autogain#0
+visiblePlugin=equalizer#1
 
 [Window]
 enableServiceMode=false
 height=1016
 showTrayIcon=false
-width=936
+width=1888

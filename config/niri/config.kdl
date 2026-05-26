@@ -61,8 +61,8 @@ workspace-auto-back-and-forth
 
     keyboard {
         xkb {
-                    layout "us"
-                    variant "altgr-intl"
+            layout "us"
+            variant "altgr-intl"
         }
 
         numlock
