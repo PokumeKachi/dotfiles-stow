@@ -13,6 +13,7 @@ band3Gain=-2.460000000000001
 band5Gain=-5.169999999999998
 
 [soe][Equalizer#1]
+bypass=true
 inputGain=-2.5
 numBands=5
 

@@ -3,5 +3,6 @@ threshold=-18
 
 [soe][Compressor#0]
 attack=10
+bypass=true
 release=10
 threshold=-5

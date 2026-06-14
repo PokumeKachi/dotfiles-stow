@@ -1,5 +1,6 @@
 [soe][Reverb#0]
 amount=-5
+bypass=true
 decayTime=0.4
 diffusion=0.7
 hfDamp=4000
