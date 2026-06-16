@@ -1,0 +1,154 @@
+# ===================================================================
+#  SINGLE FORMAT: Everything in one place.
+#  Two-line prompt: Context (top) + Status + CmdDuration + Prompt (bottom)
+# ===================================================================
+format = """
+[╭─](bold green)$username$hostname$directory$git_branch$git_status$package$rust$nix_shell$docker_context$python$nodejs$time
+[╰─](bold green)$status$cmd_duration$character"""
+
+# ===================================================================
+#  DIRECTORY
+# ===================================================================
+[directory]
+style = "bold cyan"
+truncation_length = 3
+truncation_symbol = "…/"
+home_symbol = "~"
+read_only = " 🔒"
+
+# ===================================================================
+#  GIT BRANCH
+# ===================================================================
+[git_branch]
+symbol = "🌿 "
+style = "bold yellow"
+truncation_length = 20
+
+# ===================================================================
+#  GIT STATUS
+# ===================================================================
+[git_status]
+style = "yellow"
+conflicted = "🏳️"
+ahead = "⇡${count}"
+behind = "⇣${count}"
+staged = "+${count}"
+modified = "!${count}"
+untracked = "?${count}"
+deleted = "✘${count}"
+renamed = "▶${count}"
+diverged = "⇡⇣${count}"
+
+# ===================================================================
+#  PACKAGE VERSION
+# ===================================================================
+[package]
+symbol = "📦 "
+style = "bold 208"
+
+# ===================================================================
+#  RUST
+# ===================================================================
+[rust]
+symbol = "🦀 "
+style = "bold red"
+format = "via [$symbol$version]($style) "
+
+# ===================================================================
+#  NIX SHELL
+# ===================================================================
+[nix_shell]
+symbol = "❄️ "
+style = "bold blue"
+format = "via [$symbol$name]($style) "
+
+# ===================================================================
+#  DOCKER CONTEXT
+# ===================================================================
+[docker_context]
+symbol = "🐳 "
+style = "bold 39"
+format = "via [$symbol$context]($style) "
+only_with_files = true
+
+# ===================================================================
+#  PYTHON
+# ===================================================================
+[python]
+symbol = "🐍 "
+style = "bold yellow"
+format = "via [$symbol$version]($style) "
+
+# ===================================================================
+#  NODEJS
+# ===================================================================
+[nodejs]
+symbol = "⬢ "
+style = "bold green"
+format = "via [$symbol$version]($style) "
+
+# ===================================================================
+#  USERNAME (only if root or SSH)
+# ===================================================================
+[username]
+style_user = "white bold"
+style_root = "red bold"
+format = "[$user]($style) "
+show_always = false
+
+# ===================================================================
+#  HOSTNAME (only when SSH)
+# ===================================================================
+[hostname]
+ssh_only = true
+style = "bold dimmed white"
+format = "at [$hostname]($style) "
+
+# ===================================================================
+#  TIME (24h, always shown)
+# ===================================================================
+[time]
+format = "at [$time]($style) "
+style = "dimmed white"
+time_format = "%H:%M"
+use_12hr = false
+
+# ===================================================================
+#  COMMAND DURATION (only if > 2 seconds)
+# ===================================================================
+[cmd_duration]
+format = "took [$duration]($style) "
+style = "yellow"
+min_time = 2_000
+
+# ===================================================================
+#  STATUS (exit code, only if non‑zero)
+# ===================================================================
+[status]
+format = "[$symbol$status]($style) "
+style = "bold red"
+symbol = "✖ "
+map_symbol = true
+
+# ===================================================================
+#  CHARACTER (the prompt symbol)
+# ===================================================================
+[character]
+success_symbol = "[➜](bold green)"
+error_symbol = "[➜](bold red)"
+vicmd_symbol = "[❮](bold purple)"  # visible if you use zsh-vi-mode
+
+# ===================================================================
+#  FILL (optional – pushes elements to the right; not used here)
+# ===================================================================
+# [fill] # removed because we don't use it in the format
+
+# ===================================================================
+#  BATTERY (optional – for laptops)
+# ===================================================================
+[battery]
+full_symbol = "🔋 "
+charging_symbol = "⚡️ "
+discharging_symbol = "🔋 "
+percent = true
+threshold = 10
