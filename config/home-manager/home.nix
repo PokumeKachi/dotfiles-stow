@@ -30,14 +30,14 @@
     };
 
     # Optional: shell configuration (HM can manage your shell)
-    programs.zsh = {
-        enable = true;
-        shellAliases = {
-            ll = "ls -l";
-            la = "ls -a";
-            update = "home-manager switch";
-        };
-    };
+    # programs.zsh = {
+    #     enable = true;
+    #     shellAliases = {
+    #         ll = "ls -l";
+    #         la = "ls -a";
+    #         update = "home-manager switch";
+    #     };
+    # };
 
     # Environment variables
     home.sessionVariables = {
