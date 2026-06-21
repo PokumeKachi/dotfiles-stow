@@ -1,5 +1,6 @@
 return {
 	"nvim-treesitter/nvim-treesitter",
+    branch = "main",
 	build = ":TSUpdate",
 	event = { "BufReadPost", "BufNewFile" },
 	dependencies = {
@@ -62,7 +63,7 @@ return {
 		},
 	},
 	config = function(_, opts)
-		require("nvim-treesitter.configs").setup(opts)
+		require("nvim-treesitter").setup(opts)
 
 		vim.api.nvim_create_autocmd("ColorScheme", {
 			callback = function()

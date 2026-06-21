@@ -51,6 +51,7 @@ return {
 			-- in specified locations, see :h treesitter-language-injections.
 			-- Set enabled to false in order to disable.
 
+            enabled = false,
 			gitcommit = {
 				enabled = true,
 				query = [[
