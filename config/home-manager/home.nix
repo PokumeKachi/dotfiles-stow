@@ -23,6 +23,13 @@
         gitui
     ];
 
+    home.pointerCursor = {
+        package = pkgs.gnome-themes-extra; # e.g., pkgs.catppuccin-cursors
+        name = "Adwaitda-dark";
+        size = 24;
+        gtk.enable = true; # This is important for GTK apps
+        x11.enable = true; # Good for XWayland compatibility
+    };
     # direnv with nix-direnv integration
     programs.direnv = {
         enable = true;
