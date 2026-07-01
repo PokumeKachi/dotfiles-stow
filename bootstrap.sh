@@ -137,7 +137,8 @@ deelevate_permissions() {
 
 declare -A main_script_function_map=(
     ["Set up AUR (with Paru)"]="setup_paru"
-    ["Set up the dotfiles (will set up AUR with Paru too)"]="setup_dotfiles"
+    ["Set up the dotfiles"]="setup_dotfiles"
+    ["Set up all"]="setup_all"
 )
 
 setup_paru() {
@@ -161,49 +162,71 @@ setup_paru() {
 }
 
 setup_dotfiles() {
-    setup_paru
+    gum_announce "Setting Kachi's dotfiles up..."
 
-    if [ -d "$HOME/dotfiles" ]; then
-        gum_announce "Dotfiles folder has already been set up!"
-    else
-        gum_announce "Setting Kachi's dotfiles up..."
+    sudo pacman -S --noconfirm --needed direnv just stow
 
-        sudo pacman -S --noconfirm --needed direnv just stow
+    mkdir -p ~/dotfiles
 
-        dotfiles_repo=$(gum_prompt "Which stow dotfiles repo to clone?" "https://github.com/PokumeKachi/dotfiles-stow.git")
+    declare -A repos=(
+        [stow]="PokumeKachi/dotfiles-stow.git"
+        [konfigkoll]="PokumeKachi/dotfiles-konfigkoll.git"
+        [nix]="PokumeKachi/dotfiles-nix.git"
+    )
 
-        mkdir -p ~/dotfiles
+    for name in "${!repos[@]}"; do
+        repo="${repos[$name]}"
+        target="$HOME/dotfiles/$name"
 
-        git clone "$dotfiles_repo" ~/dotfiles/stow || rm -rf ~/dotfiles/stow
+        if [ -d "$target/.git" ]; then
+            gum_announce "$name already exists, skipping..."
+            continue
+        fi
 
-        cd ~/dotfiles/stow && mkdir -p ~/.config && just link
-        cd ~/dotfiles/stow && git remote set-url origin git@github.com:PokumeKachi/dotfiles-stow.git
-    fi
+        repo=$(gum_prompt "Which $name GitHub repo to use?" "$repo")
 
+        git clone "https://github.com/$repo" "$target"
+        git -C "$target" remote set-url origin "git@github.com:$repo"
+    done
+}
+
+setup_stow() {
+    cd ~/dotfiles/stow && mkdir -p ~/.config && just link
+}
+
+setup_nix() {
     if command -v nix >/dev/null 2>&1; then
         gum_announce "Nix has already been set up!"
     else
-        # sh <(curl -L https://nixos.org/nix/install) --daemon --yes
         curl -sSf -L https://install.lix.systems/lix | sudo sh -s -- install --no-confirm
     fi
+}
 
+setup_home_manager() {
     if command -v home-manager >/dev/null 2>&1; then
         gum_announce "Home Manager has already been set up!"
     else
         bash --login -c '
-            # nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
-            # nix-channel --update
-            # nix-shell '\''<home-manager>'\'' -A install
-            # home-manager switch
             nix run github:nix-community/home-manager -- switch --flake ~/dotfiles/nix#home
         '
     fi
+}
 
+setup_konfigkoll() {
     if command -v konfigkoll >/dev/null 2>&1; then
         gum_announce "Konfigkoll has already been set up!"
     else
         paru -S --noconfirm --needed konfigkoll
     fi
+}
+
+setup_all() {
+    setup_paru
+    setup_dotfiles
+    setup_stow
+    setup_nix
+    setup_home_manager
+    setup_konfigkoll
 }
 
 gum_announce "Script starting. Setting up the base..."
