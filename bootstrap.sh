@@ -199,16 +199,7 @@ setup_nix() {
         gum_announce "Nix has already been set up!"
     else
         curl -sSf -L https://install.lix.systems/lix | sudo sh -s -- install --no-confirm
-    fi
-}
-
-setup_home_manager() {
-    if command -v home-manager >/dev/null 2>&1; then
-        gum_announce "Home Manager has already been set up!"
-    else
-        bash --login -c '
-            nix run github:nix-community/home-manager -- switch --flake ~/dotfiles/nix#home
-        '
+        cd ~ && just nix-switch
     fi
 }
 
@@ -225,7 +216,6 @@ setup_all() {
     setup_dotfiles
     setup_stow
     setup_nix
-    setup_home_manager
     setup_konfigkoll
 }
 
