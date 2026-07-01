@@ -65,5 +65,8 @@ wifi:
     adb connect $DEVICE_IP
     scrcpy --serial $DEVICE_IP
 
-ssh-vps:
+sshfs-vps:
     nix-shell -p sshfs --run "sshfs root@minhluu.pro.vn:/ ~/vps"
+
+nix-switch:
+    nix run ~/dotfiles/nix#switch
