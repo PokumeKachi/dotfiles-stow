@@ -8,9 +8,6 @@ return {
 		local ls = require("luasnip")
 		ls.setup(opts)
 
-		-- require("luasnip.loaders.from_vscode").lazy_load({
-		-- 	include = { "javascript", "typescript", "lua", "rust" },
-		-- })
 		require("luasnip.loaders.from_lua").lazy_load({
 			paths = vim.fn.stdpath("config") .. "/snippets",
 		})

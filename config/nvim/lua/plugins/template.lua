@@ -3,7 +3,7 @@ return {
 	cmd = { "Template", "TemProject" },
 	config = function()
 		require("template").setup({
-			temp_dir = "~/.config/nvim/templates",
+            temp_dir = vim.fn.stdpath("config") .. "/templates",
 		})
 	end,
 }

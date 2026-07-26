@@ -1,0 +1,5 @@
+require("core.autocmds")
+require("core.colorscheme")
+require("core.filetypes")
+require("core.keymaps")
+require("core.options")

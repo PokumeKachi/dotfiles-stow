@@ -1,5 +1,12 @@
 local map = vim.keymap.set
 
+local direction_map = {
+    h = "left",
+    j = "below",
+    k = "above",
+    l = "right",
+}
+
 local silent = {
 	silent = true,
 }
@@ -217,18 +224,14 @@ local function split(split_direction, no_oil)
 	end
 end
 
-map("n", "<C-w>nh", function()
-	split("left")
-end, { noremap = true, silent = true, desc = "split left" })
-map("n", "<C-w>nj", function()
-	split("below")
-end, { noremap = true, silent = true, desc = "split below" })
-map("n", "<C-w>nk", function()
-	split("above")
-end, { noremap = true, silent = true, desc = "split above" })
-map("n", "<C-w>nl", function()
-	split("right")
-end, { noremap = true, silent = true, desc = "split right" })
+for key, dir in pairs(direction_map) do
+    map("n", "<C-w>n" .. key, function()
+        split(dir)
+    end, {
+        desc = "split " .. dir,
+        silent = true,
+    })
+end
 
 map("n", "<leader>qq", ":quit<CR>", {
 	silent = true,
@@ -249,20 +252,16 @@ local function noAutoConfirmWrapper(fn)
 	end
 end
 
-map("n", "<leader>ld", noAutoConfirmWrapper(Picker.lsp_definitions), { desc = "definitions" })
-map("n", "<leader>lr", noAutoConfirmWrapper(Picker.lsp_references), { desc = "references" })
-map(
-	"n",
-	"<leader>li",
-	noAutoConfirmWrapper(Picker.lsp_implementations),
-	{ desc = "implementations" }
-)
-map(
-	"n",
-	"<leader>lt",
-	noAutoConfirmWrapper(Picker.lsp_type_definitions),
-	{ desc = "type definitions" }
-)
+for key, fn, desc in ipairs({
+    { "d", Picker.lsp_definitions, "definitions" },
+    { "r", Picker.lsp_references, "references" },
+    { "i", Picker.lsp_implementations, "implementations" },
+    { "t", Picker.lsp_type_definitions, "type definitions" },
+}) do
+    map("n", "<leader>l" .. fn[1], noAutoConfirmWrapper(fn[2]), {
+        desc = fn[3],
+    })
+end
 
 map("n", "<leader>la", Lsp.code_action, {
 	desc = "code actions",
@@ -669,14 +668,6 @@ map("x", "zknl", ":'<,'>ZkInsertLinkAtSelection<CR>", {
 	silent = true,
 })
 
-map("n", "<leader>zkl", function()
-	vim.cmd("ZkLinks")
-end, { desc = "[z][k] [l]inks view", noremap = true, silent = true })
-
-map("n", "<leader>zkb", function()
-	vim.cmd("ZkLinks")
-end, { desc = "[z][k] [b]acklinks view", noremap = true, silent = true })
-
 local function pickNotes(param1, param2)
 	Zk.pick_notes(param1 or {}, param2 or {}, function(selection)
 		if not selection then
@@ -789,25 +780,15 @@ map("n", "<leader>mt", "<cmd>Mtoc<CR>", {
 	desc = "create table of contents",
 })
 
-map("n", "<leader>th", function()
-	split("left")
-	vim.cmd("term")
-end, { desc = "[t]erminal open left", noremap = true, silent = true })
-
-map("n", "<leader>tj", function()
-	split("below")
-	vim.cmd("term")
-end, { desc = "[t]erminal open down", noremap = true, silent = true })
-
-map("n", "<leader>tk", function()
-	split("above")
-	vim.cmd("term")
-end, { desc = "[t]erminal open up", noremap = true, silent = true })
-
-map("n", "<leader>tl", function()
-	split("right")
-	vim.cmd("term")
-end, { desc = "[t]erminal open right", noremap = true, silent = true })
+for key, dir in pairs(direction_map) do
+    map("n", "<leader>t" .. key, function()
+        split(dir)
+        vim.cmd.term()
+    end, {
+        desc = "terminal " .. dir,
+        silent = true,
+    })
+end
 
 map("n", "<leader>ts", "<cmd>split | term<CR>", {
 	desc = "terminal (horizontal split)",
