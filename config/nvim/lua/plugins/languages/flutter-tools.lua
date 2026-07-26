@@ -14,10 +14,6 @@ return {
                 prefix = "   >> ",
             },
             lsp = {
-                color = {
-                    enabled = true,
-                    foreground = true,
-                },
                 capabilities = capabilities,
             },
         }
