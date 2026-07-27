@@ -1,5 +1,5 @@
 return {
-    require("plugins.editing.auto-save"),
+    -- require("plugins.editing.auto-save"),
     require("plugins.editing.conform"),
     require("plugins.editing.hardtime"),
     require("plugins.editing.mini"),

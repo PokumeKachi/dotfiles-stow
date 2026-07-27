@@ -1,6 +1,6 @@
 return {
-    require("plugins.navigation.focus"),
-    require("plugins.navigation.fyler"),
+    -- require("plugins.navigation.focus"),
+    -- require("plugins.navigation.fyler"),
     require("plugins.navigation.fzf-lua"),
     require("plugins.navigation.neoscroll"),
     require("plugins.navigation.oil"),

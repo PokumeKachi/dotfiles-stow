@@ -1,5 +1,7 @@
 local g = vim.g
-local is_termux = vim.fn.getenv("PREFIX") == "/data/data/com.termux/files/usr"
+local opt = vim.opt
+
+local is_termux = vim.fn.getenv("prefix") == "/data/data/com.termux/files/usr"
 
 local function setup_termux_clipboard()
     g.clipboard = {
@@ -16,7 +18,7 @@ local function setup_termux_clipboard()
     }
 end
 
-if vim.env.SSH_CONNECTION then
+if vim.env.ssh_connection then
     g.clipboard = "osc52"
     return
 end
@@ -24,3 +26,5 @@ end
 if is_termux then
     setup_termux_clipboard()
 end
+
+opt.clipboard = "unnamedplus"

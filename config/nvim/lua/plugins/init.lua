@@ -15,6 +15,7 @@ local NonTerm = {
 	require("plugins.navigation"),
 	require("plugins.treesitter"),
 	require("plugins.ui"),
+    require("plugins.template"),
 }
 
 function ensure_lazy()
