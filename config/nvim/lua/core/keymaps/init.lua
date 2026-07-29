@@ -11,7 +11,9 @@ local silent = {
 	silent = true,
 }
 local Snacks = require("snacks")
-local Picker = require("snacks").picker
+local Picker = Snacks.picker
+local Rename = Snacks.rename
+
 local BlinkCmp = require("blink.cmp")
 local Zk = require("zk")
 local ZkApi = require("zk.api")
@@ -25,6 +27,14 @@ local function is_buf_in_other_win(buf)
 		end
 	end
 	return false
+end
+
+local function split(split_direction, no_oil)
+	local ft = vim.bo.filetype
+	vim.api.nvim_open_win(0, true, { split = split_direction })
+	if ft ~= "oil" and not no_oil then
+		require("oil").open()
+	end
 end
 
 -- local function get_visual_selection_txt()
@@ -149,7 +159,7 @@ local function float_win()
 end
 
 local function get_current_file()
-	local cwd = vim.loop.cwd()
+	local cwd = vim.uv.cwd()
 
 	if vim.bo.buftype == "terminal" or vim.bo.filetype == "oil" then
 		return "."
@@ -196,6 +206,16 @@ end, {
 	desc = "window operations",
 })
 
+for key, dir in pairs(direction_map) do
+    map("n", "<C-w>n" .. key, function()
+        split(dir)
+    end, {
+        noremap = true,
+        desc = "split " .. dir,
+        silent = true,
+    })
+end
+
 map("n", "<C-w>m", function()
 	require("winmove").start_mode("resize")
 end, {
@@ -216,22 +236,7 @@ end, {
 -- 	silent = true,
 -- })
 
-local function split(split_direction, no_oil)
-	local ft = vim.bo.filetype
-	vim.api.nvim_open_win(0, true, { split = split_direction })
-	if ft ~= "oil" and not no_oil then
-		require("oil").open()
-	end
-end
 
-for key, dir in pairs(direction_map) do
-    map("n", "<C-w>n" .. key, function()
-        split(dir)
-    end, {
-        desc = "split " .. dir,
-        silent = true,
-    })
-end
 
 map("n", "<leader>qq", ":quit<CR>", {
 	silent = true,
@@ -300,35 +305,7 @@ end, {
 })
 
 map("n", "<leader>fr", function()
-	local old_buf = vim.api.nvim_get_current_buf()
-
-	local full_name = vim.api.nvim_buf_get_name(0)
-
-	local dir = vim.fn.fnamemodify(full_name, ":h")
-	local filename = vim.fn.fnamemodify(full_name, ":t")
-
-	vim.ui.input({
-		prompt = "new name: ",
-		default = filename,
-	}, function(new_name)
-		if not new_name or new_name == "" or new_name == full_name then
-			return
-		end
-
-		new_name = dir .. "/" .. new_name
-
-		if vim.uv.fs_stat(full_name) then
-			local ok, err = vim.uv.fs_rename(full_name, new_name)
-
-			if not ok then
-				print(err)
-				return
-			end
-		end
-
-		vim.cmd("edit " .. vim.fn.fnameescape(new_name))
-		Snacks.bufdelete(old_buf)
-	end)
+    Rename()
 end, {
 	desc = "[file] rename",
 })
@@ -995,3 +972,9 @@ end
 vim.api.nvim_create_autocmd("VimLeavePre", {
 	callback = killTypstPreview,
 })
+
+
+map("n", "<leader>el", ":NoiceSnacks<CR>")
+map("n", "<leader>ee", function()
+    Snacks.explorer()
+end)

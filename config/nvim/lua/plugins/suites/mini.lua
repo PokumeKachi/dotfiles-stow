@@ -1,92 +1,3 @@
-function mini_clue()
-	-- local key_tree = {
-	-- 	["<leader>"] = {
-	-- 		l = {
-	-- 			d = "go to definition",
-	-- 			h = "view documentation",
-	-- 			n = "rename",
-	-- 			a = "view code actions",
-	-- 			r = "go to references",
-	-- 			i = "go to implementation",
-	-- 			t = "go to type definition",
-	-- 		},
-	-- 	},
-	-- }
-	--
-	-- local generated_clues = {}
-	--
-	-- local function build_clues(prefix, tbl)
-	-- 	for k, v in pairs(tbl) do
-	-- 		local new_prefix = prefix .. k
-	-- 		if type(v) == "string" then
-	-- 			table.insert(generated_clues, { mode = "n", keys = new_prefix, desc = v })
-	-- 		elseif type(v) == "table" then
-	-- 			-- for group, add a group label
-	-- 			table.insert(generated_clues, { mode = "n", keys = new_prefix, desc = "+" .. k })
-	-- 			build_clues(new_prefix, v)
-	-- 		end
-	-- 	end
-	-- end
-	--
-	-- build_clues("", key_tree)
-	--
-	-- print(generated_clues)
-
-	local miniclue = require("mini.clue")
-
-	miniclue.setup({
-		triggers = {
-			{ mode = "n", keys = "<leader>" },
-			{ mode = "x", keys = "<leader>" },
-
-			{ mode = "i", keys = "<C-x>" },
-
-			-- `g` key
-			{ mode = "n", keys = "g" },
-			{ mode = "x", keys = "g" },
-
-			-- Maks
-			{ mode = "n", keys = "'" },
-			{ mode = "n", keys = "`" },
-			{ mode = "x", keys = "'" },
-			{ mode = "x", keys = "`" },
-
-			-- Registes
-			{ mode = "n", keys = '"' },
-			{ mode = "x", keys = '"' },
-			{ mode = "i", keys = "<C-r>" },
-
-			{ mode = "c", keys = "<C-r>" },
-
-			-- Window commands
-			{ mode = "n", keys = "<C-w>" },
-
-			-- `z` key
-			{ mode = "n", keys = "z" },
-			{ mode = "x", keys = "z" },
-		},
-
-		clues =
-			-- vim.list_extend(
-			{
-				miniclue.gen_clues.builtin_completion(),
-				miniclue.gen_clues.g(),
-				miniclue.gen_clues.marks(),
-				miniclue.gen_clues.registers(),
-				miniclue.gen_clues.windows(),
-				miniclue.gen_clues.z(),
-
-				{ mode = "n", keys = "<leader>l", desc = "+lsp" },
-			},
-		-- , generated_clues),
-
-		window = {
-			delay = 0,
-			config = { width = "auto" },
-		},
-	})
-end
-
 return {
 	"nvim-mini/mini.nvim",
 	version = "*",
@@ -94,18 +5,18 @@ return {
 		local hues = require("mini.hues")
 
 		local hues_palette = {
-			foreground = "#f6d0f5",
+			foreground = "#f6d0d5",
 			-- background = "#202426",
 			-- foreground = "#ffdfb0",
 			-- background = "#303436";
 			-- foreground = "#ffffff",
-			background = "#202426",
+			background = "#202456",
 			n_hues = 8,
 			-- saturation = 'mediumhigh',
 			saturation = "high",
 			--One of: 'bg', 'fg', 'red', 'orange', 'yellow', 'green',
 			-- 'cyan', 'azure', 'blue', 'purple'
-			accent = "azure",
+			accent = "fg",
 		}
 
 		hues._palette = hues_palette
@@ -148,40 +59,6 @@ return {
 			silent = false,
 		})
 
-		mini_clue()
-
-		require("mini.surround").setup({
-			search_method = "cover_or_nearest",
-			n_lines = 20,
-            silent = true,
-		})
-		require("mini.pairs").setup({
-			-- In which modes mappings from this `config` should be created
-			modes = { insert = true, command = false, terminal = false },
-
-			-- Global mappings. Each right hand side should be a pair information, a
-			-- table with at least these fields (see more in |MiniPairs.map|):
-			-- - <action> - one of 'open', 'close', 'closeopen'.
-			-- - <pair> - two character string for pair to be used.
-			-- By default pair is not inserted after `\`, quotes are not recognized by
-			-- <CR>, `'` does not insert pair after a letter.
-			-- Only parts of tables can be tweaked (others will use these defaults).
-			mappings = {
-				["("] = { action = "open", pair = "()", neigh_pattern = "[^\\]." },
-				["["] = { action = "open", pair = "[]", neigh_pattern = "[^\\]." },
-				["{"] = { action = "open", pair = "{}", neigh_pattern = "[^\\]." },
-				-- ['<'] = { action = 'open', pair = '<>', neigh_pattern = '[^\\].' },
-
-				[")"] = { action = "close", pair = "()", neigh_pattern = "[^\\]." },
-				["]"] = { action = "close", pair = "[]", neigh_pattern = "[^\\]." },
-				["}"] = { action = "close", pair = "{}", neigh_pattern = "[^\\]." },
-				[">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
-
-				['"'] = { action = "open", pair = '""', neigh_pattern = "[^\\].", register = { cr = false } },
-				["'"] = { action = "open", pair = "''", neigh_pattern = "[^%a\\].", register = { cr = false } },
-				["`"] = { action = "open", pair = "``", neigh_pattern = "[^\\].", register = { cr = false } },
-			},
-		})
 
 		require("mini.animate").setup({
 			scroll = { enable = false }, -- this shit breaks mouse scrolling
@@ -191,19 +68,10 @@ return {
 			close = { enable = false },
 		})
 
-		-- local cat = require("catppuccin.palettes").get_palette("mocha")
-		--
-		-- require("mini.colors").make_scheme("catppuccin_mocha", {
-		-- 	Normal = { fg = cat.text, bg = cat.base },
-		-- 	Comment = { fg = cat.overlay1 },
-		-- 	String = { fg = cat.green },
-		-- 	Function = { fg = cat.blue },
-		-- })
-		-- require("mini.colors").apply_scheme("catppuccin_mocha")
-
-		require("mini.colors").setup()
-		-- require("mini.hues").setup(hues._palette)
+		-- require('mini.clue').setup()
+		-- require("mini.colors").setup()
 		require("mini.cursorword").setup()
+		-- require("mini.hues").setup(hues._palette)
 		-- require("mini.cmdline").setup({
 		-- 	autocomplete = {
 		-- 		enable = false,
@@ -249,31 +117,32 @@ return {
 		-- })
 		require("mini.hipatterns").setup()
 		require("mini.icons").setup()
-		require("mini.indentscope").setup()
+		-- require("mini.indentscope").setup()
 		-- require("mini.map").setup()
 		-- require('mini.map').open()
-		require("mini.notify").setup({
-			content = {
-				-- Function which formats the notification message
-				-- By default prepends message with notification time
-				format = nil,
 
-				-- Function which orders notification array from most to least important
-				-- By default orders first by level and then by update timestamp
-				sort = nil,
-			},
-			lsp_progress = { enable = false },
-			window = {
-				-- Floating window config
-				config = {},
-
-				-- Maximum window width as share (between 0 and 1) of available columns
-				max_width_share = 0.382,
-
-				-- Value of 'winblend' option
-				winblend = 25,
-			},
-		})
+		-- require("mini.notify").setup({
+		-- 	content = {
+		-- 		-- Function which formats the notification message
+		-- 		-- By default prepends message with notification time
+		-- 		format = nil,
+		--
+		-- 		-- Function which orders notification array from most to least important
+		-- 		-- By default orders first by level and then by update timestamp
+		-- 		sort = nil,
+		-- 	},
+		-- 	lsp_progress = { enable = false },
+		-- 	window = {
+		-- 		-- Floating window config
+		-- 		config = {},
+		--
+		-- 		-- Maximum window width as share (between 0 and 1) of available columns
+		-- 		max_width_share = 0.382,
+		--
+		-- 		-- Value of 'winblend' option
+		-- 		winblend = 25,
+		-- 	},
+		-- })
 		-- require("mini.starter").setup()
 
 		require("mini.statusline").setup({
@@ -336,5 +205,38 @@ return {
 			tabpage_section = "left",
 		})
 		require("mini.trailspace").setup()
+
+		require("mini.surround").setup({
+			search_method = "cover_or_nearest",
+			n_lines = 20,
+            silent = true,
+		})
+		require("mini.pairs").setup({
+			-- In which modes mappings from this `config` should be created
+			modes = { insert = true, command = false, terminal = false },
+
+			-- Global mappings. Each right hand side should be a pair information, a
+			-- table with at least these fields (see more in |MiniPairs.map|):
+			-- - <action> - one of 'open', 'close', 'closeopen'.
+			-- - <pair> - two character string for pair to be used.
+			-- By default pair is not inserted after `\`, quotes are not recognized by
+			-- <CR>, `'` does not insert pair after a letter.
+			-- Only parts of tables can be tweaked (others will use these defaults).
+			mappings = {
+				["("] = { action = "open", pair = "()", neigh_pattern = "[^\\]." },
+				["["] = { action = "open", pair = "[]", neigh_pattern = "[^\\]." },
+				["{"] = { action = "open", pair = "{}", neigh_pattern = "[^\\]." },
+				-- ['<'] = { action = 'open', pair = '<>', neigh_pattern = '[^\\].' },
+
+				[")"] = { action = "close", pair = "()", neigh_pattern = "[^\\]." },
+				["]"] = { action = "close", pair = "[]", neigh_pattern = "[^\\]." },
+				["}"] = { action = "close", pair = "{}", neigh_pattern = "[^\\]." },
+				[">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
+
+				['"'] = { action = "open", pair = '""', neigh_pattern = "[^\\].", register = { cr = false } },
+				["'"] = { action = "open", pair = "''", neigh_pattern = "[^%a\\].", register = { cr = false } },
+				["`"] = { action = "open", pair = "``", neigh_pattern = "[^\\].", register = { cr = false } },
+			},
+		})
 	end,
 }

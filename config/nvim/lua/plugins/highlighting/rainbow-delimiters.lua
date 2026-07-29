@@ -1,3 +1,5 @@
+-- Make your braces differently colored, may help with recognition
+
 return {
 	"HiPhish/rainbow-delimiters.nvim",
 	event = "VeryLazy",

@@ -1,3 +1,5 @@
+-- The theme of our editor
+
 return {
 	{ "ellisonleao/gruvbox.nvim", priority = 1000, opts = {} },
 	{

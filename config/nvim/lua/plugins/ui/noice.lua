@@ -1,3 +1,9 @@
+-- Press :
+-- See how the command input box is floating in the middle of the screen?
+-- Yeah that was *noice*
+-- The same styling also applies to like dialog boxes and notifications and allat
+-- (Notifications is passed on to be handled by nvim-notify.nvim though)
+
 return {
 	"folke/noice.nvim",
 	event = "VeryLazy",

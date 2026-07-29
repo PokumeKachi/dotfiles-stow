@@ -1,61 +1,38 @@
-local LazyList = {
-	-- require('plugins.which-key'),
-	-- replaced by mini.clue ^^
+local ToBeLoaded = {}
+
+local NonTerminalPlugins = { -- renamed for clarity
+  require("plugins.completion"),
+  require("plugins.dap"),
+  require("plugins.editing"),
+  require("plugins.git"),
+  require("plugins.highlighting"),
+  require("plugins.languages"),
+  require("plugins.lsp"),
+  require("plugins.navigation"),
+  require("plugins.suites"),
+  require("plugins.themes"),
+  require("plugins.ui"),
 }
 
-local NonTerm = {
-	require("plugins.appearance"),
-	require("plugins.completion"),
-	require("plugins.dap"),
-	require("plugins.editing"),
-	require("plugins.git"),
-	require("plugins.languages"),
-	require("plugins.lsp"),
-	require("plugins.markdown"),
-	require("plugins.navigation"),
-	require("plugins.treesitter"),
-	require("plugins.ui"),
-    require("plugins.template"),
-}
+-- Condition: skip these plugins when running in terminal-only mode
+local is_terminal_mode = vim.fn.argc() == 1 and vim.fn.argv()[1] == "+term"
 
-function ensure_lazy()
-	local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-
-	if not vim.loop.fs_stat(lazypath) then
-		print("Installing lazy.nvim from git...")
-
-		vim.fn.system({
-			"git",
-			"clone",
-			"--filter=blob:none",
-			"https://github.com/folke/lazy.nvim.git",
-			"--branch=stable",
-			lazypath,
-		})
-	end
-
-	vim.opt.rtp:prepend(lazypath)
-
+if not is_terminal_mode then
+  vim.list_extend(ToBeLoaded, NonTerminalPlugins) -- cleaner than ipairs loop
 end
 
-if vim.fn.argc() == 1 and vim.fn.argv()[1] == "+term" then
-else
-	for _, v in ipairs(NonTerm) do
-		table.insert(LazyList, v)
-	end
+-- Bootstrap lazy.nvim
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+  vim.fn.system({
+    "git", "clone", "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git", "--branch=stable", lazypath
+  })
 end
+vim.opt.rtp:prepend(lazypath)
 
-ensure_lazy()
-
-require("lazy").setup(LazyList, {
-	git = {
-		depth = 1,
-	},
-	lockfile = vim.fn.stdpath("data") .. "/lazy-lock.json",
+-- Setup
+require("lazy").setup(ToBeLoaded, {
+  git = { depth = 1 },
+  lockfile = vim.fn.stdpath("data") .. "/lazy-lock.json",
 })
-
--- local hues = require('mini.hues')
--- local palette = hues.make_palette(hues._palette)
---
--- vim.api.nvim_set_hl(0, 'StatusLine', { fg = palette.fg, bg = palette.bg })
--- vim.api.nvim_set_hl(0, 'StatusLineNC', { fg = palette.fg, bg = palette.bg })

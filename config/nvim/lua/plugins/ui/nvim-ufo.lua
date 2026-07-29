@@ -1,3 +1,5 @@
+-- Make folds more beautiful!
+
 local handler = function(virtText, lnum, endLnum, width, truncate)
 	local newVirtText = {}
 	-- suffix with folded lines count

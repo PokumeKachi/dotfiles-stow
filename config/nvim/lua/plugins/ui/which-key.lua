@@ -1,30 +1,76 @@
-
 return {
   "folke/which-key.nvim",
   event = "VeryLazy",
-lazy = false,
-  config = function()
-    local wk = require("which-key")
-
-    wk.setup()
-
-    wk.add({
-      { "<leader>l", group = "lsp" },
-      { "<leader>ld", "<cmd>lua vim.lsp.buf.definition()<CR>", desc = "go to definition", silent = true },
-      { "<leader>lh", "<cmd>lua vim.lsp.buf.hover()<CR>", desc = "view documentation", silent = true },
-      { "<leader>ln", "<cmd>lua vim.lsp.buf.rename()<CR>", desc = "rename", silent = true },
-      { "<leader>la", "<cmd>lua vim.lsp.buf.code_action()<CR>", desc = "view code actions", silent = true },
-      { "<leader>lr", "<cmd>lua vim.lsp.buf.references()<CR>", desc = "go to references", silent = true },
-      { "<leader>li", "<cmd>lua vim.lsp.buf.implementation()<CR>", desc = "go to implementation", silent = true },
-      { "<leader>lt", "<cmd>lua vim.lsp.buf.type_definition()<CR>", desc = "go to type definition", silent = true },
-      {
-        "<leader>?",
-        function()
-          wk.show({ global = false })
-        end,
-        desc = "Buffer Local Keymaps (which-key)",
+  lazy = false,
+  opts = {
+    -- preset = "helix",
+    delay = 0,
+     win = {
+        -- don't allow the popup to overlap with the cursor
+        no_overlap = true,
+        width = { min = 4, max = 25 },
+        height = { min = 4, max = 25 },
+        col = math.huge,
+        row = math.huge,
+        -- border = "rounded", -- rounded, none, single, double
+        border = {
+          "╭", "═", "╮",
+          "║", "╯", "═", "╰", "║"
+        },
+        padding = { 1, 1 }, -- extra window padding [top/bottom, right/left]
+        title = true,
+        title_pos = "left",
+        zindex = 1000,
+        bo = {},
+        wo = {
+          winblend = 20, -- value between 0-100 0 for fully opaque and 100 for fully transparent
+        },
       },
-    })
-  end,
-}
+    layout = {
+      align = "center",
+      spacing = 2,
+    },
+    sort = { "local", "order", "group", "alphanum", "mod" },
+    icons = {
+      breadcrumb = "»",
+      separator = "➜",
+      group = "+",
+      ellipsis = "…",
+    },
+    triggers = {
+      { "<leader>", mode = { "n", "v" } },
+      { "g", mode = "n" },
+      { "z", mode = { "n", "v" } },
+      { "<C-w>", mode = "n" },
+    },
+  },
+    config = function(_, opts)
+      local wk = require("which-key")
+      wk.setup(opts)
 
+      -- ✅ ONLY groups go here. No action mappings with missing rhs!
+      wk.add({
+        { "<leader>l", group = "LSP" },
+        { "<leader>f", group = "Find" },
+        { "<leader>s", group = "Search" },
+        { "<leader>g", group = "Git" },
+        { "<leader>u", group = "UI" },
+        { "<leader>t", group = "Terminal" },
+        { "<leader>w", group = "Windows" },
+        { "<leader>b", group = "Buffers" },
+        { "<leader>z", group = "Zen/Zoom" },
+        { "<leader>h", group = "Help" },
+      })
+
+      -- ✅ This special mapping IS valid (it has a function)
+      wk.add({
+        {
+          "<leader>?",
+          function()
+            wk.show({ global = false })
+          end,
+          desc = "Buffer Local Keymaps",
+        },
+      })
+    end,
+}

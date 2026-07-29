@@ -1,5 +1,8 @@
 return {
+    require("plugins.languages.markdown"),
+
     require("plugins.languages.flutter-tools"),
+
     require("plugins.languages.luau-lsp"),
     require("plugins.languages.luau-tree"),
     require("plugins.languages.rustaceanvim"),

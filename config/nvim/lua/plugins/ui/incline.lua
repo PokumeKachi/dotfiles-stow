@@ -1,16 +1,16 @@
--- Helper to convert a color number (0xRRGGBB) to "#RRGGBB"
+-- Floating statusline, particularly annoying when it hides the actual content!
+
 local function hex(c)
   return string.format("#%06x", c)
 end
 
--- Safely retrieve highlight attributes, with fallback defaults
 local function get_hl_attrs(group, defaults)
   defaults = defaults or {}
   local ok, attrs = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
   if not ok or not attrs then
     return defaults
   end
-  -- Merge, giving priority to the actual highlight
+
   return vim.tbl_extend("force", defaults, attrs)
 end
 
@@ -60,19 +60,19 @@ return {
       local ft = vim.bo[buf].filetype or "?"
       local flags = (vim.bo[buf].modified and "" or "") .. (vim.bo[buf].readonly and "" or "")
 
-      -- 2. Safely get the highlight groups we want to use
+      -- 2. Safely get highlight groups
       local normal = get_hl_attrs("NormalFloat", { fg = 0xcccccc, bg = 0x1a1a1a })
-      local title  = get_hl_attrs("Title", { fg = 0xffff00, bg = normal.bg })
-
-      -- Title background: use its own, otherwise normal.bg
+      local title = get_hl_attrs("Title", { fg = 0xffff00, bg = normal.bg })
       local title_bg = title.bg or normal.bg
 
-      -- 3. Build the statusline segments
+      -- 3. Build the statusline as a list of items.
+      --    Each item is either a string or a table with the string as its first element
+      --    followed by highlight attributes.
       local parts = {}
 
       -- Mode indicator (bold, using Title colours)
       parts[#parts + 1] = {
-        text = " " .. mode .. " ",
+        " " .. mode .. " ",
         guifg = hex(title.fg),
         guibg = hex(title_bg),
         gui = "bold",
@@ -86,14 +86,14 @@ return {
       main_text = main_text .. " [" .. ft .. "]" .. rec_indicator .. " "
 
       parts[#parts + 1] = {
-        text = main_text,
+        main_text,
         guifg = hex(normal.fg),
         guibg = hex(normal.bg),
       }
 
       -- Percentage (line number / total)
       parts[#parts + 1] = {
-        text = (" │ %d/%d (%d%%)"):format(cur, total, pct),
+        (" │ %d/%d (%d%%)"):format(cur, total, pct),
         guifg = hex(normal.fg),
         guibg = hex(normal.bg),
       }

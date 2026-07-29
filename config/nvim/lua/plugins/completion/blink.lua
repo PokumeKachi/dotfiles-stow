@@ -1,6 +1,5 @@
 return {
 	"saghen/blink.cmp",
-	-- dependencies = { "rafamadriz/friendly-snippets" },
 	dependencies = { "L3MON4D3/LuaSnip", version = "v2.*" },
 	version = "1.*",
 
@@ -18,7 +17,7 @@ return {
 
 			accept = { auto_brackets = { enabled = false } },
 
-			list = { selection = { preselect = false, auto_insert = true } },
+			list = { selection = { preselect = false, auto_insert = false } },
 
 			menu = {
 				auto_show = true,

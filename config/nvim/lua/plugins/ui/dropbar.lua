@@ -1,3 +1,5 @@
+-- IDE-like breadcrumbs
+
 return {
 	"Bekaboo/dropbar.nvim",
 	dependencies = {
