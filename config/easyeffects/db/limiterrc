@@ -1,2 +1,4 @@
 [soe][Limiter#0]
-bypass=true
+attack=0.25
+oversampling=22
+threshold=-1

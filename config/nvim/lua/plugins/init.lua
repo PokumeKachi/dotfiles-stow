@@ -1,6 +1,6 @@
 local ToBeLoaded = {}
 
-local NonTerminalPlugins = { -- renamed for clarity
+local NonTerminalPlugins = {
   require("plugins.completion"),
   require("plugins.dap"),
   require("plugins.editing"),
