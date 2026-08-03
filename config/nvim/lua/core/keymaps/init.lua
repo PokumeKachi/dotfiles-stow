@@ -1,3 +1,5 @@
+require("core.keymaps.general")
+
 local map = vim.keymap.set
 
 local direction_map = {

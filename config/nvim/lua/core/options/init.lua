@@ -1,4 +1,3 @@
--- Load external module files
 require("core.options.clipboard")
 require("core.options.general")
 
