@@ -1,4 +1,5 @@
 [soe][Limiter#0]
 attack=0.25
 oversampling=22
+release=20
 threshold=-1
