@@ -1,6 +1,6 @@
 local opt = vim.opt
-local undodir = vim.fn.stdpath("state") .. "/undo"
 
+local undodir = vim.fn.stdpath("state") .. "/undo"
 vim.fn.mkdir(undodir, "p")
 
 opt.undodir = undodir

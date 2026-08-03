@@ -6,4 +6,5 @@ autocmd("TermOpen", {
 	callback = function()
         vim.cmd.startinsert()
 	end,
+    desc = "Start terminal in Insert mode, not the default Normal mode",
 })

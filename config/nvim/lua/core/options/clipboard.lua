@@ -1,9 +1,20 @@
 local g = vim.g
 local opt = vim.opt
 
-local is_termux = vim.fn.getenv("prefix") == "/data/data/com.termux/files/usr"
+-- Always enable system clipboard integration
+opt.clipboard = "unnamedplus"
 
-local function setup_termux_clipboard()
+-- Check if the environment variable `PREFIX` is set
+local is_termux = vim.fn.getenv("PREFIX") == "/data/data/com.termux/files/usr"
+
+-- Detect SSH connection
+local is_ssh = vim.env.SSH_CONNECTION ~= nil
+
+if is_ssh then
+    -- Use OSC52 for terminal clipboard (works over SSH)
+    g.clipboard = "osc52"
+elseif is_termux then
+    -- Use Termux's native clipboard commands
     g.clipboard = {
         name = "termux-clipboard",
         copy = {
@@ -14,17 +25,7 @@ local function setup_termux_clipboard()
             ["+"] = "termux-clipboard paste",
             ["*"] = "termux-clipboard paste",
         },
-        cache_enabled = 0,
+        cache_enabled = false,
     }
 end
-
-if vim.env.ssh_connection then
-    g.clipboard = "osc52"
-    return
-end
-
-if is_termux then
-    setup_termux_clipboard()
-end
-
-opt.clipboard = "unnamedplus"
+-- If neither, `g.clipboard` is left unset for Neovim default fallback
