@@ -9,6 +9,7 @@ local NonTerminalPlugins = {
   require("plugins.languages"),
   require("plugins.lsp"),
   require("plugins.navigation"),
+  require("plugins.sessions"),
   require("plugins.suites"),
   require("plugins.themes"),
   require("plugins.ui"),
