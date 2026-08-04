@@ -4,8 +4,8 @@ return {
 	build = "make install_jsregexp",
 	event = "InsertEnter",
 	config = function(_, opts)
-		local ls = require("luasnip")
-		ls.setup(opts)
+		local luasnip = require("luasnip")
+		luasnip.setup(opts)
 
 		require("luasnip.loaders.from_lua").lazy_load({
 			paths = vim.fn.stdpath("config") .. "/snippets",

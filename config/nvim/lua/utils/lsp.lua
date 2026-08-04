@@ -1,34 +1,42 @@
-local lspconfig = require("lspconfig")
 local blink_cmp = require("blink.cmp")
+local map = require("utils.keymap").buf_map
 
 local M = {}
 
--- Shared capabilities and on_attach
+-- Shared capabilities
 M.capabilities = blink_cmp.get_lsp_capabilities()
 
--- on_attach uses the same helper for buffer-local keymaps
+-- Shared on_attach (LSP keymaps)
 M.on_attach = function(client, bufnr)
-    M.buf_keymap(bufnr, "n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
-    M.buf_keymap(bufnr, "n", "K", vim.lsp.buf.hover, { desc = "Hover" })
-    M.buf_keymap(bufnr, "n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename symbol" })
-    M.buf_keymap(bufnr, "n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code actions" })
+    map(bufnr, "n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
+    map(bufnr, "n", "K", vim.lsp.buf.hover, { desc = "Hover" })
+    map(bufnr, "n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename" })
+    map(bufnr, "n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Actions" })
 end
 
--- Helper to set up an LSP server
-function M.lsp_setup(server_name, user_opts)
+-- Defaults that apply to ALL servers
+M.defaults = {
+    capabilities = M.capabilities,
+    on_attach = M.on_attach,
+}
+
+-- Register a server with the modern API
+function M.register(server_name, user_opts)
     user_opts = user_opts or {}
-    local defaults = lspconfig[server_name] and lspconfig[server_name].configs.default_config
-    if not defaults then
-        vim.notify("Server '" .. server_name .. "' not found in lspconfig", vim.log.levels.WARN)
-        return
-    end
 
-    local final_config = vim.tbl_deep_extend("force", defaults, user_opts)
-    final_config.capabilities = M.capabilities
-    final_config.on_attach = M.on_attach
+    -- Merge user options with defaults
+    local config = vim.tbl_deep_extend("force", M.defaults, user_opts)
 
-    vim.lsp.config(server_name, final_config)
+    -- Register using the modern API
+    vim.lsp.config(server_name, config)
     vim.lsp.enable(server_name)
+end
+
+-- Batch register multiple servers
+function M.register_all(servers)
+    for server_name, user_opts in pairs(servers) do
+        M.register(server_name, user_opts)
+    end
 end
 
 return M

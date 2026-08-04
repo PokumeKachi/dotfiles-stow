@@ -1,13 +1,8 @@
 local M = {}
 
-local KEYMAP_DEFAULTS = {
-    silent = true,
-    noremap = true,
-}
-
 -- Helper to get caller info for debugging
 local function get_caller_info()
-    local info = debug.getinfo(3, "Sl")  -- 3 = caller of keymap() / buf_keymap()
+    local info = debug.getinfo(4, "Sl")  -- 3 = caller of keymap() / buf_keymap()
     if not info then return "unknown", 0 end
     local source = info.source:gsub("^@", ""):gsub("^.*lua/", "")
     return source, info.currentline or 0
@@ -22,32 +17,42 @@ local function warn_if_no_action(rhs, opts)
             vim.log.levels.WARN,
             { title = "Keymap" }
         )
+        return 1
     end
 end
 
+local KEYMAP_DEFAULTS = {
+    silent = true,
+    noremap = true,
+}
+
 -- 🔧 Global mappings
 function M.map(mode, lhs, rhs, opts)
-    -- If the 3rd argument is a table, it's actually opts (skip rhs)
     if type(rhs) == "table" then
         opts = rhs
         rhs = nil
     end
     opts = opts or {}
 
-    warn_if_no_action(rhs, opts)
+    if warn_if_no_action(rhs, opts) then
+        return
+    end
+
     vim.keymap.set(mode, lhs, rhs, vim.tbl_extend("force", KEYMAP_DEFAULTS, opts))
 end
 
 -- 🔧 Buffer-local mappings
 function M.buf_map(bufnr, mode, lhs, rhs, opts)
-    -- If the 4th argument (rhs) is a table, shift it to opts
     if type(rhs) == "table" then
         opts = rhs
         rhs = nil
     end
     opts = opts or {}
 
-    warn_if_no_action(rhs, opts)
+    if warn_if_no_action(rhs, opts) then
+        return
+    end
+
     local buf_defaults = vim.tbl_extend("force", KEYMAP_DEFAULTS, { buffer = bufnr })
     vim.keymap.set(mode, lhs, rhs, vim.tbl_extend("force", buf_defaults, opts))
 end
@@ -67,7 +72,9 @@ function M.lazy_map(lhs, rhs, opts)
 
     opts = opts or {}
 
-    warn_if_no_action(rhs, opts)
+    if warn_if_no_action(rhs, opts) then
+        return
+    end
 
     return {
         lhs,

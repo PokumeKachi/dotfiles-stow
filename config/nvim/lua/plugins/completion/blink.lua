@@ -2,7 +2,6 @@ return {
 	"saghen/blink.cmp",
 	dependencies = { "L3MON4D3/LuaSnip", version = "v2.*" },
 	version = "1.*",
-
 	opts = {
 		keymap = {
 			preset = "default",
@@ -14,14 +13,10 @@ return {
 		appearance = { nerd_font_variant = "mono" },
 		completion = {
 			keyword = { range = "full" },
-
 			accept = { auto_brackets = { enabled = false } },
-
 			list = { selection = { preselect = false, auto_insert = false } },
-
 			menu = {
 				auto_show = true,
-
 				draw = {
 					columns = {
 						{ "label", "label_description", gap = 1 },
@@ -29,9 +24,7 @@ return {
 					},
 				},
 			},
-
 			documentation = { auto_show = true, auto_show_delay_ms = 10 },
-
 			ghost_text = { enabled = true },
 		},
 		snippets = { preset = "luasnip" },

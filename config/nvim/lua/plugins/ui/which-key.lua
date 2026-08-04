@@ -8,22 +8,23 @@ return {
      win = {
         -- don't allow the popup to overlap with the cursor
         no_overlap = true,
-        width = { min = 4, max = 25 },
-        height = { min = 4, max = 25 },
-        col = math.huge,
+        -- width = { min = 4, max = 50 },
+        height = { min = 4, max = 20 },
+        -- col = math.huge,
         row = math.huge,
         -- border = "rounded", -- rounded, none, single, double
-        border = {
-          "╭", "═", "╮",
-          "║", "╯", "═", "╰", "║"
-        },
-        padding = { 1, 1 }, -- extra window padding [top/bottom, right/left]
+        border = "rounded",
+        -- {
+        --   "╭", "═", "╮",
+        --   "║", "╯", "═", "╰", "║"
+        -- },
+        padding = { 0, 0 }, -- extra window padding [top/bottom, right/left]
         title = true,
         title_pos = "left",
         zindex = 1000,
         bo = {},
         wo = {
-          winblend = 20, -- value between 0-100 0 for fully opaque and 100 for fully transparent
+          winblend = 0, -- value between 0-100 0 for fully opaque and 100 for fully transparent
         },
       },
     layout = {

@@ -8,6 +8,7 @@ require("core.keymaps.pickers")
 require("core.keymaps.terminal")
 require("core.keymaps.typst")
 require("core.keymaps.ui")
+require("core.keymaps.zk")
 
 local map = vim.keymap.set
 
@@ -25,7 +26,6 @@ local Snacks = require("snacks")
 local Picker = Snacks.picker
 local Rename = Snacks.rename
 
-local BlinkCmp = require("blink.cmp")
 local Zk = require("zk")
 local ZkApi = require("zk.api")
 local Lsp = vim.lsp.buf
@@ -156,20 +156,6 @@ local function get_word_under_cursor()
 	return line:sub(s + 1, e)
 end
 
-local function get_current_file()
-	local cwd = vim.uv.cwd()
-
-	if vim.bo.buftype == "terminal" or vim.bo.filetype == "oil" then
-		return "."
-	end
-
-	local name = vim.api.nvim_buf_get_name(0)
-	if name == "" then
-		return "."
-	end
-
-	return vim.fn.fnamemodify(name, ":.")
-end
 
 local luasnip = require("luasnip")
 
@@ -618,91 +604,6 @@ end, {
 	silent = true,
 })
 
-map("n", "<leader>zknn", ":ZkNew<CR>", {
-	desc = "[z][k] [n]ew [n]ote",
-	noremap = true,
-	silent = true,
-})
-
-map("x", "zknn", ":ZkNewFromTitleSelection<CR>", {
-	desc = "[z][k] [n]ew [n]ote",
-	silent = true,
-})
-
-map("n", "<leader>zknl", function()
-	ZkApi.index()
-	vim.cmd("ZkInsertLink")
-end, {
-	desc = "[z][k] [n]ew [l]ink",
-	noremap = true,
-	silent = true,
-})
-
-map("x", "zknl", ":'<,'>ZkInsertLinkAtSelection<CR>", {
-	desc = "[z][k] new link",
-	silent = true,
-})
-
-local function pickNotes(param1, param2)
-	Zk.pick_notes(param1 or {}, param2 or {}, function(selection)
-		if not selection then
-			return
-		end
-
-		for _, note in ipairs(selection) do
-			local buf = vim.fn.bufadd(note.absPath)
-			vim.fn.bufload(buf)
-			vim.bo[buf].buflisted = true
-			vim.api.nvim_open_win(buf, true, {
-				split = "right",
-			})
-		end
-	end)
-end
-
-map("n", "<leader>zkpn", function()
-	Zk.index()
-	pickNotes()
-end, {
-	desc = "[z][k] [p]icker - notes",
-	noremap = true,
-	silent = true,
-})
-
-map("n", "<leader>zkpt", function()
-	Zk.index()
-	Zk.pick_tags({}, {}, function(selection)
-		if not selection then
-			return
-		end
-
-		local tags = {}
-
-		for _, tag in pairs(selection) do
-			table.insert(tags, tag.name)
-		end
-
-		pickNotes({
-			tags = tags,
-		})
-	end)
-end, {
-	desc = "[z][k] [p]icker - tags",
-	noremap = true,
-	silent = true,
-})
-
-map("n", "<leader>zkl", ":ZkLinks<CR>", {
-	desc = "[z][k] [l]inks view",
-	noremap = true,
-	silent = true,
-})
-
-map("n", "<leader>zkb", ":ZkBacklinks<CR>", {
-	desc = "[z][k] [back]links view",
-	noremap = true,
-	silent = true,
-})
 
 map("n", "<leader>da", Lsp.code_action, {
 	desc = "Show code actions",
@@ -913,30 +814,6 @@ local has_words_before = function()
 		and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s")
 			== nil
 end
-
--- map({ "i" }, "<Tab>", function()
--- 	if BlinkCmp.is_visible() then
--- 		BlinkCmp.select_next()
--- 	elseif has_words_before() then
--- 		BlinkCmp.select_accept_and_enter()
--- 	end
--- end)
---
--- map({ "i" }, "<S-Tab>", function()
--- 	if BlinkCmp.is_visible() then
--- 		BlinkCmp.select_prev()
--- 	end
--- end)
---
--- map({ "i" }, "<CR>", function()
--- 	BlinkCmp.accept()
--- 	if BlinkCmp.is_visible() then
--- 		BlinkCmp.accept()
--- 		print("yea")
--- 	else
--- 		return "<CR>"
--- 	end
--- end, { expr = true })
 
 map("n", "<F9>", function()
 	require("dap").toggle_breakpoint()

@@ -22,14 +22,18 @@ chill:
 update-music:
     @yt-dlp \
         -x --audio-format opus \
-        -o "~/media/music/%(uploader)s - %(title)s [%(id)s].%(ext)s" \
-        --restrict-filenames \
+        -o "$HOME/media/music/%(title)s-[%(id)s].%(ext)s" \
+        --replace-in-metadata title " " "-" \
+        --embed-metadata \
+        --embed-thumbnail \
+        --postprocessor-args "ExtractAudio:-af loudnorm=I=-16:LRA=11:TP=-1.5" \
         --yes-playlist \
-        --sleep-interval 30 \
+        --sleep-interval 5 \
+        --max-sleep-interval 15 \
         --downloader aria2c \
         --downloader-args aria2c:"-x 8 -s 8 -k 2M -j 4" \
         --cookies-from-browser firefox \
-        --download-archive ~/media/music-archive.txt \
+        --download-archive "$HOME/media/music-archive.txt" \
         "https://www.youtube.com/playlist?list=PLFen3AmxoGIhg_wPkrGE3h-v19pAIkgRW"
 
 cache-clear:
