@@ -1,4 +1,13 @@
 require("core.keymaps.general")
+require("core.keymaps.git")
+
+require("core.keymaps.lsp")
+require("core.keymaps.markdown")
+require("core.keymaps.navigation")
+require("core.keymaps.pickers")
+require("core.keymaps.terminal")
+require("core.keymaps.typst")
+require("core.keymaps.ui")
 
 local map = vim.keymap.set
 
@@ -145,19 +154,6 @@ local function get_word_under_cursor()
 		e = e + 1
 	end
 	return line:sub(s + 1, e)
-end
-
-local function float_win()
-	local buf = vim.api.nvim_create_buf(false, true)
-	local win = vim.api.nvim_open_win(buf, true, {
-		relative = "editor",
-		width = math.floor(vim.o.columns * 0.7),
-		height = math.floor(vim.o.lines * 0.6),
-		row = math.floor(vim.o.lines * 0.2),
-		col = math.floor(vim.o.columns * 0.15),
-		style = "minimal",
-		border = "rounded",
-	})
 end
 
 local function get_current_file()
@@ -946,18 +942,6 @@ map("n", "<F9>", function()
 	require("dap").toggle_breakpoint()
 end)
 
-map("n", "<F5>", function()
-	local current_file = get_current_file()
-	float_win()
-	vim.fn.termopen("just --choose -- " .. current_file)
-end)
-
-map("n", "<F6>", function()
-	local current_file = get_current_file()
-	float_win()
-	-- vim.fn.termopen("just run " .. current_file)
-	vim.fn.termopen("just run")
-end)
 
 local typstJob
 local zathuraJob

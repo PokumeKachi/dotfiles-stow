@@ -1,14 +1,6 @@
 local autocmd = vim.api.nvim_create_autocmd
 local augroup = vim.api.nvim_create_augroup("General", { clear = true })
 
-autocmd("TextYankPost", {
-  group = augroup,
-  callback = function()
-    vim.highlight.on_yank({ higroup = "IncSearch", timeout = 150 })
-  end,
-  desc = "Highlight yanked text",
-})
-
 -- Your new code: Hover diagnostics on cursor hold
 autocmd("CursorHold", {
   group = augroup,

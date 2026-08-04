@@ -3,6 +3,14 @@ local augroup = vim.api.nvim_create_augroup("Colorscheme", { clear = true })
 
 local hl = vim.api.nvim_set_hl
 
+autocmd("TextYankPost", {
+  group = augroup,
+  callback = function()
+    vim.highlight.on_yank({ higroup = "IncSearch", timeout = 250 })
+  end,
+  desc = "Highlight yanked text",
+})
+
 -- Define the function once so we can call it repeatedly
 local function apply_overrides()
     if vim.o.background == "dark" then
