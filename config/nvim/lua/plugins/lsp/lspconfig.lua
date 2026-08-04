@@ -6,10 +6,9 @@ return {
     event = { "BufReadPre", "BufNewFile" },
 
     config = function()
-local servers = require("lsp-servers")
         local lsp_utils = require("utils.lsp")
+        local lsp_servers = require("utils.toolset").lsp
 
-        -- ✅ Register custom servers (if needed)
         local configs = require("lspconfig.configs")
         if not configs.just_lsp then
             configs.just_lsp = {
@@ -21,7 +20,6 @@ local servers = require("lsp-servers")
             }
         end
 
-        -- ✅ Register ALL servers with one call
-        lsp_utils.register_all(servers)
+        lsp_utils.register_all(lsp_servers)
     end,
 }

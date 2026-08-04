@@ -23,7 +23,7 @@ return {
             }
 
             local mappings = require("mason-lspconfig").get_mappings()
-            local lsp_servers = vim.tbl_keys(require("utils.tools").lsp)
+            local lsp_servers = vim.tbl_keys(require("utils.toolset").lsp)
             local excluded_lsp_servers = {
                 dartls = true,
                 nixd = true,
