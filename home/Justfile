@@ -1,4 +1,4 @@
-PLAYBACK := "mpv --vo=dummy --ao=alsa --af=aresample=resampler=soxr --loop-playlist --shuffle"
+PLAYBACK := "mpv --ao=alsa --af=aresample=resampler=soxr --loop-playlist --shuffle"
 VISUAL_PLAYBACK := "mpv --no-video --ao=alsa --af=aresample=resampler=soxr --loop-playlist --shuffle"
 
 _default:
