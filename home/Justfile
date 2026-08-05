@@ -20,10 +20,18 @@ chill:
 	{{PLAYBACK}} https://www.youtube.com/watch?v=ZUIT_rQIR5M
 
 update-music:
+    @cd ~/media/music && \
+    for f in *.opus; do \
+        [ -f "$f" ] || continue; \
+        newname=$(printf '%s' "$f" | sed 's/[ ()]/-/g' | sed 's/--*/-/g'); \
+        [ "$f" != "$newname" ] && mv -- "$f" "$newname"; \
+    done
     @yt-dlp \
-        -x --audio-format opus \
+        -f bestaudio[ext=m4a] \
+        -x \
+        --audio-format opus \
+        --audio-quality 0 \
         -o "$HOME/media/music/%(title)s-[%(id)s].%(ext)s" \
-        --replace-in-metadata title " " "-" \
         --embed-metadata \
         --embed-thumbnail \
         --postprocessor-args "ExtractAudio:-af loudnorm=I=-16:LRA=11:TP=-1.5" \
@@ -34,6 +42,7 @@ update-music:
         --downloader-args aria2c:"-x 8 -s 8 -k 2M -j 4" \
         --cookies-from-browser firefox \
         --download-archive "$HOME/media/music-archive.txt" \
+        --no-post-overwrites \
         "https://www.youtube.com/playlist?list=PLFen3AmxoGIhg_wPkrGE3h-v19pAIkgRW"
 
 cache-clear:
