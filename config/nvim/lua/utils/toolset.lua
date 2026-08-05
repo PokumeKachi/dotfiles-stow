@@ -1,13 +1,8 @@
 local M = {}
 
 M.lsp = {
-    -- Astro (AstroJS / Astro framework)
     astro = {},
-
-    -- Clangd (C/C++)
     clangd = {},
-
-    -- CSS Language Server (CSS, SCSS, Less)
     cssls = {
         cmd = { "vscode-css-language-server", "--stdio" },
         filetypes = { "css", "scss", "less" },
@@ -27,8 +22,6 @@ M.lsp = {
             less = { validate = true },
         },
     },
-
-    -- Dart (Flutter / Dart)
     dartls = {
         cmd = { "dart", "language-server", "--protocol=lsp" },
         settings = {
@@ -39,14 +32,8 @@ M.lsp = {
             },
         },
     },
-
-    -- JSON Language Server
     jsonls = {},
-
-    -- Just (justfile)
     just_lsp = {},
-
-    -- Lua Language Server (Neovim config)
     lua_ls = {
         settings = {
             Lua = {
@@ -60,8 +47,6 @@ M.lsp = {
             },
         },
     },
-
-    -- Markdown (Marksman)
     marksman = {
         settings = {
             marksman = {
@@ -69,36 +54,16 @@ M.lsp = {
             },
         },
     },
-
-    -- Nix (nixd)
     nixd = {},
-
-    -- Rust (rust-analyzer)
     rust_analyzer = {
         settings = {
             ["rust-analyzer"] = {
-                imports = {
-                    granularity = { group = "crate" },
-                    prefix = "self",
-                },
-                assist = {
-                    importGranularity = "crate",
-                    importPrefix = "by_self",
-                },
-                procMacro = { enable = false },
                 cargo = {
                     features = "all",
                     buildScripts = { enable = false },
-                    noDefaultFeatures = false,
-                    allTargets = true,
                     extraArgs = { "-j", 8 },
                 },
-                noDefaultFeatures = false,
-                allTargets = true,
-                checkOnSave = true,
-                diagnostics = { enable = false },
                 check = {
-                    command = "check",
                     extraArgs = {
                         "--target-dir",
                         ".target-clippy",
@@ -113,24 +78,16 @@ M.lsp = {
             },
         },
     },
-
-    -- SuperHTML (HTML)
     superhtml = {
         filetypes = { "html" },
         root_dir = function(_)
             return vim.fs.root(0, { "package.json", ".git" }) or vim.fn.getcwd()
         end,
     },
-
-    -- Svelte (SvelteKit)
     svelte = {},
-
-    -- Texlab (LaTeX)
     texlab = {
         filetypes = { "tex", "markdown" },
     },
-
-    -- Tinymist (Typst)
     tinymist = {
         settings = {
             exportPdf = "never",
@@ -141,11 +98,70 @@ M.lsp = {
             formatterIndentSize = 4,
         },
     },
-
-    -- TypeScript / JavaScript (ts_ls)
     ts_ls = {},
-
     zk = {},
 }
+
+M.formatters = {
+    prettier = {
+        command = "prettier",
+        args = {
+            "--stdin-filepath",
+            "$FILENAME",
+            "--tab-width",
+            "4",
+            "--use-tabs",
+            "false",
+        },
+        stdin = true,
+    },
+    clang_format = {
+        command = "clang-format",
+        args = {
+            "-style",
+            "{BasedOnStyle: Google, IndentWidth: 4}",
+        },
+    },
+    nixfmt = {
+        command = "nixfmt",
+        args = { "--indent", "4" },
+    },
+    stylua = {
+        command = "stylua",
+        args = { "--column-width", "100", "-" },
+        stdin = true,
+    },
+    dart_format = {
+        command = "dart",
+        args = { "format", "--indent", "4", "$FILENAME" },
+    },
+}
+
+M.formatters_by_ft = {
+    dart = { "dart_format" },
+    lua = { "stylua" },
+    luau = { "stylua" },
+    tex = { "latexindent" },
+    python = { "black" },
+    sh = { "shfmt" },
+    c = { "clang_format" },
+    cpp = { "clang_format" },
+    rust = { "rustfmt" },
+    nix = { "nixfmt" },
+    toml = { "taplo" },
+    -- typst = { "lsp" }, -- Uncomment when ready
+}
+
+local prettier_fts = {
+    "javascript",
+    "html",
+    "css",
+    "typescript",
+    "json",
+    "markdown",
+}
+for _, ft in ipairs(prettier_fts) do
+    M.formatters_by_ft[ft] = { "prettier" }
+end
 
 return M
