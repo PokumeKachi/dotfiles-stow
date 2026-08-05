@@ -20,14 +20,14 @@ chill:
 	{{PLAYBACK}} https://www.youtube.com/watch?v=ZUIT_rQIR5M
 
 update-music:
-    @cd ~/media/music && \
+    cd ~/media/music && \
     for f in *.opus; do \
         [ -f "$f" ] || continue; \
         newname=$(printf '%s' "$f" | sed 's/[ ()]/-/g' | sed 's/--*/-/g'); \
-        [ "$f" != "$newname" ] && mv -- "$f" "$newname"; \
+        mv -n -- "$f" "$newname"; \
     done
-    @yt-dlp \
-        -f bestaudio[ext=m4a] \
+    yt-dlp \
+        -f bestaudio[ext=m4a]/bestaudio \
         -x \
         --audio-format opus \
         --audio-quality 0 \
