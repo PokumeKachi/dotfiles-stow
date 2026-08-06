@@ -9,6 +9,18 @@ night:
       && pkill gammastep \
       || (gammastep -P -O {{env_var_or_default("COLOR", "3500")}} & disown)
 
+choose-music:
+    @clear
+    @easyeffects & disown
+    @find "$HOME/media/music" -type f \
+        \( -iname '*.opus' -o -iname '*.mp3' -o -iname '*.flac' -o -iname '*.m4a' -o -iname '*.ogg' -o -iname '*.wav' \) \
+        | sort \
+        | fzf \
+            --multi \
+            --prompt="🎵 " \
+            --preview 'mediainfo {} 2>/dev/null | head -30' \
+        | {{VISUAL_PLAYBACK}} --playlist=-
+
 music:
 	@clear
 	@easyeffects & disown
