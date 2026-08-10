@@ -1,6 +1,8 @@
+local map = require("utils.keymap").lazy_map
+
 return {
 	"lewis6991/gitsigns.nvim",
-    event = "BufReadPost",
+	event = "BufReadPost",
 	opts = {
 		signs = {
 			add = { text = "┃" },
@@ -49,5 +51,39 @@ return {
 			row = 0,
 			col = 1,
 		},
+	},
+	keys = {
+		map("n", "<leader>gu", function()
+			for _, cmd in ipairs({
+				"toggle_signs",
+				"toggle_linehl",
+				"toggle_numhl",
+				"toggle_current_line_blame",
+				"toggle_deleted",
+				"toggle_word_diff",
+			}) do
+				vim.cmd("Gitsigns " .. cmd)
+			end
+		end, {
+			desc = "Toggle Git UI Decorations",
+		}),
+		map("n", "<leader>gs", function()
+			require("gitsigns").stage_hunk()
+		end, {
+			desc = "Git (Un)stage Hunk",
+		}),
+		map("v", "<leader>gs", function()
+			require("gitsigns").stage_hunk({
+				vim.fn.line("."),
+				vim.fn.line("v"),
+			})
+		end, {
+			desc = "Git (Un)stage Selected Lines",
+		}),
+		map("n", "<leader>gS", function()
+			require("gitsigns").stage_buffer()
+		end, {
+			desc = "Git Stage Entire Buffer",
+		}),
 	},
 }

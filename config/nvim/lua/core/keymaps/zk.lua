@@ -1,27 +1,7 @@
-local map = require('utils.keymap').map
+local map = require("utils.keymap").map
 
-map({"n", "x"}, "<leader>zk", "<nop>", { desc = "Zk Commands" })
-map("n", "<leader>zkp", "<nop>", { desc = "Picker" })
-map({"n", "x"}, "<leader>zkn", "<nop>", { desc = "Create New" })
-
-map("n", "<leader>zknn", ":ZkNew<CR>", {
-	desc = "New Note",
-})
-
-map("x", "<leader>zknn", ":ZkNewFromTitleSelection<CR>", {
-	desc = "New Note (Named From Selection)",
-})
-
-map("n", "<leader>zknl", function()
-	ZkApi.index()
-	vim.cmd("ZkInsertLink")
-end, {
-	desc = "Insert Link",
-})
-
-map("x", "<leader>zknl", ":'<,'>ZkInsertLinkAtSelection<CR>", {
-	desc = "Insert Link (Named From Selection)",
-})
+local Zk = require("zk")
+local ZkApi = require("zk.api")
 
 local function pickNotes(param1, param2)
 	Zk.pick_notes(param1 or {}, param2 or {}, function(selection)
@@ -39,6 +19,29 @@ local function pickNotes(param1, param2)
 		end
 	end)
 end
+
+map({ "n", "x" }, "<leader>zk", "<nop>", { desc = "Zk Commands" })
+map("n", "<leader>zkp", "<nop>", { desc = "Picker" })
+map({ "n", "x" }, "<leader>zkn", "<nop>", { desc = "Create New" })
+
+map("n", "<leader>zknn", ":ZkNew<CR>", {
+	desc = "New Note",
+})
+
+map("x", "<leader>zknn", ":ZkNewFromTitleSelection<CR>", {
+	desc = "New Note (Named From Selection)",
+})
+
+map("n", "<leader>zknl", function()
+	ZkApi.index()
+	vim.cmd("ZkInsertLink")
+end, {
+	desc = "New Link",
+})
+
+map("x", "<leader>zknl", ":'<,'>ZkInsertLinkAtSelection<CR>", {
+	desc = "New Link (Named From Selection)",
+})
 
 map("n", "<leader>zkpn", function()
 	Zk.index()

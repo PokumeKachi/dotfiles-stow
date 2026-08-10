@@ -1,11 +1,24 @@
+local map = require("utils.keymap").lazy_map
+
 return {
-  "folke/persistence.nvim",
-  event = "BufReadPre", -- this will only start session saving when an actual file was opened
-  opts = {
-  dir = vim.fn.stdpath("state") .. "/sessions/", -- directory where session files are saved
-  -- minimum number of file buffers that need to be open to save
-  -- Set to 0 to always save
-  need = 1,
-  branch = true, -- use git branch to save session
-}
+	"folke/persistence.nvim",
+	event = "BufReadPre", -- this will only start session saving when an actual file was opened
+	opts = {
+		dir = vim.fn.stdpath("state") .. "/sessions/", -- directory where session files are saved
+		-- minimum number of file buffers that need to be open to save
+		-- Set to 0 to always save
+		need = 1,
+		branch = true, -- use git branch to save session
+	},
+	keys = {
+		map("n", "<leader>ql", function()
+			require("persistence").select()
+		end, { desc = "Load Session (From Menu)" }),
+		map("n", "<leader>qs", function()
+			require("persistence").save()
+		end, { desc = "Save Session" }),
+		map("n", "<leader>qX", function()
+			require("persistence").stop()
+		end, { desc = "Stop Session" }),
+	},
 }

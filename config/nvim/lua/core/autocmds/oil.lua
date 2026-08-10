@@ -3,31 +3,20 @@ local augroup = vim.api.nvim_create_augroup("Oil", { clear = true })
 
 local oil = require("oil")
 
-local function openOil(path)
-    vim.schedule(function()
-        oil.open(path)
-    end)
-end
-
-autocmd("VimEnter", {
-    group = augroup,
+autocmd("BufEnter", {
+	pattern = "",
+	group = augroup,
 	callback = function()
-		local args = vim.fn.argv()
+		vim.schedule(function()
+			local buf = vim.api.nvim_get_current_buf()
 
-		if #args == 0 then
-            openOil(vim.fn.getcwd())
-			return
-		end
-
-		for _, path in ipairs(args) do
-			local stat = vim.uv.fs_stat(path)
-
-			if stat and stat.type == "directory" then
-                openOil(path)
-
-                break
+			if vim.api.nvim_buf_get_name(buf) == "" and vim.bo[buf].buftype == "" then
+				local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+				if #lines == 0 or (#lines == 1 and lines[1] == "") then
+					oil.open()
+				end
 			end
-		end
+		end)
 	end,
-    desc = "Opens Oil on editor start",
+	desc = "Replace empty buffers with Oil",
 })

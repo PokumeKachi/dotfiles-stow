@@ -8,6 +8,7 @@ function M.get_current()
 	end
 
 	local name = vim.api.nvim_buf_get_name(0)
+
 	if name == "" then
 		return "."
 	end

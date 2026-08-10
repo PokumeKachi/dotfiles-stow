@@ -1,21 +1,21 @@
 return {
-    'nvim-flutter/flutter-tools.nvim',
-    lazy = false,
-    dependencies = {
-        'nvim-lua/plenary.nvim',
-        'stevearc/dressing.nvim', -- optional for vim.ui.select
-    },
-    config = function()
-        local capabilities = vim.lsp.protocol.make_client_capabilities()
+	"nvim-flutter/flutter-tools.nvim",
+	ft = { "dart" },
+	dependencies = {
+		"nvim-lua/plenary.nvim",
+		"stevearc/dressing.nvim", -- optional for vim.ui.select
+	},
+	config = function()
+		local capabilities = vim.lsp.protocol.make_client_capabilities()
 
-        require("flutter-tools").setup {
-            closing_tags = {
-                -- highlight = "ErrorMsg",
-                prefix = "   >> ",
-            },
-            lsp = {
-                capabilities = capabilities,
-            },
-        }
-    end,
+		require("flutter-tools").setup({
+			closing_tags = {
+				-- highlight = "ErrorMsg",
+				prefix = "   >> ",
+			},
+			lsp = {
+				capabilities = capabilities,
+			},
+		})
+	end,
 }

@@ -1,8 +1,10 @@
--- Press :
+-- Press ":"
 -- See how the command input box is floating in the middle of the screen?
 -- Yeah that was *noice*
 -- The same styling also applies to like dialog boxes and notifications and allat
 -- (Notifications is passed on to be handled by nvim-notify.nvim though)
+
+local map = require("utils.keymap").lazy_map
 
 return {
 	"folke/noice.nvim",
@@ -43,4 +45,10 @@ return {
 			},
 		})
 	end,
+	keys = {
+		map("<leader>el", ":NoiceSnacks<CR>", {
+			mode = { "n" },
+            desc = "View Noice Notification History (With Snacks!)",
+		}),
+	},
 }

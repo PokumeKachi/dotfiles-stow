@@ -1,3 +1,5 @@
+local map = require("utils.keymap").lazy_map
+
 return {
 	"MeanderingProgrammer/render-markdown.nvim",
 	dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" }, -- if you use the mini.nvim suite
@@ -51,7 +53,7 @@ return {
 			-- in specified locations, see :h treesitter-language-injections.
 			-- Set enabled to false in order to disable.
 
-            enabled = false,
+			enabled = false,
 			gitcommit = {
 				enabled = true,
 				query = [[
@@ -944,5 +946,11 @@ return {
 			-- Additional modes to render yaml.
 			render_modes = false,
 		},
+	},
+	keys = {
+		map("<leader>mr", ":RenderMarkdown buf_toggle<CR>", {
+            mode = { "n", "v", "s", "o" },
+			desc = "Toggle RenderMarkdown",
+		}),
 	},
 }

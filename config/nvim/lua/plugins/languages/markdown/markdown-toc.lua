@@ -1,11 +1,16 @@
+-- Table of contents generation for Markdown
+
+local map = require("utils.keymap").lazy_map
+
 return {
-  "hedyhli/markdown-toc.nvim",
-  ft = "markdown",  -- Lazy load on markdown filetype
-  cmd = { "Mtoc" }, -- Or, lazy load on "Mtoc" command
-  config = function()
-    require("mtoc").setup()
-  end,
-  -- opts = {
-  --   -- Your configuration here (optional)
-  -- },
+	"hedyhli/markdown-toc.nvim",
+	ft = "markdown", -- Lazy load on markdown filetype
+	cmd = { "Mtoc" }, -- Or, lazy load on "Mtoc" command
+	opts = {},
+	keys = {
+		map("<leader>mt", "<cmd>Mtoc<CR>", {
+			mode = { "n" },
+			desc = "Create Table of Contents",
+		}),
+	},
 }

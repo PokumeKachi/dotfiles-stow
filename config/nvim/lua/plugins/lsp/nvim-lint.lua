@@ -1,11 +1,11 @@
+local toolset = require('utils.toolset')
+
 return {
 	"mfussenegger/nvim-lint",
 	config = function()
         local lint = require("lint")
 
-		lint.linters_by_ft = {
-			luau = { "selene" },
-		}
+		lint.linters_by_ft = toolset.linters_by_ft
 
 		vim.api.nvim_create_autocmd("BufWritePost", {
 			callback = function()

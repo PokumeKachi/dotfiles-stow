@@ -1,7 +1,7 @@
 return {
     require("plugins.languages.markdown.bullets"),
     -- require("plugins.languages.markdown.headlines"),
-    --
+
     require("plugins.languages.markdown.markdown-preview"),
     require("plugins.languages.markdown.markdown-toc"),
     require("plugins.languages.markdown.markview"),
