@@ -58,20 +58,11 @@ M.lsp = {
 	rust_analyzer = {
 		settings = {
 			["rust-analyzer"] = {
-				cargo = {
-					features = "all",
-					buildScripts = { enable = false },
-					extraArgs = { "-j", 8 },
-				},
 				check = {
 					extraArgs = {
 						"--target-dir",
 						".target-clippy",
-						"-D",
-						"warnings",
 						"--",
-						"-j",
-						8,
 						"--quiet",
 					},
 				},
