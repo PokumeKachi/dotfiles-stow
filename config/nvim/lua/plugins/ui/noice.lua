@@ -46,8 +46,7 @@ return {
 		})
 	end,
 	keys = {
-		map("<leader>el", ":NoiceSnacks<CR>", {
-			mode = { "n" },
+		map("n","<leader>nl", "<cmd>NoiceSnacks<CR>", {
             desc = "View Noice Notification History (With Snacks!)",
 		}),
 	},

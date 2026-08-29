@@ -24,3 +24,5 @@ end
 map("n", "<leader>qwc", ":quit<CR>", { desc = "Quit Current Window" })
 map("n", "<leader>qwa", ":qa<CR>", { desc = "Quit All Windows" })
 map("n", "<leader>qwo", ":only<CR>", { desc = "Quit Other Windows" })
+
+map("n", "<leader>w=", "<C-w>=", { desc = "Equalize Window Sizes" })

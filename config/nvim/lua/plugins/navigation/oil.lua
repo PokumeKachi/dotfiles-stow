@@ -1,3 +1,5 @@
+local map = require("utils.keymap").lazy_map
+
 function _G.get_oil_winbar()
 	local bufnr = vim.api.nvim_win_get_buf(vim.g.statusline_winid)
 	local dir = require("oil").get_current_dir(bufnr)
@@ -12,6 +14,7 @@ end
 return {
 	"stevearc/oil.nvim",
 	-- lazy = false,
+	dependencies = { "nvim-tree/nvim-web-devicons" },
 	opts = {
 		default_file_explorer = true,
 		columns = {
@@ -47,6 +50,9 @@ return {
 			autosave_changes = false,
 		},
 	},
-	dependencies = { "nvim-tree/nvim-web-devicons" },
-	keys = { { "-", "<cmd>Oil<cr>", desc = "oil" } },
+	keys = {
+		map("n", "-", "<cmd>Oil<cr>", {
+			desc = "Open Oil",
+		}),
+	},
 }

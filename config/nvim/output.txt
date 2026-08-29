@@ -1,0 +1,5536 @@
+=== ./init.lua ===
+-- Performance
+vim.loader.enable()
+
+-- Disable built-in plugins
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
+-- Leader
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
+
+require("plugins")
+require("core")
+
+=== ./Justfile ===
+_default:
+    @just --choose
+
+git:
+    ssh kachi@ka.myvnc.com 'cd ~/.config/nvim && git pull'
+
+test:
+    XDG_CONFIG_HOME=.. nvim
+
+dart-test:
+    XDG_CONFIG_HOME=.. nvim .tests/test.dart
+
+md-test:
+    XDG_CONFIG_HOME=.. nvim .tests/test.md
+
+dir-test:
+    XDG_CONFIG_HOME=.. nvim .tests/
+
+c-test:
+    XDG_CONFIG_HOME=.. nvim .tests/test.c
+
+rs-test:
+    XDG_CONFIG_HOME=.. nvim .tests/test.rs
+
+nix-test:
+    XDG_CONFIG_HOME=.. nvim .tests/test.nix
+
+html-test:
+    XDG_CONFIG_HOME=.. nvim .tests/test.html
+
+luau-test:
+    XDG_CONFIG_HOME=.. nvim .tests/luau
+
+=== ./lua/core/autocmds/buffer.lua ===
+local autocmd = vim.api.nvim_create_autocmd
+local augroup = vim.api.nvim_create_augroup("Buffer", { clear = true })
+
+local oil = require("oil")
+
+autocmd("BufEnter", {
+	pattern = "",
+	group = augroup,
+	callback = function()
+		vim.schedule(function()
+			local buf = vim.api.nvim_get_current_buf()
+
+			if vim.api.nvim_buf_get_name(buf) == "" and vim.bo[buf].buftype == "" then
+				local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+				if #lines == 0 or (#lines == 1 and lines[1] == "") then
+					oil.open()
+				end
+			end
+		end)
+	end,
+	desc = "Replace empty buffers with Oil",
+})
+
+=== ./lua/core/autocmds/colorscheme.lua ===
+local autocmd = vim.api.nvim_create_autocmd
+local augroup = vim.api.nvim_create_augroup("Colorscheme", { clear = true })
+
+local hl = vim.api.nvim_set_hl
+
+autocmd("TextYankPost", {
+	group = augroup,
+	callback = function()
+		vim.highlight.on_yank({ higroup = "IncSearch", timeout = 250 })
+	end,
+	desc = "Highlight Yanked Text",
+})
+
+-- Define the function once so we can call it repeatedly
+local function apply_overrides()
+	if vim.o.background == "dark" then
+		hl(0, "LineNr", { fg = "#555555" })
+		hl(0, "CursorLineNr", { fg = "#ff6b6b", bold = true })
+	else
+		hl(0, "LineNr", { fg = "#b0b0b0" })
+		hl(0, "CursorLineNr", { fg = "#cc0000", bold = true })
+	end
+
+	-- These apply regardless of background
+	hl(0, "@text.emphasis", { italic = true })
+	hl(0, "markdownItalic", { italic = true })
+end
+
+-- Apply overrides immediately
+apply_overrides()
+
+-- Re-apply overrides every time the colorscheme changes
+autocmd("ColorScheme", {
+	group = augroup,
+	callback = apply_overrides,
+	desc = "Apply Custom Highlight Overrides",
+})
+
+=== ./lua/core/autocmds/dart.lua ===
+local autocmd = vim.api.nvim_create_autocmd
+local augroup = vim.api.nvim_create_augroup("Dart", { clear = true })
+
+autocmd("FileType", {
+	pattern = "dart",
+	group = augroup,
+	callback = function()
+		vim.opt_local.softtabstop = 2
+		vim.opt_local.tabstop = 2
+		vim.opt_local.shiftwidth = 2
+	end,
+	desc = "Custom Tab Size For Dart",
+})
+
+=== ./lua/core/autocmds/general.lua ===
+local autocmd = vim.api.nvim_create_autocmd
+local augroup = vim.api.nvim_create_augroup("General", { clear = true })
+
+autocmd("CursorHold", {
+	group = augroup,
+	callback = function()
+		vim.diagnostic.open_float(nil, { focusable = false })
+	end,
+	desc = "Show Hovering Diagnostics When Caret Is Idling",
+})
+
+autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
+	group = augroup,
+	command = "checktime",
+	desc = "Auto-reload File Changes On Disk",
+})
+
+=== ./lua/core/autocmds/init.lua ===
+require("core.autocmds.buffer")
+require("core.autocmds.colorscheme")
+require("core.autocmds.dart")
+require("core.autocmds.general")
+
+require("core.autocmds.terminal")
+require("core.autocmds.text")
+
+
+=== ./lua/core/autocmds/terminal.lua ===
+local autocmd = vim.api.nvim_create_autocmd
+local augroup = vim.api.nvim_create_augroup("Terminal", { clear = true })
+
+autocmd("TermOpen", {
+    group = augroup,
+	callback = function()
+        vim.cmd.startinsert()
+	end,
+    desc = "Start terminal in Insert mode, not the default Normal mode",
+})
+
+=== ./lua/core/autocmds/text.lua ===
+local autocmd = vim.api.nvim_create_autocmd
+local augroup = vim.api.nvim_create_augroup("Text", { clear = true })
+
+autocmd("FileType", {
+	pattern = { "text", "markdown", "typst" },
+    group = augroup,
+	callback = function()
+		vim.opt_local.wrap = true
+		vim.opt_local.linebreak = true
+	end,
+    desc = "Enable wrapping",
+})
+
+autocmd("FileType", {
+	pattern = "markdown",
+    group = augroup,
+	callback = function()
+        -- Enable spell check
+
+		vim.opt_local.spell = true
+		vim.opt_local.spelllang = "en"
+
+        -- Disable autocomplete
+
+		vim.opt_local.completefunc = ""
+		vim.opt_local.omnifunc = ""
+		vim.b.copilot_enabled = false
+        vim.b.blink_cmp_disable = true
+
+        -- Add pairing for *italic text* and $latex$
+
+		local pairs = require("mini.pairs")
+		pairs.map_buf(0, "i", "*", { action = "open", pair = "**" })
+		pairs.map_buf(0, "i", "$", { action = "open", pair = "$$" })
+
+		vim.opt_local.conceallevel = 2
+		vim.opt_local.concealcursor = "nc"
+
+        -- Shorten -> , => , ... into one Unicode character
+
+		vim.fn.matchadd("Conceal", "->", 10, -1, { conceal = "→" })
+		vim.fn.matchadd("Conceal", "=>", 10, -1, { conceal = "⇒" })
+		vim.fn.matchadd("Conceal", "\\.\\.\\.", 10, -1, { conceal = "…" })
+	end,
+    desc = "Markdown overrides",
+})
+
+=== ./lua/core/filetypes/init.lua ===
+
+require("core.filetypes.json")
+
+=== ./lua/core/filetypes/json.lua ===
+local filetype = vim.filetype
+
+-- .arb is a JSON-based localization file format
+
+filetype.add({
+    extension = {
+        arb = "json",
+    },
+})
+
+=== ./lua/core/init.lua ===
+require("core.autocmds")
+require("core.filetypes")
+require("core.keymaps")
+require("core.options")
+
+=== ./lua/core/keymaps/buffer.lua ===
+local map = require("utils.keymap").map
+
+local buffer = require("utils.buffer")
+
+map("n", "<leader>qbc", function()
+	vim.api.nvim_buf_delete(vim.api.nvim_get_current_buf(), { force = false })
+end, {
+	desc = "Quit Current Buffer",
+})
+
+map("n", "<leader>qba", function()
+	for _, buf in ipairs(buffer.get_bufs()) do
+		vim.api.nvim_buf_delete(buf, { force = false })
+	end
+end, {
+	desc = "Quit All Buffers",
+})
+
+map("n", "<leader>qbo", function()
+	for _, buf in ipairs(buffer.get_bufs()) do
+		if
+			#vim.fn.win_findbuf(buf) == 0
+			and vim.bo[buf].buftype == ""
+			and vim.bo[buf].buflisted
+		then
+			vim.api.nvim_buf_delete(buf, { force = false })
+		end
+	end
+end, {
+	desc = "Quit Other Buffers",
+})
+
+=== ./lua/core/keymaps/general.lua ===
+local map = require("utils.keymap").map
+
+map({ "n", "i", "v" }, "<C-s>", "<cmd>write<CR>", {
+	desc = "Save file",
+})
+
+
+=== ./lua/core/keymaps/init.lua ===
+require("core.keymaps.buffer")
+require("core.keymaps.general")
+
+require("core.keymaps.lsp")
+require("core.keymaps.modal")
+require("core.keymaps.navigation")
+require("core.keymaps.search")
+require("core.keymaps.window")
+
+=== ./lua/core/keymaps/lsp.lua ===
+local map = require("utils.keymap").map
+
+local Lsp = vim.lsp.buf
+local Diagnostic = vim.diagnostic
+
+map("n", "<leader>la", Lsp.code_action, {
+	desc = "See Code Actions",
+})
+
+map("n", "K", Lsp.hover, {
+	desc = "Hover Documentation",
+})
+
+map("n", "<leader>ln", Lsp.rename, {
+	desc = "Rename Symbol",
+})
+
+map("n", "<C-k>", Lsp.signature_help, {
+	desc = "Signature Help",
+})
+
+map("n", "<leader>df", Diagnostic.open_float, {
+	desc = "View Floating Diagnostics",
+})
+
+map("n", "<leader>dq", Diagnostic.setqflist, {
+	desc = "View Diagnostics Quickfix List",
+})
+
+map("n", "<leader>dl", Diagnostic.setloclist, {
+	desc = "View Diagnostic Location Lists",
+})
+
+map("n", "[d", Diagnostic.goto_prev, {
+	desc = "Prev Diagnostic",
+})
+
+map("n", "]d", Diagnostic.goto_next, {
+	desc = "Next Diagnostic",
+})
+
+=== ./lua/core/keymaps/modal.lua ===
+local map = require("utils.keymap").map
+local map_all_cases = require("utils.keymap").map_all_cases
+
+map("n", "<esc>", "<cmd>nohlsearch<cr>")
+map_all_cases(map, { "i" }, "jk", "<C-\\><C-n>")
+
+=== ./lua/core/keymaps/navigation.lua ===
+local map = require("utils.keymap").map
+
+map("n", "<Tab>", ":bnext<CR>")
+map("n", "<S-tab>", ":bprev<CR>")
+map("n", "<leader><Tab>", "<C-^>")
+
+map("n", "<C-d>", "<C-d>zz")
+map("n", "<C-u>", "<C-u>zz")
+
+
+=== ./lua/core/keymaps/search.lua ===
+local map = require("utils.keymap").map
+
+map({ "n", "x" }, "/", "/\\V")
+
+map("v", "/", "<Esc>/\\%V\\V", {
+	desc = "Search Within Visual Selection",
+})
+
+=== ./lua/core/keymaps/window.lua ===
+local map = require("utils.keymap").map
+
+local DIRECTION_MAP = {
+	h = "left",
+	j = "below",
+	k = "above",
+	l = "right",
+}
+
+for key, direction in pairs(DIRECTION_MAP) do
+	map("n", "<leader>wn" .. key, function()
+		vim.api.nvim_open_win(0, true, { split = direction })
+	end, {
+		desc = "Split Window To " .. direction,
+	})
+end
+
+for key, direction in pairs(DIRECTION_MAP) do
+	map("n", "<leader>w" .. key, "<C-w>" .. key, {
+		desc = "Focus Window " .. direction,
+	})
+end
+
+map("n", "<leader>qwc", ":quit<CR>", { desc = "Quit Current Window" })
+map("n", "<leader>qwa", ":qa<CR>", { desc = "Quit All Windows" })
+map("n", "<leader>qwo", ":only<CR>", { desc = "Quit Other Windows" })
+
+map("n", "<leader>w=", "<C-w>=", { desc = "Equalize Window Sizes" })
+
+=== ./lua/core/options/clipboard.lua ===
+local g = vim.g
+local opt = vim.opt
+
+-- Always enable system clipboard integration
+opt.clipboard = "unnamedplus"
+
+-- Check if the environment variable `PREFIX` is set
+local is_termux = vim.fn.getenv("PREFIX") == "/data/data/com.termux/files/usr"
+
+-- Detect SSH connection
+local is_ssh = vim.env.SSH_CONNECTION ~= nil
+
+if is_ssh then
+    -- Use OSC52 for terminal clipboard (works over SSH)
+    g.clipboard = "osc52"
+elseif is_termux then
+    -- Use Termux's native clipboard commands
+    g.clipboard = {
+        name = "termux-clipboard",
+        copy = {
+            ["+"] = "termux-clipboard copy",
+            ["*"] = "termux-clipboard copy",
+        },
+        paste = {
+            ["+"] = "termux-clipboard paste",
+            ["*"] = "termux-clipboard paste",
+        },
+        cache_enabled = false,
+    }
+end
+-- If neither, `g.clipboard` is left unset for Neovim default fallback
+
+=== ./lua/core/options/fold.lua ===
+local opt = vim.opt
+
+opt.foldmethod = "expr"
+opt.foldexpr = "v:lua.vim.treesitter.fold()"
+opt.foldlevelstart = 99
+
+=== ./lua/core/options/general.lua ===
+local opt = vim.opt
+
+-- === Core Behavior ===
+opt.autoread = true
+opt.updatetime = 200
+opt.timeoutlen = 200
+
+-- === UI & Display ===
+opt.number = true
+opt.relativenumber = true
+opt.cursorline = true
+opt.signcolumn = "yes"
+opt.termguicolors = true
+opt.mouse = ""
+
+-- === Text Display ===
+opt.wrap = false
+opt.linebreak = true
+opt.breakindent = true
+
+-- === Command Line ===
+opt.wildmenu = true
+opt.wildmode = "longest:full,full"
+opt.inccommand = "nosplit"
+opt.completeopt = { "menu", "menuone", "noselect" }
+
+=== ./lua/core/options/indent.lua ===
+local opt = vim.opt
+
+opt.tabstop = 4
+opt.softtabstop = 4
+opt.shiftwidth = 4
+opt.expandtab = true
+opt.smartindent = true
+
+=== ./lua/core/options/init.lua ===
+require("core.options.clipboard")
+require("core.options.fold")
+require("core.options.general")
+require("core.options.indent")
+
+require("core.options.undo")
+require("core.options.window")
+
+=== ./lua/core/options/undo.lua ===
+local opt = vim.opt
+
+local undodir = vim.fn.stdpath("state") .. "/undo"
+vim.fn.mkdir(undodir, "p")
+
+opt.undodir = undodir
+opt.undofile = true
+opt.undolevels = 1000
+opt.undoreload = 10000
+
+=== ./lua/core/options/window.lua ===
+local opt = vim.opt
+
+opt.splitbelow = true
+opt.splitright = true
+
+=== ./lua/plugins/completion/blink.lua ===
+return {
+	"saghen/blink.cmp",
+	dependencies = { "L3MON4D3/LuaSnip", version = "v2.*" },
+	version = "1.*",
+	opts = {
+		keymap = {
+			preset = "default",
+			["<CR>"] = { "accept", "fallback" },
+			["<S-Tab>"] = { "select_prev", "fallback" },
+			["<Tab>"] = { "select_next", "fallback" },
+		},
+		cmdline = { enabled = true, sources = { "cmdline", "path" } },
+		appearance = { nerd_font_variant = "mono" },
+		completion = {
+			keyword = { range = "full" },
+			accept = { auto_brackets = { enabled = false } },
+			list = { selection = { preselect = false, auto_insert = false } },
+			menu = {
+				auto_show = true,
+				draw = {
+					columns = {
+						{ "label", "label_description", gap = 1 },
+						{ "kind_icon", "kind" },
+					},
+				},
+			},
+			documentation = { auto_show = true, auto_show_delay_ms = 10 },
+			ghost_text = { enabled = true },
+		},
+		snippets = { preset = "luasnip" },
+		sources = {
+			default = { "lsp", "path", "snippets", "buffer" },
+		},
+		fuzzy = { implementation = "prefer_rust_with_warning" },
+	},
+}
+
+=== ./lua/plugins/completion/init.lua ===
+return {
+    require("plugins.completion.blink"),
+
+    require("plugins.completion.luasnip"),
+}
+
+=== ./lua/plugins/completion/luasnip.lua ===
+return {
+	"L3MON4D3/LuaSnip",
+	version = "v2.*",
+	build = "make install_jsregexp",
+	event = "InsertEnter",
+	config = function(_, opts)
+		local luasnip = require("luasnip")
+		luasnip.setup(opts)
+
+		require("luasnip.loaders.from_lua").lazy_load({
+			paths = vim.fn.stdpath("config") .. "/snippets",
+		})
+	end,
+	keys = {
+		{
+			"<C-k>",
+			function()
+				require("luasnip").expand()
+			end,
+			mode = "i",
+			silent = true,
+		},
+		{
+			"<C-l>",
+			function()
+				require("luasnip").jump(1)
+			end,
+			mode = { "i", "s" },
+			silent = true,
+		},
+		{
+			"<C-h>",
+			function()
+				require("luasnip").jump(-1)
+			end,
+			mode = { "i", "s" },
+			silent = true,
+		},
+		{
+			"<C-e>",
+			function()
+				local ls = require("luasnip")
+				if ls.choice_active() then
+					ls.change_choice(1)
+				end
+			end,
+			mode = { "i", "s" },
+			silent = true,
+		},
+	},
+}
+
+=== ./lua/plugins/dap/init.lua ===
+return {
+    require("plugins.dap.nvim-dap"),
+}
+
+=== ./lua/plugins/dap/nvim-dap.lua ===
+local map = require("utils.keymap").lazy_map
+
+return {
+	"mfussenegger/nvim-dap",
+	keys = {
+		map("n", "<F9>", function()
+			require("dap").toggle_breakpoint()
+		end, {
+			desc = "Toggle Breakpoint",
+		}),
+		-- { "<F10>", function() require("dap").step_over() end,  mode = "n", desc = "Step over" },
+		-- { "<F11>", function() require("dap").step_into() end,  mode = "n", desc = "Step into" },
+		-- { "<F12>", function() require("dap").step_out() end,   mode = "n", desc = "Step out" },
+		-- { "<F5>",  function() require("dap").continue() end,   mode = "n", desc = "Start/continue debug" },
+	},
+}
+
+=== ./lua/plugins/editing/init.lua ===
+return {
+
+    require("plugins.editing.nvim-ts-autotag"),
+    require("plugins.editing.tex2uni"),
+    require("plugins.editing.unicode"),
+    require("plugins.editing.vim-visual-multi"),
+}
+
+=== ./lua/plugins/editing/nvim-ts-autotag.lua ===
+return {
+	"windwp/nvim-ts-autotag",
+    event = "InsertEnter",
+
+    config = function()
+        require('nvim-ts-autotag').setup({
+          opts = {
+            -- Defaults
+            enable_close = true, -- Auto close tags
+            enable_rename = true, -- Auto rename pairs of tags
+            enable_close_on_slash = true, -- Auto close on trailing </
+            },
+          -- Also override individual filetype configs, these take priority.
+          -- Empty by default, useful if one of the "opts" global settings
+          -- doesn't work well in a specific filetype
+          per_filetype = {
+            ["html"] = {
+              enable_close = false
+            }
+          }
+        })
+    end,
+}
+
+=== ./lua/plugins/editing/tex2uni.lua ===
+return {
+	"Zeta611/tex2uni.nvim",
+	opts = {
+		ft = { "tex", "markdown" },
+		abbreviations = {
+			extra = { ["pure"] = "⌜$CURSOR⌝" },
+		},
+	},
+}
+
+=== ./lua/plugins/editing/unicode.lua ===
+-- A tool for looking up unicode of a symbol
+
+return {
+	{
+		"chrisbra/unicode.vim",
+		cmd = { "UnicodeName", "UnicodeSearch" },
+	},
+}
+
+=== ./lua/plugins/editing/vim-visual-multi.lua ===
+return {
+	"mg979/vim-visual-multi",
+	branch = "master",
+	init = function()
+		vim.g.VM_default_mappings = 1
+	end,
+}
+
+=== ./lua/plugins/frameworks/init.lua ===
+return {
+    require("plugins.frameworks.mini"),
+    require("plugins.frameworks.snacks"),
+}
+
+=== ./lua/plugins/frameworks/mini.lua ===
+-- ~/.config/nvim/lua/plugins/mini.lua
+-- All available mini.nvim modules.
+-- Commented-out modules are either not needed or require additional setup.
+-- Uncomment and adjust as you like.
+
+return {
+  "nvim-mini/mini.nvim",
+  version = "*",
+  config = function()
+    -- ============================================================================
+    -- 1. COLORS / HUES (commented out – use your own colorscheme)
+    -- ============================================================================
+    -- local hues = require("mini.hues")
+    -- local hues_palette = {
+    --   foreground = "#f6d0d5",
+    --   background = "#202456",
+    --   n_hues = 8,
+    --   saturation = "high",
+    --   accent = "fg",
+    -- }
+    -- hues._palette = hues_palette
+    -- require("mini.hues").setup(hues._palette)
+
+    -- ============================================================================
+    -- 2. TEXT OBJECTS (ai)
+    -- ============================================================================
+    require("mini.ai").setup({
+      custom_textobjects = nil,
+      mappings = {
+        around = "a",
+        inside = "i",
+        around_next = "an",
+        inside_next = "in",
+        around_last = "al",
+        inside_last = "il",
+        goto_left = "g[",
+        goto_right = "g]",
+      },
+      n_lines = 200,
+      search_method = "cover_or_nearest",
+      silent = false,
+    })
+
+    -- ============================================================================
+    -- 3. ANIMATIONS (disabled to avoid mouse scroll issues)
+    -- ============================================================================
+    require("mini.animate").setup({
+      scroll = { enable = false },
+      resize = { enable = false },
+      cursor = { enable = false },
+      open = { enable = false },
+      close = { enable = false },
+    })
+
+    -- ============================================================================
+    -- 4. OTHER MODULES – Uncomment if needed
+    -- ============================================================================
+
+    -- base16 (colorscheme builder) – not used
+    -- require("mini.base16").setup()
+
+    -- basics (basic keymaps, e.g., Q, ;) – not needed
+    -- require("mini.basics").setup()
+
+    -- bracket (bracket navigation) – not used
+    -- require("mini.bracket").setup()
+
+    -- bufremove (buffer deletion) – you might already have this elsewhere
+    -- require("mini.bufremove").setup()
+
+    -- clue (which-key like) – not used
+    -- require("mini.clue").setup()
+
+    -- colors (color preview) – not used
+    -- require("mini.colors").setup()
+
+    -- comment (built-in comments already exist in Neovim >=0.10)
+    -- require("mini.comment").setup()
+
+    -- completion (LSP/completion) – you likely use nvim-cmp
+    -- require("mini.completion").setup()
+
+    -- cursorword (highlight word under cursor) – ENABLED
+    require("mini.cursorword").setup()
+
+    -- diff (git diff signs) – not used (maybe use gitsigns)
+    -- require("mini.diff").setup()
+
+    -- doc (documentation preview) – not used
+    -- require("mini.doc").setup()
+
+    -- extra (extra operators: g? etc.) – optional
+    -- require("mini.extra").setup()
+
+    -- files (file operations) – not used
+    -- require("mini.files").setup()
+
+    -- hipatterns (highlight patterns, e.g., hex colors) – ENABLED
+    require("mini.hipatterns").setup()
+
+    -- icons (icons for other mini modules) – ENABLED
+    require("mini.icons").setup()
+
+    -- indentscope (indentation guides) – not used
+    -- require("mini.indentscope").setup()
+
+    -- jump (jump to next/prev character) – not used
+    -- require("mini.jump").setup()
+
+    -- map (create mappings with descriptions) – you have your own mapping util
+    -- require("mini.map").setup()
+
+    -- misc (misc helpers) – not used
+    -- require("mini.misc").setup()
+
+    -- notify (notification system) – you use snacks.notify
+    -- require("mini.notify").setup()
+
+    -- operators (g? etc.) – not used
+    -- require("mini.operators").setup()
+
+    -- pairs (auto‑pair) – ENABLED (customized)
+    require("mini.pairs").setup({
+      modes = { insert = true, command = false, terminal = false },
+      mappings = {
+        ["("] = { action = "open", pair = "()", neigh_pattern = "[^\\]." },
+        ["["] = { action = "open", pair = "[]", neigh_pattern = "[^\\]." },
+        ["{"] = { action = "open", pair = "{}", neigh_pattern = "[^\\]." },
+        -- ['<'] = { action = 'open', pair = '<>', neigh_pattern = '[^\\].' },
+        [")"] = { action = "close", pair = "()", neigh_pattern = "[^\\]." },
+        ["]"] = { action = "close", pair = "[]", neigh_pattern = "[^\\]." },
+        ["}"] = { action = "close", pair = "{}", neigh_pattern = "[^\\]." },
+        [">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
+        ['"'] = { action = "open", pair = '""', neigh_pattern = "[^\\].", register = { cr = false } },
+        ["'"] = { action = "open", pair = "''", neigh_pattern = "[^%a\\].", register = { cr = false } },
+        ["`"] = { action = "open", pair = "``", neigh_pattern = "[^\\].", register = { cr = false } },
+      },
+    })
+
+    -- picker (file picker) – you use snacks.picker
+    -- require("mini.picker").setup()
+
+    -- sessions (session management) – not used
+    -- require("mini.sessions").setup()
+
+    -- splitjoin (split/join lines) – not used
+    -- require("mini.splitjoin").setup()
+
+    -- starter (start screen) – not used
+    -- require("mini.starter").setup()
+
+    -- statusline – ENABLED (custom)
+    require("mini.statusline").setup({
+      use_icons = vim.g.have_nerd_font,
+      content = {
+        inactive = function()
+          local buf = vim.api.nvim_get_current_buf()
+          local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":.")
+          return MiniStatusline.combine_groups({
+            { hl = "Comment", strings = { filename or "" } },
+            { hl = "Comment", strings = { " %=" } },
+          })
+        end,
+        active = function()
+          local buf = vim.api.nvim_get_current_buf()
+
+          local check_macro_recording = function()
+            if vim.fn.reg_recording() ~= "" then
+              return "Recording @" .. vim.fn.reg_recording()
+            else
+              return ""
+            end
+          end
+
+          local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
+          local git = MiniStatusline.section_git({ trunc_width = 40 })
+          local diff = MiniStatusline.section_diff({ trunc_width = 75 })
+          local diagnostics = MiniStatusline.section_diagnostics({ trunc_width = 75 })
+          local lsp = MiniStatusline.section_lsp({ trunc_width = 75 })
+          local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":.")
+          local fileinfo = MiniStatusline.section_fileinfo({ trunc_width = 120 })
+          local search = MiniStatusline.section_searchcount({ trunc_width = 75 })
+          local macro = check_macro_recording()
+          local location_raw = MiniStatusline.section_location({ trunc_width = 200 })
+
+          local line = vim.fn.line(".")
+          local total_lines = vim.fn.line("$")
+          local scroll_percent = math.floor(line / total_lines * 100)
+          local location = string.format("%s (%d%%%%)", location_raw, scroll_percent)
+
+          return MiniStatusline.combine_groups({
+            { hl = mode_hl, strings = { mode } },
+            { hl = "MiniStatuslineDevinfo", strings = { git, diff, diagnostics } },
+            "%<",
+            { hl = "MiniStatuslineFilename", strings = { filename, lsp } },
+            "%=",
+            { hl = "MiniStatuslineFilename", strings = { macro } },
+            { hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
+            { hl = mode_hl, strings = { search, location } },
+          })
+        end,
+      },
+    })
+
+    -- sticky (sticky scrolling) – not used
+    -- require("mini.sticky").setup()
+
+    -- surround (surroundings) – ENABLED
+    require("mini.surround").setup({
+      search_method = "cover_or_nearest",
+      n_lines = 20,
+      silent = true,
+    })
+
+    -- tabline – ENABLED
+    require("mini.tabline").setup({
+      tabpage_section = "left",
+    })
+
+    -- test (testing framework integration) – not used
+    -- require("mini.test").setup()
+
+    -- trailspace (trailing whitespace) – ENABLED
+    require("mini.trailspace").setup()
+
+    -- vis (visual mode enhancements) – not used
+    -- require("mini.vis").setup()
+  end,
+}
+
+=== ./lua/plugins/frameworks/snacks.lua ===
+-- A bunch of plugins...
+
+local map = require("utils.keymap").lazy_map
+local file = require("utils.file")
+
+return {
+	"folke/snacks.nvim",
+	priority = 1000,
+	lazy = false,
+	opts = {
+		-- animate = {enabled = true},
+		bigfile = { enabled = true },
+		-- bufdelete = { enabled = true },
+		-- dashboard = { enabled = true },
+		debug = { enabled = true },
+		dim = { enabled = true },
+		explorer = { enabled = true },
+		gh = { enabled = true },
+		git = { enabled = true },
+		gitbrowse = { enabled = true },
+		image = { enabled = true },
+		indent = { enabled = true },
+		input = { enabled = true },
+		keymap = { enabled = true },
+		layout = { enabled = true },
+		lazygit = { enabled = true },
+		notifier = { enabled = true },
+		notify = { enabled = true },
+		picker = {
+			enabled = true,
+			layout = { preset = "ivy" }, -- default, vertical, ivy, vscode
+		},
+		profiler = { enabled = true },
+		quickfile = { enabled = true },
+		rename = { enabled = true },
+		scope = { enabled = true },
+		-- scroll = { enabled = true },
+		statuscolumn = { enabled = true },
+		terminal = { enabled = true },
+		toggle = { enabled = true },
+		util = { enabled = true },
+		win = { enabled = true },
+		words = { enabled = true },
+		zen = { enabled = true },
+	},
+	keys = {
+		map("n", "<leader><space>", function()
+			Snacks.picker.smart()
+		end, { desc = "Smart Find Files" }),
+		map("n", "<leader>nh", function()
+			Snacks.notifier.show_history()
+		end, { desc = "Notification History" }),
+		map("n", "<leader>e", function()
+			local explorers = Snacks.picker.get({ source = "explorer" })
+			if explorers and #explorers > 0 then
+				explorers[1]:focus()
+			else
+				Snacks.explorer()
+			end
+		end, { desc = "Toggle Explorer" }),
+		-- find
+		map("n", "<leader>fb", function()
+			Snacks.picker.buffers()
+		end, { desc = "Find Buffers" }),
+		map("n", "<leader>ff", function()
+			Snacks.picker.files()
+		end, { desc = "Find Files" }),
+		map("n", "<leader>fg", function()
+			Snacks.picker.git_files()
+		end, { desc = "Find Git Files" }),
+		map("n", "<leader>fp", function()
+			Snacks.picker.projects()
+		end, { desc = "Find Projects" }),
+		map("n", "<leader>fr", function()
+			Snacks.picker.recent()
+		end, { desc = "Find Recent Files" }),
+		-- git
+		map("n", "<leader>gb", function()
+			Snacks.picker.git_branches()
+		end, { desc = "Git Branches" }),
+		map("n", "<leader>gl", function()
+			Snacks.picker.git_log()
+		end, { desc = "Git Log" }),
+		map("n", "<leader>gL", function()
+			Snacks.picker.git_log_line()
+		end, { desc = "Git Log Line" }),
+		map("n", "<leader>gs", function()
+			Snacks.picker.git_status()
+		end, { desc = "Git Status" }),
+		map("n", "<leader>gS", function()
+			Snacks.picker.git_stash()
+		end, { desc = "Git Stash" }),
+		map("n", "<leader>gd", function()
+			Snacks.picker.git_diff()
+		end, { desc = "Git Diff (Hunks)" }),
+		map("n", "<leader>gf", function()
+			Snacks.picker.git_log_file()
+		end, { desc = "Git Log File" }),
+		-- gh
+		map("n", "<leader>gi", function()
+			Snacks.picker.gh_issue()
+		end, { desc = "GitHub Issues (open)" }),
+		map("n", "<leader>gI", function()
+			Snacks.picker.gh_issue({ state = "all" })
+		end, { desc = "GitHub Issues (all)" }),
+		map("n", "<leader>gp", function()
+			Snacks.picker.gh_pr()
+		end, { desc = "GitHub Pull Requests (open)" }),
+		map("n", "<leader>gP", function()
+			Snacks.picker.gh_pr({ state = "all" })
+		end, { desc = "GitHub Pull Requests (all)" }),
+		-- Grep
+		map("n", "<leader>sb", function()
+			Snacks.picker.lines()
+		end, { desc = "Buffer Lines" }),
+		map("n", "<leader>sB", function()
+			Snacks.picker.grep_buffers()
+		end, { desc = "Grep Open Buffers" }),
+		map("n", "<leader>sg", function()
+			Snacks.picker.grep()
+		end, { desc = "Grep" }),
+		map({ "n", "x" }, "<leader>sw", function()
+			Snacks.picker.grep_word()
+		end, { desc = "Visual selection or word" }),
+		-- search
+		map("n", '<leader>s"', function()
+			Snacks.picker.registers()
+		end, { desc = "Registers" }),
+		map("n", "<leader>s/", function()
+			Snacks.picker.search_history()
+		end, { desc = "Search History" }),
+		map("n", "<leader>sa", function()
+			Snacks.picker.autocmds()
+		end, { desc = "Autocmds" }),
+		map("n", "<leader>sc", function()
+			Snacks.picker.command_history()
+		end, { desc = "Command History" }),
+		map("n", "<leader>sC", function()
+			Snacks.picker.commands()
+		end, { desc = "Commands" }),
+		map("n", "<leader>sd", function()
+			Snacks.picker.diagnostics()
+		end, { desc = "Diagnostics" }),
+		map("n", "<leader>sD", function()
+			Snacks.picker.diagnostics_buffer()
+		end, { desc = "Buffer Diagnostics" }),
+		map("n", "<leader>sh", function()
+			Snacks.picker.help()
+		end, { desc = "Help Pages" }),
+		map("n", "<leader>sH", function()
+			Snacks.picker.highlights()
+		end, { desc = "Highlights" }),
+		map("n", "<leader>si", function()
+			Snacks.picker.icons()
+		end, { desc = "Icons" }),
+		map("n", "<leader>sj", function()
+			Snacks.picker.jumps()
+		end, { desc = "Jumps" }),
+		map("n", "<leader>sk", function()
+			Snacks.picker.keymaps()
+		end, { desc = "Keymaps" }),
+		map("n", "<leader>sl", function()
+			Snacks.picker.loclist()
+		end, { desc = "Location List" }),
+		map("n", "<leader>sm", function()
+			Snacks.picker.marks()
+		end, { desc = "Marks" }),
+		map("n", "<leader>sM", function()
+			Snacks.picker.man()
+		end, { desc = "Man Pages" }),
+		map("n", "<leader>sp", function()
+			Snacks.picker.lazy()
+		end, { desc = "Search for Plugin Spec" }),
+		map("n", "<leader>sq", function()
+			Snacks.picker.qflist()
+		end, { desc = "Quickfix List" }),
+		map("n", "<leader>sR", function()
+			Snacks.picker.resume()
+		end, { desc = "Resume" }),
+		map("n", "<leader>su", function()
+			Snacks.picker.undo()
+		end, { desc = "Undo History" }),
+		map("n", "<leader>uC", function()
+			Snacks.picker.colorschemes()
+		end, { desc = "Colorschemes" }),
+		-- LSP
+		map("n", "gd", function()
+			Snacks.picker.lsp_definitions()
+		end, { desc = "Goto Definition" }),
+		map("n", "gD", function()
+			Snacks.picker.lsp_declarations()
+		end, { desc = "Goto Declaration" }),
+		map("n", "gr", function()
+			Snacks.picker.lsp_references()
+		end, { nowait = true, desc = "References" }),
+		map("n", "gI", function()
+			Snacks.picker.lsp_implementations()
+		end, { desc = "Goto Implementation" }),
+		map("n", "gy", function()
+			Snacks.picker.lsp_type_definitions()
+		end, { desc = "Goto T[y]pe Definition" }),
+		map("n", "gai", function()
+			Snacks.picker.lsp_incoming_calls()
+		end, { desc = "C[a]lls Incoming" }),
+		map("n", "gao", function()
+			Snacks.picker.lsp_outgoing_calls()
+		end, { desc = "C[a]lls Outgoing" }),
+		map("n", "<leader>ss", function()
+			Snacks.picker.lsp_symbols()
+		end, { desc = "LSP Symbols" }),
+		map("n", "<leader>sS", function()
+			Snacks.picker.lsp_workspace_symbols()
+		end, { desc = "LSP Workspace Symbols" }),
+		-- Other
+		map("n", "<leader>zz", function()
+			Snacks.zen()
+		end, { desc = "Toggle Zen Mode" }),
+		map("n", "<leader>zZ", function()
+			Snacks.zen.zoom()
+		end, { desc = "Toggle Zoom (Fullscreen) Mode" }),
+		map("n", "<leader>.", function()
+			Snacks.scratch()
+		end, { desc = "Toggle Scratch Buffer" }),
+		map("n", "<leader>S", function()
+			Snacks.scratch.select()
+		end, { desc = "Select Scratch Buffer" }),
+		map("n", "<leader>cR", function()
+			Snacks.rename.rename_file()
+		end, { desc = "Rename File" }),
+		map({ "n", "v" }, "<leader>gB", function()
+			Snacks.gitbrowse()
+		end, { desc = "Open On GitHub (Browser)" }),
+		map("n", "<leader>gg", function()
+			Snacks.lazygit()
+		end, { desc = "Lazygit" }),
+		map("n", "<leader>un", function()
+			Snacks.notifier.hide()
+		end, { desc = "Dismiss All Notifications" }),
+		map({ "n", "t" }, "]]", function()
+			Snacks.words.jump(vim.v.count1)
+		end, { desc = "Next Reference" }),
+		map({ "n", "t" }, "[[", function()
+			Snacks.words.jump(-vim.v.count1)
+		end, { desc = "Prev Reference" }),
+		-- Terminal mappings
+		map("n", "<leader>t", function()
+			Snacks.terminal()
+		end, { desc = "Open Terminal" }),
+		map("n", "<F5>", function()
+			Snacks.terminal({ "just", "--choose", "--", file.get_current() })
+		end, { desc = "Open Just" }),
+		map("n", "<F6>", function()
+			Snacks.terminal({ "just", "run" })
+		end, { desc = "Execute just run" }),
+		-- Neovim News
+		map("n", "<leader>N", function()
+			Snacks.win({
+				file = vim.api.nvim_get_runtime_file("doc/news.txt", false)[1],
+				width = 0.6,
+				height = 0.6,
+				wo = {
+					spell = false,
+					wrap = false,
+					signcolumn = "yes",
+					statuscolumn = " ",
+					conceallevel = 3,
+				},
+			})
+		end, { desc = "Neovim News" }),
+	},
+	init = function()
+		vim.api.nvim_create_autocmd("User", {
+			pattern = "VeryLazy",
+			callback = function()
+				-- Setup some globals for debugging (lazy-loaded)
+				_G.dd = function(...)
+					Snacks.debug.inspect(...)
+				end
+				_G.bt = function()
+					Snacks.debug.backtrace()
+				end
+
+				-- Override print to use snacks for `:=` command
+				if vim.fn.has("nvim-0.11") == 1 then
+					vim._print = function(_, ...)
+						dd(...)
+					end
+				else
+					vim.print = _G.dd
+				end
+
+				-- Create some toggle mappings
+				Snacks.toggle.option("spell", { name = "Spelling" }):map("<leader>us")
+				Snacks.toggle.option("wrap", { name = "Wrap" }):map("<leader>uw")
+				Snacks.toggle
+					.option("relativenumber", { name = "Relative Number" })
+					:map("<leader>uL")
+				Snacks.toggle.diagnostics():map("<leader>ud")
+				Snacks.toggle.line_number():map("<leader>ul")
+				Snacks.toggle
+					.option(
+						"conceallevel",
+						{ off = 0, on = vim.o.conceallevel > 0 and vim.o.conceallevel or 2 }
+					)
+					:map("<leader>uc")
+				Snacks.toggle.treesitter():map("<leader>uT")
+				Snacks.toggle
+					.option("background", { off = "light", on = "dark", name = "Dark Background" })
+					:map("<leader>ub")
+				Snacks.toggle.inlay_hints():map("<leader>uh")
+				Snacks.toggle.indent():map("<leader>ug")
+				Snacks.toggle.dim():map("<leader>uD")
+			end,
+		})
+	end,
+}
+
+=== ./lua/plugins/git/gitsigns.lua ===
+local map = require("utils.keymap").lazy_map
+
+return {
+	"lewis6991/gitsigns.nvim",
+	event = "BufReadPost",
+	opts = {
+		signs = {
+			add = { text = "┃" },
+			change = { text = "┃" },
+			delete = { text = "_" },
+			topdelete = { text = "‾" },
+			changedelete = { text = "~" },
+			untracked = { text = "┆" },
+		},
+		signs_staged = {
+			add = { text = "┃" },
+			change = { text = "┃" },
+			delete = { text = "_" },
+			topdelete = { text = "‾" },
+			changedelete = { text = "~" },
+			untracked = { text = "┆" },
+		},
+		signs_staged_enable = true,
+		signcolumn = false, -- Toggle with `:Gitsigns toggle_signs`
+		numhl = false, -- Toggle with `:Gitsigns toggle_numhl`
+		linehl = false, -- Toggle with `:Gitsigns toggle_linehl`
+		word_diff = false, -- Toggle with `:Gitsigns toggle_word_diff`
+		watch_gitdir = {
+			follow_files = true,
+		},
+		auto_attach = true,
+		attach_to_untracked = false,
+		current_line_blame = false, -- Toggle with `:Gitsigns toggle_current_line_blame`
+		current_line_blame_opts = {
+			virt_text = true,
+			virt_text_pos = "eol", -- 'eol' | 'overlay' | 'right_align'
+			delay = 1000,
+			ignore_whitespace = false,
+			virt_text_priority = 100,
+			use_focus = true,
+		},
+		current_line_blame_formatter = "<author>, <author_time:%R> - <summary>",
+		sign_priority = 6,
+		update_debounce = 100,
+		status_formatter = nil, -- Use default
+		max_file_length = 40000, -- Disable if file is longer than this (in lines)
+		preview_config = {
+			-- Options passed to nvim_open_win
+			style = "minimal",
+			relative = "cursor",
+			row = 0,
+			col = 1,
+		},
+	},
+	keys = {
+		map("n", "<leader>gu", function()
+			for _, cmd in ipairs({
+				"toggle_signs",
+				"toggle_linehl",
+				"toggle_numhl",
+				"toggle_current_line_blame",
+				"toggle_deleted",
+				"toggle_word_diff",
+			}) do
+				vim.cmd("Gitsigns " .. cmd)
+			end
+		end, {
+			desc = "Toggle Git UI Decorations",
+		}),
+		map("n", "<leader>gs", function()
+			require("gitsigns").stage_hunk()
+		end, {
+			desc = "Git (Un)stage Hunk",
+		}),
+		map("v", "<leader>gs", function()
+			require("gitsigns").stage_hunk({
+				vim.fn.line("."),
+				vim.fn.line("v"),
+			})
+		end, {
+			desc = "Git (Un)stage Selected Lines",
+		}),
+		map("n", "<leader>gS", function()
+			require("gitsigns").stage_buffer()
+		end, {
+			desc = "Git Stage Entire Buffer",
+		}),
+	},
+}
+
+=== ./lua/plugins/git/init.lua ===
+return {
+    require("plugins.git.gitsigns"),
+
+    require("plugins.git.oil-git-status"),
+}
+
+=== ./lua/plugins/git/oil-git-status.lua ===
+return {
+	"refractalize/oil-git-status.nvim",
+	dependencies = {
+		"stevearc/oil.nvim",
+	},
+	ft = "oil",
+	config = true,
+}
+
+=== ./lua/plugins/highlighting/indent-blankline.lua ===
+-- Indentation guides for easier looks
+
+return {
+	"lukas-reineke/indent-blankline.nvim",
+	main = "ibl",
+    config = function()
+        local highlight = {
+            "RainbowRed",
+            "RainbowYellow",
+            "RainbowBlue",
+            "RainbowOrange",
+            "RainbowGreen",
+            "RainbowViolet",
+            "RainbowCyan",
+        }
+
+        local hooks = require "ibl.hooks"
+
+        hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
+            vim.api.nvim_set_hl(0, "RainbowRed", { fg = "#E06C75" })
+            vim.api.nvim_set_hl(0, "RainbowYellow", { fg = "#E5C07B" })
+            vim.api.nvim_set_hl(0, "RainbowBlue", { fg = "#61AFEF" })
+            vim.api.nvim_set_hl(0, "RainbowOrange", { fg = "#D19A66" })
+            vim.api.nvim_set_hl(0, "RainbowGreen", { fg = "#98C379" })
+            vim.api.nvim_set_hl(0, "RainbowViolet", { fg = "#C678DD" })
+            vim.api.nvim_set_hl(0, "RainbowCyan", { fg = "#56B6C2" })
+        end)
+
+        require("ibl").setup { indent = { highlight = highlight } }
+    end,
+}
+
+=== ./lua/plugins/highlighting/init.lua ===
+return {
+    require("plugins.highlighting.indent-blankline"),
+
+    -- require("plugins.highlighting.nvim-colorizer"), -- replaced by mini.hipatterns
+    require("plugins.highlighting.rainbow-delimiters"),
+    require("plugins.highlighting.treesitter-context"),
+    require("plugins.highlighting.treesitter"),
+}
+
+=== ./lua/plugins/highlighting/nvim-colorizer.lua ===
+-- #FF0000
+-- red
+-- #F00
+-- rgb(255, 0, 0)
+-- rgba(255, 0, 0, 0)
+-- Nvim-colorize.nvim makes all the texts above red-background-colored
+
+return {
+	"catgoose/nvim-colorizer.lua",
+	event = "BufReadPost",
+	opts = {
+		filetypes = { "*" },
+		user_default_options = {
+			RGB = true, -- #RGB hex codes
+			RRGGBB = true, -- #RRGGBB hex codes
+			names = true, -- "blue", "red", etc.
+			RRGGBBAA = true, -- #RRGGBBAA hex codes
+			rgb_fn = true, -- rgb() and rgba()
+			hsl_fn = true, -- hsl() and hsla()
+			css = true, -- enable all CSS features
+			mode = "background", -- foreground | background | virtualtext
+		},
+        options = {
+            parsers = {
+              tailwind = {
+                enable = true,
+                lsp = {
+                  enable = true,
+                  disable_document_color = true, -- default
+                },
+                update_names = true,
+              },
+            },
+          },
+	},
+}
+
+=== ./lua/plugins/highlighting/rainbow-delimiters.lua ===
+-- Make your braces differently colored, may help with recognition
+
+return {
+	"HiPhish/rainbow-delimiters.nvim",
+	event = "VeryLazy",
+	config = function()
+		require("rainbow-delimiters.setup").setup({
+			strategy = {
+				[""] = "rainbow-delimiters.strategy.global",
+				vim = "rainbow-delimiters.strategy.local",
+			},
+			query = {
+				[""] = "rainbow-delimiters",
+				lua = "rainbow-blocks",
+			},
+			priority = {
+				[""] = 110,
+				lua = 210,
+			},
+			highlight = {
+				"RainbowDelimiterRed",
+				"RainbowDelimiterYellow",
+				"RainbowDelimiterBlue",
+				"RainbowDelimiterOrange",
+				"RainbowDelimiterGreen",
+				"RainbowDelimiterViolet",
+				"RainbowDelimiterCyan",
+			},
+		})
+	end,
+}
+
+=== ./lua/plugins/highlighting/treesitter-context.lua ===
+return {
+	"nvim-treesitter/nvim-treesitter-context",
+	event = "BufReadPost",
+	dependencies = { "nvim-treesitter/nvim-treesitter" },
+	config = function()
+		require("treesitter-context").setup({
+			enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+			multiwindow = true, -- Enable multiwindow support.
+			max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
+			min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+			line_numbers = true,
+			multiline_threshold = 20, -- Maximum number of lines to show for a single context
+			trim_scope = "outer", -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+			-- mode = 'cursor',          -- Line used to calculate context. Choices: 'cursor', 'topline'
+			mode = "topline",
+			-- Separator between context and content. Should be a single character string, like '-'.
+			-- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
+			-- separator = "━",
+			-- separator = "─",
+			separator = nil,
+			zindex = 20, -- The Z-index of the context window
+			on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
+		})
+	end,
+}
+
+=== ./lua/plugins/highlighting/treesitter.lua ===
+return {
+	"nvim-treesitter/nvim-treesitter",
+    branch = "main",
+	build = ":TSUpdate",
+	event = { "BufReadPost", "BufNewFile" },
+	dependencies = {
+		-- "hiphish/rainbow-delimiters.nvim",
+	},
+	opts = {
+		highlight = {
+			enable = true, -- enable treesitter-based highlighting
+			additional_vim_regex_highlighting = false, -- disable legacy regex highlighting for speed & accuracy
+		},
+		incremental_selection = {
+			enable = true,
+		},
+		indent = {
+			enable = true, -- enable treesitter indent (can improve indent accuracy)
+		},
+		-- optional: enable rainbow parentheses for easier nesting visibility
+		-- rainbow = {
+		--   enable = true,
+		--   extended_mode = true, -- highlight non-bracket delimiters too
+		--   max_file_lines = nil, -- disable limit on file size
+		-- },
+		--
+		modules = {},
+		sync_install = false,
+		auto_install = true,
+
+		ignore_install = {},
+		ensure_installed = {
+			"c",
+			"cpp",
+			"rust",
+
+			"lua",
+			"luau",
+			"python",
+
+			"make",
+			"just",
+
+			"bash",
+
+			"kdl",
+			"toml",
+			"yaml",
+
+			"html",
+			"css",
+			"javascript",
+			"typescript",
+			"typst",
+			"json",
+
+			"astro",
+			"tsx",
+
+			"latex",
+			"markdown",
+			"markdown_inline",
+		},
+	},
+	config = function(_, opts)
+		require("nvim-treesitter").setup(opts)
+
+		vim.api.nvim_create_autocmd("ColorScheme", {
+			callback = function()
+				vim.api.nvim_set_hl(0, "@variable", { link = "Identifier" })
+			end,
+		})
+	end,
+}
+
+=== ./lua/plugins/init.lua ===
+local ToBeLoaded = {}
+
+local NonTerminalPlugins = {
+  require("plugins.completion"),
+  require("plugins.dap"),
+  require("plugins.editing"),
+  require("plugins.frameworks"),
+  require("plugins.git"),
+  require("plugins.highlighting"),
+  require("plugins.languages"),
+  require("plugins.lsp"),
+  require("plugins.navigation"),
+  require("plugins.sessions"),
+  require("plugins.themes"),
+  require("plugins.ui"),
+}
+
+-- Condition: skip these plugins when running in terminal-only mode
+local is_terminal_mode = vim.fn.argc() == 1 and vim.fn.argv()[1] == "+term"
+
+if not is_terminal_mode then
+  vim.list_extend(ToBeLoaded, NonTerminalPlugins) -- cleaner than ipairs loop
+end
+
+-- Bootstrap lazy.nvim
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+  vim.fn.system({
+    "git", "clone", "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git", "--branch=stable", lazypath
+  })
+end
+vim.opt.rtp:prepend(lazypath)
+
+-- Setup
+require("lazy").setup(ToBeLoaded, {
+  git = { depth = 1 },
+  lockfile = vim.fn.stdpath("data") .. "/lazy-lock.json",
+})
+
+=== ./lua/plugins/languages/flutter/flutter-tools.lua ===
+return {
+	"nvim-flutter/flutter-tools.nvim",
+	ft = { "dart" },
+	dependencies = {
+		"nvim-lua/plenary.nvim",
+		"stevearc/dressing.nvim", -- optional for vim.ui.select
+	},
+	config = function()
+		local capabilities = vim.lsp.protocol.make_client_capabilities()
+
+		require("flutter-tools").setup({
+			closing_tags = {
+				-- highlight = "ErrorMsg",
+				prefix = "   >> ",
+			},
+			lsp = {
+				capabilities = capabilities,
+			},
+		})
+	end,
+}
+
+=== ./lua/plugins/languages/flutter/init.lua ===
+return {
+    require("plugins.languages.flutter.flutter-tools"),
+}
+
+=== ./lua/plugins/languages/init.lua ===
+return {
+    require("plugins.languages.flutter"),
+    require("plugins.languages.luau"),
+    require("plugins.languages.rust"),
+    require("plugins.languages.text"),
+}
+
+=== ./lua/plugins/languages/luau/init.lua ===
+return {
+
+    require("plugins.languages.luau.luau-lsp"),
+    require("plugins.languages.luau.luau-tree"),
+}
+
+=== ./lua/plugins/languages/luau/luau-lsp.lua ===
+return {
+	"lopi-py/luau-lsp.nvim",
+	opts = {
+		platform = {
+			type = "roblox",
+		},
+		types = {
+			roblox_security_level = "PluginSecurity",
+		},
+		sourcemap = {
+			enabled = true,
+			autogenerate = true,
+			generator_cmd = { "argon", "sourcemap", "-w", "-n", "-o", "sourcemap.json" },
+			rojo_project_file = "default.project.json",
+			sourcemap_file = "sourcemap.json",
+		},
+		plugin = {
+			enabled = true,
+			port = 3667,
+		},
+	},
+	dependencies = {
+		"nvim-lua/plenary.nvim",
+	},
+}
+
+=== ./lua/plugins/languages/luau/luau-tree.lua ===
+return {
+	-- "zilibobi/luau-tree.nvim",
+	-- config = function()
+	-- 	local config = require("luau-tree.config")
+	--
+	-- 	config.host = "127.0.0.1"
+	-- 	config.port = 3668
+	--
+	-- 	config.enabled = true
+	-- end,
+}
+
+=== ./lua/plugins/languages/rust/init.lua ===
+return {
+
+    require("plugins.languages.rust.rustaceanvim"),
+}
+
+=== ./lua/plugins/languages/rust/rustaceanvim.lua ===
+return {
+    "mrcjkb/rustaceanvim",
+    version = "^6",
+    ft = { "rust" },
+
+    init = function()
+        vim.g.rustaceanvim = {
+            server = {
+                default_settings = {
+                    ["rust-analyzer"] = {},
+                },
+            },
+        }
+    end,
+}
+
+=== ./lua/plugins/languages/text/bullets.lua ===
+return {
+    "bullets-vim/bullets.vim",
+    -- ft = { "markdown", "text" },
+    config = function()
+        -- vim.g.bullets_enabled_file_types = { "markdown", "text" }
+        -- vim.g.bullets_checkbox_markers = " x"
+        -- -- optional keymap to toggle checkbox
+        -- vim.api.nvim_set_keymap("n", "<Space>x", ":call bullets#toggle_checkbox()<CR>", { noremap = true, silent = true })
+    end,
+}
+
+=== ./lua/plugins/languages/text/headlines.lua ===
+return {
+  "lukas-reineke/headlines.nvim",
+  dependencies = "nvim-treesitter/nvim-treesitter",
+  config = function()
+    local H = require("headlines")
+
+    vim.api.nvim_create_autocmd("InsertEnter", {
+      pattern = { "*.md", "*.org", "*.txt" },
+      callback = function()
+        H.disable()
+        -- H.opts = H.opts or {}
+        -- H.opts.markdown = H.opts.markdown or {}
+        -- H.opts.markdown.headline_highlights = false
+      end,
+    })
+
+    vim.api.nvim_create_autocmd("InsertLeave", {
+      pattern = { "*.md", "*.org", "*.txt" },
+      callback = function()
+        -- H.opts.markdown.headline_highlights = true
+        -- H.setup(H.opts)
+      end,
+    })
+  end, -- or `opts = {}`
+}
+
+=== ./lua/plugins/languages/text/init.lua ===
+return {
+    require("plugins.languages.text.bullets"),
+    -- require("plugins.languages.text.headlines"),
+
+    require("plugins.languages.text.markdown-preview"),
+    require("plugins.languages.text.markdown-toc"),
+    require("plugins.languages.text.markview"),
+    require("plugins.languages.text.mdmath"),
+    require("plugins.languages.text.nabla"),
+    require("plugins.languages.text.render-markdown"),
+    require("plugins.languages.text.typst-preview"),
+    require("plugins.languages.text.vimtex"),
+    require("plugins.languages.text.vivify"),
+    require("plugins.languages.text.zk"),
+}
+
+=== ./lua/plugins/languages/text/markdown-preview.lua ===
+local map = require("utils.keymap").lazy_map
+
+return {
+	"iamcco/markdown-preview.nvim",
+	cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+	build = "cd app && yarn install",
+	ft = { "markdown" },
+	init = function()
+		vim.cmd([[
+        function! OpenMarkdownPreview(url)
+            call jobstart(['firefox', '--new-window', a:url], {'detach': v:true})
+        endfunction
+        ]])
+
+		local config_path = vim.fn.stdpath("config")
+		vim.g.mkdp_markdown_css = config_path .. "/markdown.css"
+		vim.g.mkdp_math = 1
+		vim.g.mkdp_filetypes = { "markdown" }
+		vim.g.mkdp_browserfunc = "OpenMarkdownPreview"
+	end,
+	keys = {
+		map("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<CR>", {
+			desc = "Toggle Markdown Preview",
+		}),
+	},
+}
+
+=== ./lua/plugins/languages/text/markdown-toc.lua ===
+-- Table of contents generation for Markdown
+
+local map = require("utils.keymap").lazy_map
+
+return {
+	"hedyhli/markdown-toc.nvim",
+	ft = "markdown", -- Lazy load on markdown filetype
+	cmd = { "Mtoc" }, -- Or, lazy load on "Mtoc" command
+	opts = {},
+	keys = {
+		map("n", "<leader>mt", "<cmd>Mtoc<CR>", {
+			desc = "Create Table of Contents",
+		}),
+	},
+}
+
+=== ./lua/plugins/languages/text/markview.lua ===
+return {
+    "OXY2DEV/markview.nvim",
+    lazy = false,
+    config = function()
+        local markview = require("markview")
+        vim.api.nvim_create_autocmd({ "InsertEnter" }, {
+            callback = function()
+                vim.cmd("Markview Disable")
+            end,
+        })
+
+        vim.api.nvim_create_autocmd({ "InsertLeave" }, {
+            callback = function()
+                vim.cmd("Markview Enable")
+            end,
+        })
+
+        markview.setup({
+            enable_math = true,
+            preview = {
+                icon_provider = "mini",
+            },
+        })
+    end,
+    priority = 49,
+}
+
+=== ./lua/plugins/languages/text/mdmath.lua ===
+return {
+	"Thiago4532/mdmath.nvim",
+	event = { "BufReadPost *.md", "BufNewFile *.md" },
+	dependencies = {
+		"nvim-treesitter/nvim-treesitter",
+	},
+	opts = {
+		dynamic = true,
+		dynamic_scale = 1,
+		update_interval = 200,
+		internal_scale = 1.5,
+	},
+
+	-- The build is already done by default in lazy.nvim, so you don't need
+	-- the next line, but you can use the command `:MdMath build` to rebuild
+	-- if the build fails for some reason.
+	-- build = ':MdMath build'
+}
+
+=== ./lua/plugins/languages/text/nabla.lua ===
+-- Latex Preview for Markdown
+
+local map = require("utils.keymap").lazy_map
+
+return {
+	"jbyuki/nabla.nvim",
+	ft = { "markdown", "tex" },
+	dependencies = {
+		"nvim-treesitter/nvim-treesitter",
+	},
+	config = function()
+		vim.g.nabla_border = "rounded" -- "single", "double", "none"
+	end,
+	keys = {
+		map({ "n", "v" }, "<leader>mp", function()
+			require("nabla").popup()
+		end, {
+			desc = "Preview Math Expression",
+		}),
+	},
+}
+
+=== ./lua/plugins/languages/text/render-markdown.lua ===
+local map = require("utils.keymap").lazy_map
+
+return {
+	"MeanderingProgrammer/render-markdown.nvim",
+	dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" }, -- if you use the mini.nvim suite
+	ft = { "markdown" },
+	-- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.icons' }, -- if you use standalone mini plugins
+	-- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+	---@module 'render-markdown'
+	---@type render.md.UserConfig
+	opts = {
+		-- Whether markdown should be rendered by default.
+		enabled = true,
+		-- Vim modes that will show a rendered view of the markdown file, :h mode(), for all enabled
+		-- components. Individual components can be enabled for other modes. Remaining modes will be
+		-- unaffected by this plugin.
+		render_modes = { "n", "c", "t" },
+		-- Milliseconds that must pass before updating marks, updates occur.
+		-- within the context of the visible window, not the entire buffer.
+		debounce = 100,
+		-- Pre configured settings that will attempt to mimic various target user experiences.
+		-- User provided settings will take precedence.
+		-- | obsidian | mimic Obsidian UI                                          |
+		-- | lazy     | will attempt to stay up to date with LazyVim configuration |
+		-- | none     | does nothing                                               |
+		preset = "none",
+		-- The level of logs to write to file: vim.fn.stdpath('state') .. '/render-markdown.log'.
+		-- Only intended to be used for plugin development / debugging.
+		log_level = "error",
+		-- Print runtime of main update method.
+		-- Only intended to be used for plugin development / debugging.
+		log_runtime = false,
+		-- Filetypes this plugin will run on.
+		file_types = { "markdown" },
+		-- Maximum file size (in MB) that this plugin will attempt to render.
+		-- File larger than this will effectively be ignored.
+		max_file_size = 10.0,
+		-- Takes buffer as input, if it returns true this plugin will not attach to the buffer.
+		ignore = function()
+			return false
+		end,
+		-- Whether markdown should be rendered when nested inside markdown, i.e. markdown code block
+		-- inside markdown file.
+		nested = true,
+		-- Additional events that will trigger this plugin's render loop.
+		change_events = {},
+		-- Whether the treesitter highlighter should be restarted after this plugin attaches to its
+		-- first buffer for the first time. May be necessary if this plugin is lazy loaded to clear
+		-- highlights that have been dynamically disabled.
+		restart_highlighter = false,
+		injections = {
+			-- Out of the box language injections for known filetypes that allow markdown to be interpreted
+			-- in specified locations, see :h treesitter-language-injections.
+			-- Set enabled to false in order to disable.
+
+			enabled = false,
+			gitcommit = {
+				enabled = true,
+				query = [[
+                ((message) @injection.content
+                    (#set! injection.combined)
+                    (#set! injection.include-children)
+                    (#set! injection.language "markdown"))
+            ]],
+			},
+		},
+		patterns = {
+			-- Highlight patterns to disable for filetypes, i.e. lines concealed around code blocks
+
+			markdown = {
+				disable = true,
+				directives = {
+					{ id = 17, name = "conceal_lines" },
+					{ id = 18, name = "conceal_lines" },
+				},
+			},
+		},
+		anti_conceal = {
+			-- This enables hiding added text on the line the cursor is on.
+			enabled = true,
+			-- Modes to disable anti conceal feature.
+			disabled_modes = false,
+			-- Number of lines above cursor to show.
+			above = 0,
+			-- Number of lines below cursor to show.
+			below = 0,
+			-- Which elements to always show, ignoring anti conceal behavior. Values can either be
+			-- booleans to fix the behavior or string lists representing modes where anti conceal
+			-- behavior will be ignored. Valid values are:
+			--   bullet
+			--   callout
+			--   check_icon, check_scope
+			--   code_background, code_border, code_language
+			--   dash
+			--   head_background, head_border, head_icon
+			--   indent
+			--   latex
+			--   link
+			--   quote
+			--   sign
+			--   table_border
+			--   virtual_lines
+			ignore = {
+				code_background = true,
+				indent = true,
+				sign = true,
+				virtual_lines = true,
+			},
+		},
+		padding = {
+			-- Highlight to use when adding whitespace, should match background.
+			highlight = "Normal",
+		},
+		latex = {
+			-- Turn on / off latex rendering.
+			enabled = false,
+			-- Additional modes to render latex.
+			render_modes = false,
+			-- Executable used to convert latex formula to rendered unicode.
+			-- If a list is provided the commands run in order until the first success.
+			converter = { "tectonic", "utftex", "latex2text" },
+			-- Highlight for latex blocks.
+			highlight = "RenderMarkdownMath",
+			-- Determines where latex formula is rendered relative to block.
+			-- | above  | above latex block                               |
+			-- | below  | below latex block                               |
+			-- | center | centered with latex block (must be single line) |
+			position = "center",
+			-- Number of empty lines above latex blocks.
+			top_pad = 0,
+			-- Number of empty lines below latex blocks.
+			bottom_pad = 0,
+		},
+		on = {
+			-- Called when plugin initially attaches to a buffer.
+			attach = function() end,
+			-- Called before adding marks to the buffer for the first time.
+			initial = function() end,
+			-- Called after plugin renders a buffer.
+			render = function() end,
+			-- Called after plugin clears a buffer.
+			clear = function() end,
+		},
+		completions = {
+			-- Settings for blink.cmp completions source
+			blink = { enabled = false },
+			-- Settings for coq_nvim completions source
+			coq = { enabled = false },
+			-- Settings for in-process language server completions
+			lsp = { enabled = false },
+			filter = {
+				callout = function()
+					-- example to exclude obsidian callouts
+					-- return value.category ~= 'obsidian'
+					return true
+				end,
+				checkbox = function()
+					return true
+				end,
+			},
+		},
+		heading = {
+			-- Useful context to have when evaluating values.
+			-- | level    | the number of '#' in the heading marker         |
+			-- | sections | for each level how deeply nested the heading is |
+
+			-- Turn on / off heading icon & background rendering.
+			enabled = true,
+			-- Additional modes to render headings.
+			render_modes = false,
+			-- Turn on / off atx heading rendering.
+			atx = true,
+			-- Turn on / off setext heading rendering.
+			setext = true,
+			-- Turn on / off sign column related rendering.
+			sign = true,
+			-- Replaces '#+' of 'atx_h._marker'.
+			-- Output is evaluated depending on the type.
+			-- | function | `value(context)`              |
+			-- | string[] | `cycle(value, context.level)` |
+			icons = { "󰲡 ", "󰲣 ", "󰲥 ", "󰲧 ", "󰲩 ", "󰲫 " },
+			-- Determines how icons fill the available space.
+			-- | eol     | '#'s are concealed and icon is placed at right most column   |
+			-- | right   | '#'s are concealed and icon is appended to right side        |
+			-- | inline  | '#'s are concealed and icon is inlined on left side          |
+			-- | overlay | icon is left padded with spaces and overlayed hiding all '#' |
+			position = "overlay",
+			-- Added to the sign column if enabled.
+			-- Output is evaluated by `cycle(value, context.level)`.
+			signs = { "󰫎 " },
+			-- Width of the heading background.
+			-- | block | width of the heading text |
+			-- | full  | full width of the window  |
+			-- Can also be a list of the above values evaluated by `clamp(value, context.level)`.
+			width = "full",
+			-- Amount of margin to add to the left of headings.
+			-- Margin available space is computed after accounting for padding.
+			-- If a float < 1 is provided it is treated as a percentage of available window space.
+			-- Can also be a list of numbers evaluated by `clamp(value, context.level)`.
+			left_margin = 0,
+			-- Amount of padding to add to the left of headings.
+			-- Output is evaluated using the same logic as 'left_margin'.
+			left_pad = 0,
+			-- Amount of padding to add to the right of headings when width is 'block'.
+			-- Output is evaluated using the same logic as 'left_margin'.
+			right_pad = 0,
+			-- Minimum width to use for headings when width is 'block'.
+			-- Can also be a list of integers evaluated by `clamp(value, context.level)`.
+			min_width = 0,
+			-- Determines if a border is added above and below headings.
+			-- Can also be a list of booleans evaluated by `clamp(value, context.level)`.
+			border = false,
+			-- Always use virtual lines for heading borders instead of attempting to use empty lines.
+			border_virtual = false,
+			-- Highlight the start of the border using the foreground highlight.
+			border_prefix = false,
+			-- Used above heading for border.
+			above = "▄",
+			-- Used below heading for border.
+			below = "▀",
+			-- Highlight for the heading icon and extends through the entire line.
+			-- Output is evaluated by `clamp(value, context.level)`.
+			backgrounds = {
+				"RenderMarkdownH1Bg",
+				"RenderMarkdownH2Bg",
+				"RenderMarkdownH3Bg",
+				"RenderMarkdownH4Bg",
+				"RenderMarkdownH5Bg",
+				"RenderMarkdownH6Bg",
+			},
+			-- Highlight for the heading and sign icons.
+			-- Output is evaluated using the same logic as 'backgrounds'.
+			foregrounds = {
+				"RenderMarkdownH1",
+				"RenderMarkdownH2",
+				"RenderMarkdownH3",
+				"RenderMarkdownH4",
+				"RenderMarkdownH5",
+				"RenderMarkdownH6",
+			},
+			-- Define custom heading patterns which allow you to override various properties based on
+			-- the contents of a heading.
+			-- The key is for healthcheck and to allow users to change its values, value type below.
+			-- | pattern    | matched against the heading text @see :h lua-patterns |
+			-- | icon       | optional override for the icon                        |
+			-- | background | optional override for the background                  |
+			-- | foreground | optional override for the foreground                  |
+			custom = {},
+		},
+		paragraph = {
+			-- Useful context to have when evaluating values.
+			-- | text | text value of the node |
+
+			-- Turn on / off paragraph rendering.
+			enabled = true,
+			-- Additional modes to render paragraphs.
+			render_modes = false,
+			-- Amount of margin to add to the left of paragraphs.
+			-- If a float < 1 is provided it is treated as a percentage of available window space.
+			-- Output is evaluated depending on the type.
+			-- | function | `value(context)` |
+			-- | number   | `value`          |
+			left_margin = 0,
+			-- Amount of padding to add to the first line of each paragraph.
+			-- Output is evaluated using the same logic as 'left_margin'.
+			indent = 0,
+			-- Minimum width to use for paragraphs.
+			min_width = 0,
+		},
+		code = {
+			-- Turn on / off code block & inline code rendering.
+			enabled = true,
+			-- Additional modes to render code blocks.
+			render_modes = false,
+			-- Turn on / off sign column related rendering.
+			sign = true,
+			-- Whether to conceal nodes at the top and bottom of code blocks.
+			conceal_delimiters = true,
+			-- Turn on / off language heading related rendering.
+			language = true,
+			-- Determines where language icon is rendered.
+			-- | center | center of code block |
+			-- | right  | right of code block  |
+			-- | left   | left of code block   |
+			position = "left",
+			-- Whether to include the language icon above code blocks.
+			language_icon = true,
+			-- Whether to include the language name above code blocks.
+			language_name = true,
+			-- Whether to include the language info above code blocks.
+			language_info = true,
+			-- Amount of padding to add around the language.
+			-- If a float < 1 is provided it is treated as a percentage of available window space.
+			language_pad = 0,
+			-- A list of language names for which rendering will be disabled.
+			disable = {},
+			-- A list of language names for which background highlighting will be disabled.
+			-- Likely because that language has background highlights itself.
+			-- Use a boolean to make behavior apply to all languages.
+			-- Borders above & below blocks will continue to be rendered.
+			disable_background = { "diff" },
+			-- Width of the code block background.
+			-- | block | width of the code block  |
+			-- | full  | full width of the window |
+			width = "full",
+			-- Amount of margin to add to the left of code blocks.
+			-- If a float < 1 is provided it is treated as a percentage of available window space.
+			-- Margin available space is computed after accounting for padding.
+			left_margin = 0,
+			-- Amount of padding to add to the left of code blocks.
+			-- If a float < 1 is provided it is treated as a percentage of available window space.
+			left_pad = 0,
+			-- Amount of padding to add to the right of code blocks when width is 'block'.
+			-- If a float < 1 is provided it is treated as a percentage of available window space.
+			right_pad = 0,
+			-- Minimum width to use for code blocks when width is 'block'.
+			min_width = 0,
+			-- Determines how the top / bottom of code block are rendered.
+			-- | none  | do not render a border                               |
+			-- | thick | use the same highlight as the code body              |
+			-- | thin  | when lines are empty overlay the above & below icons |
+			-- | hide  | conceal lines unless language name or icon is added  |
+			border = "hide",
+			-- Used above code blocks to fill remaining space around language.
+			language_border = "█",
+			-- Added to the left of language.
+			language_left = "",
+			-- Added to the right of language.
+			language_right = "",
+			-- Used above code blocks for thin border.
+			above = "▄",
+			-- Used below code blocks for thin border.
+			below = "▀",
+			-- Turn on / off inline code related rendering.
+			inline = true,
+			-- Icon to add to the left of inline code.
+			inline_left = "",
+			-- Icon to add to the right of inline code.
+			inline_right = "",
+			-- Padding to add to the left & right of inline code.
+			inline_pad = 0,
+			-- Priority to assign to code background highlight.
+			priority = 140,
+			-- Highlight for code blocks.
+			highlight = "RenderMarkdownCode",
+			-- Highlight for code info section, after the language.
+			highlight_info = "RenderMarkdownCodeInfo",
+			-- Highlight for language, overrides icon provider value.
+			highlight_language = nil,
+			-- Highlight for border, use false to add no highlight.
+			highlight_border = "RenderMarkdownCodeBorder",
+			-- Highlight for language, used if icon provider does not have a value.
+			highlight_fallback = "RenderMarkdownCodeFallback",
+			-- Highlight for inline code.
+			highlight_inline = "RenderMarkdownCodeInline",
+			-- Determines how code blocks & inline code are rendered.
+			-- | none     | { enabled = false }                           |
+			-- | normal   | { language = false }                          |
+			-- | language | { disable_background = true, inline = false } |
+			-- | full     | uses all default values                       |
+			style = "full",
+		},
+		dash = {
+			-- Useful context to have when evaluating values.
+			-- | width | width of the current window |
+
+			-- Turn on / off thematic break rendering.
+			enabled = true,
+			-- Additional modes to render dash.
+			render_modes = false,
+			-- Replaces '---'|'***'|'___'|'* * *' of 'thematic_break'.
+			-- The icon gets repeated across the window's width.
+			icon = "─",
+			-- Width of the generated line.
+			-- If a float < 1 is provided it is treated as a percentage of available window space.
+			-- Output is evaluated depending on the type.
+			-- | function | `value(context)`    |
+			-- | number   | `value`             |
+			-- | full     | width of the window |
+			width = "full",
+			-- Amount of margin to add to the left of dash.
+			-- If a float < 1 is provided it is treated as a percentage of available window space.
+			left_margin = 0,
+			-- Priority to assign to dash.
+			priority = nil,
+			-- Highlight for the whole line generated from the icon.
+			highlight = "RenderMarkdownDash",
+		},
+		document = {
+			-- Turn on / off document rendering.
+			enabled = true,
+			-- Additional modes to render document.
+			render_modes = false,
+			-- Ability to conceal arbitrary ranges of text based on lua patterns, @see :h lua-patterns.
+			-- Relies entirely on user to set patterns that handle their edge cases.
+			conceal = {
+				-- Matched ranges will be concealed using character level conceal.
+				char_patterns = {},
+				-- Matched ranges will be concealed using line level conceal.
+				line_patterns = {},
+			},
+		},
+		bullet = {
+			-- Useful context to have when evaluating values.
+			-- | level | how deeply nested the list is, 1-indexed          |
+			-- | index | how far down the item is at that level, 1-indexed |
+			-- | value | text value of the marker node                     |
+
+			-- Turn on / off list bullet rendering
+			enabled = true,
+			-- Additional modes to render list bullets
+			render_modes = false,
+			-- Replaces '-'|'+'|'*' of 'list_item'.
+			-- If the item is a 'checkbox' a conceal is used to hide the bullet instead.
+			-- Output is evaluated depending on the type.
+			-- | function   | `value(context)`                                    |
+			-- | string     | `value`                                             |
+			-- | string[]   | `cycle(value, context.level)`                       |
+			-- | string[][] | `clamp(cycle(value, context.level), context.index)` |
+			icons = { "●", "○", "◆", "◇" },
+			-- Replaces 'n.'|'n)' of 'list_item'.
+			-- Output is evaluated using the same logic as 'icons'.
+			ordered_icons = function(ctx)
+				local value = vim.trim(ctx.value)
+				local index = tonumber(value:sub(1, #value - 1))
+				return ("%d."):format(index > 1 and index or ctx.index)
+			end,
+			-- Padding to add to the left of bullet point.
+			-- Output is evaluated depending on the type.
+			-- | function | `value(context)` |
+			-- | integer  | `value`          |
+			left_pad = 0,
+			-- Padding to add to the right of bullet point.
+			-- Output is evaluated using the same logic as 'left_pad'.
+			right_pad = 0,
+			-- Highlight for the bullet icon.
+			-- Output is evaluated using the same logic as 'icons'.
+			highlight = "RenderMarkdownBullet",
+			-- Highlight for item associated with the bullet point.
+			-- Output is evaluated using the same logic as 'icons'.
+			scope_highlight = {},
+			-- Priority to assign to scope highlight.
+			scope_priority = nil,
+		},
+		checkbox = {
+			-- Checkboxes are a special instance of a 'list_item' that start with a 'shortcut_link'.
+			-- There are two special states for unchecked & checked defined in the markdown grammar.
+
+			-- Turn on / off checkbox state rendering.
+			enabled = true,
+			-- Additional modes to render checkboxes.
+			render_modes = false,
+			-- Render the bullet point before the checkbox.
+			bullet = false,
+			-- Padding to add to the left of checkboxes.
+			left_pad = 0,
+			-- Padding to add to the right of checkboxes.
+			right_pad = 1,
+			unchecked = {
+				-- Replaces '[ ]' of 'task_list_marker_unchecked'.
+				icon = "󰄱 ",
+				-- Highlight for the unchecked icon.
+				highlight = "RenderMarkdownUnchecked",
+				-- Highlight for item associated with unchecked checkbox.
+				scope_highlight = nil,
+			},
+			checked = {
+				-- Replaces '[x]' of 'task_list_marker_checked'.
+				icon = "󰱒 ",
+				-- Highlight for the checked icon.
+				highlight = "RenderMarkdownChecked",
+				-- Highlight for item associated with checked checkbox.
+				scope_highlight = nil,
+			},
+        -- Define custom checkbox states, more involved, not part of the markdown grammar.
+        -- As a result this requires neovim >= 0.10.0 since it relies on 'inline' extmarks.
+        -- The key is for healthcheck and to allow users to change its values, value type below.
+        -- | raw             | matched against the raw text of a 'shortcut_link'           |
+        -- | rendered        | replaces the 'raw' value when rendering                     |
+        -- | highlight       | highlight for the 'rendered' icon                           |
+        -- | scope_highlight | optional highlight for item associated with custom checkbox |
+        -- stylua: ignore
+        custom = {
+            todo = { raw = '[-]', rendered = '󰥔 ', highlight = 'RenderMarkdownTodo', scope_highlight = nil },
+        },
+			-- Priority to assign to scope highlight.
+			scope_priority = nil,
+		},
+		quote = {
+			-- Turn on / off block quote & callout rendering.
+			enabled = true,
+			-- Additional modes to render quotes.
+			render_modes = false,
+			-- Replaces '>' of 'block_quote'.
+			icon = "▋",
+			-- Whether to repeat icon on wrapped lines. Requires neovim >= 0.10. This will obscure text
+			-- if incorrectly configured with :h 'showbreak', :h 'breakindent' and :h 'breakindentopt'.
+			-- A combination of these that is likely to work follows.
+			-- | showbreak      | '  ' (2 spaces)   |
+			-- | breakindent    | true              |
+			-- | breakindentopt | '' (empty string) |
+			-- These are not validated by this plugin. If you want to avoid adding these to your main
+			-- configuration then set them in win_options for this plugin.
+			repeat_linebreak = false,
+			-- Highlight for the quote icon.
+			-- If a list is provided output is evaluated by `cycle(value, level)`.
+			highlight = {
+				"RenderMarkdownQuote1",
+				"RenderMarkdownQuote2",
+				"RenderMarkdownQuote3",
+				"RenderMarkdownQuote4",
+				"RenderMarkdownQuote5",
+				"RenderMarkdownQuote6",
+			},
+		},
+		pipe_table = {
+			-- Turn on / off pipe table rendering.
+			enabled = true,
+			-- Additional modes to render pipe tables.
+			render_modes = false,
+			-- Pre configured settings largely for setting table border easier.
+			-- | heavy  | use thicker border characters     |
+			-- | double | use double line border characters |
+			-- | round  | use round border corners          |
+			-- | none   | does nothing                      |
+			preset = "none",
+			-- Determines how individual cells of a table are rendered.
+			-- | overlay | writes completely over the table, removing conceal behavior and highlights |
+			-- | raw     | replaces only the '|' characters in each row, leaving the cells unmodified |
+			-- | padded  | raw + cells are padded to maximum visual width for each column             |
+			-- | trimmed | padded except empty space is subtracted from visual width calculation      |
+			cell = "padded",
+			-- Adjust the computed width of table cells using custom logic.
+			cell_offset = function()
+				return 0
+			end,
+			-- Amount of space to put between cell contents and border.
+			padding = 1,
+			-- Minimum column width to use for padded or trimmed cell.
+			min_width = 0,
+        -- Characters used to replace table border.
+        -- Correspond to top(3), delimiter(3), bottom(3), vertical, & horizontal.
+        -- stylua: ignore
+        border = {
+            '┌', '┬', '┐',
+            '├', '┼', '┤',
+            '└', '┴', '┘',
+            '│', '─',
+        },
+			-- Turn on / off top & bottom lines.
+			border_enabled = true,
+			-- Always use virtual lines for table borders instead of attempting to use empty lines.
+			-- Will be automatically enabled if indentation module is enabled.
+			border_virtual = false,
+			-- Gets placed in delimiter row for each column, position is based on alignment.
+			alignment_indicator = "━",
+			-- Highlight for table heading, delimiter, and the line above.
+			head = "RenderMarkdownTableHead",
+			-- Highlight for everything else, main table rows and the line below.
+			row = "RenderMarkdownTableRow",
+			-- Determines how the table as a whole is rendered.
+			-- | none   | { enabled = false }        |
+			-- | normal | { border_enabled = false } |
+			-- | full   | uses all default values    |
+			style = "full",
+		},
+		callout = {
+			-- Callouts are a special instance of a 'block_quote' that start with a 'shortcut_link'.
+			-- The key is for healthcheck and to allow users to change its values, value type below.
+			-- | raw        | matched against the raw text of a 'shortcut_link', case insensitive |
+			-- | rendered   | replaces the 'raw' value when rendering                             |
+			-- | highlight  | highlight for the 'rendered' text and quote markers                 |
+			-- | quote_icon | optional override for quote.icon value for individual callout       |
+			-- | category   | optional metadata useful for filtering                              |
+
+			note = {
+				raw = "[!NOTE]",
+				rendered = "󰋽 Note",
+				highlight = "RenderMarkdownInfo",
+				category = "github",
+			},
+			tip = {
+				raw = "[!TIP]",
+				rendered = "󰌶 Tip",
+				highlight = "RenderMarkdownSuccess",
+				category = "github",
+			},
+			important = {
+				raw = "[!IMPORTANT]",
+				rendered = "󰅾 Important",
+				highlight = "RenderMarkdownHint",
+				category = "github",
+			},
+			warning = {
+				raw = "[!WARNING]",
+				rendered = "󰀪 Warning",
+				highlight = "RenderMarkdownWarn",
+				category = "github",
+			},
+			caution = {
+				raw = "[!CAUTION]",
+				rendered = "󰳦 Caution",
+				highlight = "RenderMarkdownError",
+				category = "github",
+			},
+			-- Obsidian: https://help.obsidian.md/Editing+and+formatting/Callouts
+			abstract = {
+				raw = "[!ABSTRACT]",
+				rendered = "󰨸 Abstract",
+				highlight = "RenderMarkdownInfo",
+				category = "obsidian",
+			},
+			summary = {
+				raw = "[!SUMMARY]",
+				rendered = "󰨸 Summary",
+				highlight = "RenderMarkdownInfo",
+				category = "obsidian",
+			},
+			tldr = {
+				raw = "[!TLDR]",
+				rendered = "󰨸 Tldr",
+				highlight = "RenderMarkdownInfo",
+				category = "obsidian",
+			},
+			info = {
+				raw = "[!INFO]",
+				rendered = "󰋽 Info",
+				highlight = "RenderMarkdownInfo",
+				category = "obsidian",
+			},
+			todo = {
+				raw = "[!TODO]",
+				rendered = "󰗡 Todo",
+				highlight = "RenderMarkdownInfo",
+				category = "obsidian",
+			},
+			hint = {
+				raw = "[!HINT]",
+				rendered = "󰌶 Hint",
+				highlight = "RenderMarkdownSuccess",
+				category = "obsidian",
+			},
+			success = {
+				raw = "[!SUCCESS]",
+				rendered = "󰄬 Success",
+				highlight = "RenderMarkdownSuccess",
+				category = "obsidian",
+			},
+			check = {
+				raw = "[!CHECK]",
+				rendered = "󰄬 Check",
+				highlight = "RenderMarkdownSuccess",
+				category = "obsidian",
+			},
+			done = {
+				raw = "[!DONE]",
+				rendered = "󰄬 Done",
+				highlight = "RenderMarkdownSuccess",
+				category = "obsidian",
+			},
+			question = {
+				raw = "[!QUESTION]",
+				rendered = "󰘥 Question",
+				highlight = "RenderMarkdownWarn",
+				category = "obsidian",
+			},
+			help = {
+				raw = "[!HELP]",
+				rendered = "󰘥 Help",
+				highlight = "RenderMarkdownWarn",
+				category = "obsidian",
+			},
+			faq = {
+				raw = "[!FAQ]",
+				rendered = "󰘥 Faq",
+				highlight = "RenderMarkdownWarn",
+				category = "obsidian",
+			},
+			attention = {
+				raw = "[!ATTENTION]",
+				rendered = "󰀪 Attention",
+				highlight = "RenderMarkdownWarn",
+				category = "obsidian",
+			},
+			failure = {
+				raw = "[!FAILURE]",
+				rendered = "󰅖 Failure",
+				highlight = "RenderMarkdownError",
+				category = "obsidian",
+			},
+			fail = {
+				raw = "[!FAIL]",
+				rendered = "󰅖 Fail",
+				highlight = "RenderMarkdownError",
+				category = "obsidian",
+			},
+			missing = {
+				raw = "[!MISSING]",
+				rendered = "󰅖 Missing",
+				highlight = "RenderMarkdownError",
+				category = "obsidian",
+			},
+			danger = {
+				raw = "[!DANGER]",
+				rendered = "󱐌 Danger",
+				highlight = "RenderMarkdownError",
+				category = "obsidian",
+			},
+			error = {
+				raw = "[!ERROR]",
+				rendered = "󱐌 Error",
+				highlight = "RenderMarkdownError",
+				category = "obsidian",
+			},
+			bug = {
+				raw = "[!BUG]",
+				rendered = "󰨰 Bug",
+				highlight = "RenderMarkdownError",
+				category = "obsidian",
+			},
+			example = {
+				raw = "[!EXAMPLE]",
+				rendered = "󰉹 Example",
+				highlight = "RenderMarkdownHint",
+				category = "obsidian",
+			},
+			quote = {
+				raw = "[!QUOTE]",
+				rendered = "󱆨 Quote",
+				highlight = "RenderMarkdownQuote",
+				category = "obsidian",
+			},
+			cite = {
+				raw = "[!CITE]",
+				rendered = "󱆨 Cite",
+				highlight = "RenderMarkdownQuote",
+				category = "obsidian",
+			},
+		},
+		link = {
+			-- Turn on / off inline link icon rendering.
+			enabled = true,
+			-- Additional modes to render links.
+			render_modes = false,
+			-- How to handle footnote links, start with a '^'.
+			footnote = {
+				-- Turn on / off footnote rendering.
+				enabled = true,
+				-- Inlined with content.
+				icon = "󰯔 ",
+				-- Custom processing for footnote body to show.
+				-- Runs before prefix / suffix are added and superscript processing.
+				body = function(ctx)
+					return ctx.text
+				end,
+				-- Replace value with superscript equivalent.
+				superscript = true,
+				-- Added before link content.
+				prefix = "",
+				-- Added after link content.
+				suffix = "",
+			},
+			-- Inlined with 'image' elements.
+			image = "󰥶 ",
+			-- Check custom for 'image' elements.
+			image_custom = true,
+			-- Inlined with 'email_autolink' elements.
+			email = "󰀓 ",
+			-- Fallback icon for 'inline_link' and 'uri_autolink' elements.
+			hyperlink = "󰌹 ",
+			-- Applies to the inlined icon as a fallback.
+			highlight = "RenderMarkdownLink",
+			-- Applies to the link title.
+			highlight_title = "RenderMarkdownLinkTitle",
+			-- Applies to WikiLink elements.
+			wiki = {
+				-- Turn on / off WikiLink rendering.
+				enabled = true,
+				-- Inlined with content.
+				icon = "󱗖 ",
+				-- Custom processing for WikiLink body to show.
+				body = function()
+					return nil
+				end,
+				-- Applies to the inlined icon.
+				highlight = "RenderMarkdownWikiLink",
+				-- Highlight for item associated with the WikiLink.
+				scope_highlight = nil,
+			},
+			-- Define custom destination patterns so icons can quickly inform you of what a link
+			-- contains. Applies to 'image', 'inline_link', 'uri_autolink', and WikiLink nodes.
+			-- When multiple patterns match a link the one with the longer pattern is used.
+			-- The key is for healthcheck and to allow users to change its values, value type below.
+			-- | pattern   | matched against the destination text                            |
+			-- | icon      | gets inlined before the link text                               |
+			-- | kind      | optional determines how pattern is checked                      |
+			-- |           | pattern | @see :h lua-patterns, is the default if not set       |
+			-- |           | suffix  | @see :h vim.endswith()                                |
+			-- | priority  | optional used when multiple match, uses pattern length if empty |
+			-- | highlight | optional highlight for 'icon', uses fallback highlight if empty |
+			custom = {
+				web = { pattern = "^http", icon = "󰖟 " },
+				apple = { pattern = "apple%.com", icon = " " },
+				discord = { pattern = "discord%.com", icon = "󰙯 " },
+				github = { pattern = "github%.com", icon = "󰊤 " },
+				gitlab = { pattern = "gitlab%.com", icon = "󰮠 " },
+				google = { pattern = "google%.com", icon = "󰊭 " },
+				hackernews = { pattern = "ycombinator%.com", icon = " " },
+				linkedin = { pattern = "linkedin%.com", icon = "󰌻 " },
+				microsoft = { pattern = "microsoft%.com", icon = " " },
+				neovim = { pattern = "neovim%.io", icon = " " },
+				reddit = { pattern = "reddit%.com", icon = "󰑍 " },
+				slack = { pattern = "slack%.com", icon = "󰒱 " },
+				stackoverflow = { pattern = "stackoverflow%.com", icon = "󰓌 " },
+				steam = { pattern = "steampowered%.com", icon = " " },
+				twitter = { pattern = "twitter%.com", icon = " " },
+				wikipedia = { pattern = "wikipedia%.org", icon = "󰖬 " },
+				x = { pattern = "x%.com", icon = " " },
+				youtube = { pattern = "youtube[^.]*%.com", icon = "󰗃 " },
+				youtube_short = { pattern = "youtu%.be", icon = "󰗃 " },
+			},
+		},
+		sign = {
+			-- Turn on / off sign rendering.
+			enabled = true,
+			-- Priority to assign to sign.
+			priority = nil,
+			-- Applies to background of sign text.
+			highlight = "RenderMarkdownSign",
+		},
+		inline_highlight = {
+			-- Mimics Obsidian inline highlights when content is surrounded by double equals.
+			-- The equals on both ends are concealed and the inner content is highlighted.
+
+			-- Turn on / off inline highlight rendering.
+			enabled = true,
+			-- Additional modes to render inline highlights.
+			render_modes = false,
+			-- Applies to background of surrounded text.
+			highlight = "RenderMarkdownInlineHighlight",
+			-- Define custom highlights based on text prefix.
+			-- The key is for healthcheck and to allow users to change its values, value type below.
+			-- | prefix    | matched against text body, @see :h vim.startswith() |
+			-- | highlight | highlight for text body                             |
+			custom = {},
+		},
+		indent = {
+			-- Mimic org-indent-mode behavior by indenting everything under a heading based on the
+			-- level of the heading. Indenting starts from level 2 headings onward by default.
+
+			-- Turn on / off org-indent-mode.
+			enabled = false,
+			-- Additional modes to render indents.
+			render_modes = false,
+			-- Amount of additional padding added for each heading level.
+			per_level = 2,
+			-- Heading levels <= this value will not be indented.
+			-- Use 0 to begin indenting from the very first level.
+			skip_level = 1,
+			-- Do not indent heading titles, only the body.
+			skip_heading = false,
+			-- Prefix added when indenting, one per level.
+			icon = "▎",
+			-- Priority to assign to extmarks.
+			priority = 0,
+			-- Applied to icon.
+			highlight = "RenderMarkdownIndent",
+		},
+		html = {
+			-- Turn on / off all HTML rendering.
+			enabled = true,
+			-- Additional modes to render HTML.
+			render_modes = false,
+			comment = {
+				-- Useful context to have when evaluating values.
+				-- | text | text value of the comment node |
+
+				-- Turn on / off HTML comment concealing.
+				conceal = true,
+				-- Text to inline before the concealed comment.
+				-- Output is evaluated depending on the type.
+				-- | function | `value(context)` |
+				-- | string   | `value`          |
+				-- | nil      | nothing          |
+				text = nil,
+				-- Highlight for the inlined text.
+				highlight = "RenderMarkdownHtmlComment",
+			},
+			-- HTML tags whose start and end will be hidden and icon shown.
+			-- The key is matched against the tag name, value type below.
+			-- | icon            | optional icon inlined at start of tag           |
+			-- | highlight       | optional highlight for the icon                 |
+			-- | scope_highlight | optional highlight for item associated with tag |
+			tag = {},
+		},
+		win_options = {
+			-- Window options to use that change between rendered and raw view.
+
+			-- @see :h 'conceallevel'
+			conceallevel = {
+				-- Used when not being rendered, get user setting.
+				default = vim.o.conceallevel,
+				-- Used when being rendered, concealed text is completely hidden.
+				rendered = 3,
+			},
+			-- @see :h 'concealcursor'
+			concealcursor = {
+				-- Used when not being rendered, get user setting.
+				default = vim.o.concealcursor,
+				-- Used when being rendered, show concealed text in all modes.
+				rendered = "",
+			},
+		},
+		overrides = {
+			-- More granular configuration mechanism, allows different aspects of buffers to have their own
+			-- behavior. Values default to the top level configuration if no override is provided. Supports
+			-- the following fields:
+			--   enabled, render_modes, debounce, anti_conceal, bullet, callout, checkbox, code, dash,
+			--   document, heading, html, indent, inline_highlight, latex, link, padding, paragraph,
+			--   pipe_table, quote, sign, win_options, yaml
+
+			-- Override for different buflisted values, @see :h 'buflisted'.
+			buflisted = {},
+			-- Override for different buftype values, @see :h 'buftype'.
+			buftype = {
+				nofile = {
+					render_modes = true,
+					padding = { highlight = "NormalFloat" },
+					sign = { enabled = false },
+				},
+			},
+			-- Override for different filetype values, @see :h 'filetype'.
+			filetype = {},
+			-- Override for preview buffer.
+			preview = {
+				render_modes = true,
+			},
+		},
+		custom_handlers = {
+			-- Mapping from treesitter language to user defined handlers.
+			-- @see [Custom Handlers](doc/custom-handlers.md)
+		},
+		yaml = {
+			-- Turn on / off all yaml rendering.
+			enabled = true,
+			-- Additional modes to render yaml.
+			render_modes = false,
+		},
+	},
+	keys = {
+		map({ "n", "v", "s", "o" }, "<leader>mr", "<cmd>RenderMarkdown buf_toggle<CR>", {
+			desc = "Toggle RenderMarkdown",
+		}),
+	},
+}
+
+=== ./lua/plugins/languages/text/typst-preview.lua ===
+return {
+	"chomosuke/typst-preview.nvim",
+	-- lazy = false, -- or ft = 'typst'
+	ft = "typst",
+	version = "1.*",
+	opts = {},
+}
+
+=== ./lua/plugins/languages/text/vimtex.lua ===
+return {
+	"lervag/vimtex",
+	lazy = false, -- we don't want to lazy load VimTeX
+	-- tag = "v2.15", -- uncomment to pin to a specific release
+	init = function()
+		-- VimTeX configuration goes here, e.g.
+		vim.g.vimtex_view_method = "general"
+		vim.g.vimtex_view_general_viewer = "zathura"
+		-- vim.g.vimtex_view_general_options = "./build/%s"
+
+		vim.g.vimtex_compiler_method = "latexmk"
+		vim.g.vimtex_compiler_latexmk = {
+			out_dir = ".artifacts",
+			continuous = 1,
+			executable = "latexmk",
+			options = {
+				"-pdf",
+				"-interaction=nonstopmode",
+				"-synctex=1",
+				"-file-line-error",
+				"-halt-on-error",
+			},
+		}
+
+		-- vim.g.vimtex_compiler_method = "tectonic"
+		--
+		-- vim.g.vimtex_compiler_tectonic = {
+		-- 	build_dir = "build",
+		-- 	continuous = 0, -- MUST be 0
+		-- 	executable = "tectonic",
+		-- 	options = {
+		-- 		"--synctex",
+		-- 		"--keep-logs",
+		-- 		"--keep-intermediates",
+		-- 	},
+		-- }
+
+		vim.g.vimtex_compiler_silent = 1
+		vim.g.vimtex_quickfix_mode = 0
+		vim.g.vimtex_syntax_enabled = 0
+	end,
+}
+
+=== ./lua/plugins/languages/text/vivify.lua ===
+local map = require("utils.keymap").lazy_map
+
+local typstJob
+local zathuraJob
+
+local function killTypstPreview()
+	if typstJob then
+		vim.fn.jobstop(typstJob)
+	end
+	if zathuraJob then
+		vim.fn.jobstop(zathuraJob)
+	end
+end
+
+vim.api.nvim_create_autocmd("VimLeavePre", {
+	callback = killTypstPreview,
+})
+
+return {
+	"jannis-baum/vivify.vim",
+	keys = {
+		map("n", "<leader>bp", function()
+			local ft = vim.bo.filetype
+
+			if ft == "tex" then
+				vim.cmd("VimtexCompile")
+			end
+
+			if ft == "markdown" then
+				vim.cmd("Vivify")
+			end
+
+			if ft == "typst" then
+				local file = vim.fn.expand("%:p")
+				local out = "/tmp/" .. vim.fn.expand("%:t:r") .. ".pdf"
+
+				killTypstPreview()
+
+				typstJob = vim.fn.jobstart({
+					"typst",
+					"watch",
+					file,
+					out,
+				}, {
+					stderr_buffered = false,
+					on_stderr = function(_, data)
+						if not data then
+							return
+						end
+
+						local errors = {}
+						local isError = false
+
+						for _, line in ipairs(data) do
+							table.insert(errors, line)
+							if line:match("^error:") then
+								isError = true
+							end
+						end
+
+						if not isError then
+							return
+						end
+
+						local tmp = "/tmp/typst_error.typ"
+						local lines = {
+							"= Compilation failed",
+							"",
+						}
+
+						for _, line in ipairs(errors) do
+							table.insert(lines, "=== `" .. line .. "`")
+						end
+
+						vim.fn.writefile(lines, tmp)
+						vim.fn.system({
+							"typst",
+							"compile",
+							tmp,
+							out,
+						})
+					end,
+				})
+
+				zathuraJob = vim.fn.jobstart({
+					"zathura",
+					out,
+				}, {
+					detach = true,
+				})
+			end
+		end, {
+			desc = "Preview Buffer",
+		}),
+	},
+}
+
+=== ./lua/plugins/languages/text/zk.lua ===
+local map = require("utils.keymap").lazy_map
+
+local function zk()
+    return require("zk")
+end
+
+local function zk_api()
+    return require("zk.api")
+end
+
+local function pickNotes(param1, param2)
+	zk().pick_notes(param1 or {}, param2 or {}, function(selection)
+		if not selection then
+			return
+		end
+
+		for _, note in ipairs(selection) do
+			local buf = vim.fn.bufadd(note.absPath)
+			vim.fn.bufload(buf)
+			vim.bo[buf].buflisted = true
+			vim.api.nvim_open_win(buf, true, {
+				split = "right",
+			})
+		end
+	end)
+end
+
+return {
+	"zk-org/zk-nvim",
+	config = function()
+		require("zk").setup({
+			picker = "snacks_picker",
+
+			lsp = {
+				config = {
+					name = "zk",
+					cmd = { "zk", "lsp" },
+					filetypes = { "markdown", "typst" },
+				},
+
+				auto_attach = {
+					enabled = true,
+				},
+			},
+		})
+	end,
+    keys = {
+        map({ "n", "x" }, "<leader>zk", "<nop>", { desc = "Zk Commands" }),
+        map("n", "<leader>zkp", "<nop>", { desc = "Picker" }),
+        map({ "n", "x" }, "<leader>zkn", "<nop>", { desc = "Create New" }),
+
+        map("n", "<leader>zknn", "<cmd>ZkNew<CR>", {
+            desc = "New Note",
+        }),
+
+        map("x", "<leader>zknn", "<cmd>ZkNewFromTitleSelection<CR>", {
+            desc = "New Note (Named From Selection)",
+        }),
+
+        map("n", "<leader>zknl", function()
+            zk_api().index()
+            vim.cmd("ZkInsertLink")
+        end, {
+            desc = "New Link",
+        }),
+
+        map("x", "<leader>zknl", "<cmd>'<,'>ZkInsertLinkAtSelection<CR>", {
+            desc = "New Link (Named From Selection)",
+        }),
+
+        map("n", "<leader>zkpn", function()
+            zk().index()
+            pickNotes()
+        end, {
+            desc = "Pick By Note Name",
+        }),
+
+        map("n", "<leader>zkpt", function()
+            zk().index()
+            zk().pick_tags({}, {}, function(selection)
+                if not selection then
+                    return
+                end
+
+                local tags = {}
+
+                for _, tag in pairs(selection) do
+                    table.insert(tags, tag.name)
+                end
+
+                pickNotes({
+                    tags = tags,
+                })
+            end)
+        end, {
+            desc = "Pick By Tag",
+        }),
+
+        map("n", "<leader>zkl", "<cmd>ZkLinks<CR>", {
+            desc = "View Links",
+        }),
+
+        map("n", "<leader>zkb", "<cmd>ZkBacklinks<CR>", {
+            desc = "View Backlinks",
+        }),
+    },
+}
+
+=== ./lua/plugins/lsp/conform.lua ===
+local toolset = require("utils.toolset")
+local map = require("utils.keymap").lazy_map
+
+return {
+	"stevearc/conform.nvim",
+	event = { "BufReadPre", "BufNewFile" },
+	config = function()
+		require("conform").setup({
+			format_on_save = false,
+			formatters = toolset.formatters,
+			formatters_by_ft = toolset.formatters_by_ft,
+		})
+	end,
+	keys = {
+		map("n", "<leader>lf", function()
+			require("conform").format({
+				lsp_fallback = true,
+				async = true,
+			})
+		end, { desc = "Auto-format Code" }),
+	},
+}
+
+=== ./lua/plugins/lsp/init.lua ===
+return {
+    require("plugins.lsp.conform"),
+
+    require("plugins.lsp.lspconfig"),
+    require("plugins.lsp.mason"),
+    require("plugins.lsp.nvim-lint"),
+}
+
+=== ./lua/plugins/lsp/lspconfig.lua ===
+return {
+	"neovim/nvim-lspconfig",
+	event = { "BufReadPre", "BufNewFile" },
+	config = function()
+		local lsp_utils = require("utils.lsp")
+		local lsp_servers = require("utils.toolset").lsp
+
+		local configs = require("lspconfig.configs")
+		if not configs.just_lsp then
+			configs.just_lsp = {
+				default_config = {
+					cmd = { "just-lsp" },
+					filetypes = { "just" },
+					root_dir = vim.fs.root(0, { "justfile", ".justfile", ".git" }),
+				},
+			}
+		end
+
+		lsp_utils.register_all(lsp_servers)
+	end,
+}
+
+=== ./lua/plugins/lsp/mason.lua ===
+local toolset = require("utils.toolset")
+
+local extra_packages = {
+	"tree-sitter-cli",
+}
+
+local excluded_packages = {
+	dartls = true,
+	nixd = true,
+	just_lsp = true,
+
+	rustfmt = true,
+	dart_format = true,
+}
+
+local FORMATTER_TO_MASON = {}
+local LINTER_TO_MASON = {}
+
+local function get_all_referenced_formatters()
+	local seen = {}
+	local result = {}
+
+	for name, _ in pairs(toolset.formatters) do
+		seen[name] = true
+		table.insert(result, name)
+	end
+
+	for _, formatter_list in pairs(toolset.formatters_by_ft) do
+		for _, name in ipairs(formatter_list) do
+			if not seen[name] then
+				seen[name] = true
+				table.insert(result, name)
+			end
+		end
+	end
+
+	return result
+end
+
+local function get_all_referenced_linters()
+	local seen = {}
+	local result = {}
+
+	if toolset.linters_by_ft then
+		for _, linter_list in pairs(toolset.linters_by_ft) do
+			for _, name in ipairs(linter_list) do
+				if not seen[name] then
+					seen[name] = true
+					table.insert(result, name)
+				end
+			end
+		end
+	end
+
+	return result
+end
+
+return {
+	{
+		"williamboman/mason.nvim",
+		build = ":MasonUpdate",
+		opts = {},
+	},
+	{
+		"williamboman/mason-lspconfig.nvim",
+		dependencies = {
+			"williamboman/mason.nvim",
+		},
+		opts = {},
+	},
+	{
+		"WhoIsSethDaniel/mason-tool-installer.nvim",
+		dependencies = {
+			"williamboman/mason.nvim",
+			"williamboman/mason-lspconfig.nvim",
+		},
+		opts = function()
+			local to_be_installed = vim.deepcopy(extra_packages)
+
+			local mappings = require("mason-lspconfig").get_mappings()
+
+			local lsp_server_names = vim.tbl_keys(toolset.lsp)
+
+			for _, server_name in ipairs(lsp_server_names) do
+				if not excluded_packages[server_name] then
+					table.insert(
+						to_be_installed,
+						mappings.lspconfig_to_package[server_name] or server_name
+					)
+				end
+			end
+
+			local formatter_names = get_all_referenced_formatters()
+
+			for _, name in ipairs(formatter_names) do
+				if not excluded_packages[name] then
+					table.insert(
+						to_be_installed,
+						FORMATTER_TO_MASON[name] or string.gsub(name, "_", "-")
+					)
+				end
+			end
+
+			local linter_names = get_all_referenced_linters()
+			for _, name in ipairs(linter_names) do
+				if not excluded_packages[name] then
+					table.insert(to_be_installed, LINTER_TO_MASON[name] or name)
+				end
+			end
+
+			local seen = {}
+			local deduped = {}
+			for _, item in ipairs(to_be_installed) do
+				if not seen[item] then
+					seen[item] = true
+					table.insert(deduped, item)
+				end
+			end
+
+			return {
+				ensure_installed = deduped,
+				auto_update = false,
+				run_on_start = true,
+				start_delay = 0,
+				debounce_hours = 0,
+			}
+		end,
+	},
+}
+
+=== ./lua/plugins/lsp/nvim-lint.lua ===
+local toolset = require('utils.toolset')
+
+return {
+	"mfussenegger/nvim-lint",
+	config = function()
+        local lint = require("lint")
+
+		lint.linters_by_ft = toolset.linters_by_ft
+
+		vim.api.nvim_create_autocmd("BufWritePost", {
+			callback = function()
+				lint.try_lint()
+			end,
+		})
+	end,
+}
+
+=== ./lua/plugins/navigation/comfy-line-numbers.lua ===
+-- A plugin that changes all line numbers into base-5
+-- , making them easier to reach with only the left hand
+
+local function generate_labels(max_digit, max_length)
+    local labels = {}
+
+    for len = 1, max_length do
+        local function dfs(prefix, depth)
+            if depth == len then
+                labels[#labels + 1] = prefix
+                return
+            end
+            for d = 1, max_digit do
+                dfs(prefix .. d, depth + 1)
+            end
+        end
+        dfs("", 0)
+    end
+
+    return labels
+end
+
+return {
+	"mluders/comfy-line-numbers.nvim",
+    lazy = false,
+    opts = {
+        labels = generate_labels(5, 3),
+        up_key = "k",
+        down_key = "j",
+
+        -- Line numbers will be completely hidden for the following file/buffer types
+        hidden_file_types = { "undotree" },
+        hidden_buffer_types = { "nofile" },
+    },
+}
+
+=== ./lua/plugins/navigation/fyler.lua ===
+return {
+	dir = vim.fn.stdpath("config") .. "/forks/fyler.nvim",
+	-- "A7Lavinraj/fyler.nvim",
+	-- dependencies = { "nvim-mini/mini.icons" },
+	branch = "stable",
+	   lazy = false,
+	opts = {
+		hooks = {},
+		integrations = {
+			icon = "mini_icons",
+		},
+		views = {
+			finder = {
+				close_on_select = true,
+				confirm_simple = false,
+				default_explorer = true,
+				delete_to_trash = true,
+				git_status = {
+					enabled = true,
+					symbols = {
+						Untracked = "?",
+						Added = "+",
+						Modified = "*",
+						Deleted = "x",
+						Renamed = ">",
+						Copied = "~",
+						Conflict = "!",
+						Ignored = "#",
+					},
+				},
+				icon = {
+					directory_collapsed = nil,
+					directory_empty = nil,
+					directory_expanded = nil,
+				},
+				indentscope = {
+					enabled = true,
+					group = "FylerIndentMarker",
+					marker = "│",
+				},
+				mappings = {
+					["<leader>q"] = "CloseView",
+					["<CR>"] = "Select",
+					["<C-t>"] = "SelectTab",
+					["|"] = "SelectVSplit",
+					["-"] = "SelectSplit",
+					[","] = "GotoParent",
+					["="] = "GotoCwd",
+					["."] = "GotoNode",
+					["#"] = "CollapseAll",
+					["<BS>"] = "CollapseNode",
+				},
+				mappings_opts = {
+					nowait = false,
+					noremap = true,
+					silent = true,
+				},
+				follow_current_file = true,
+				watcher = {
+					enabled = false,
+				},
+				win = {
+					border = vim.o.winborder == "" and "single" or vim.o.winborder,
+					buf_opts = {
+						filetype = "fyler",
+						syntax = "fyler",
+						buflisted = false,
+						buftype = "acwrite",
+						expandtab = true,
+						shiftwidth = 4,
+					},
+					kind = "replace",
+					kinds = {
+						float = {
+							height = "70%",
+							width = "70%",
+							top = "10%",
+							left = "15%",
+						},
+						replace = {},
+						split_above = {
+							height = "70%",
+						},
+						split_above_all = {
+							height = "70%",
+							win_opts = {
+								winfixheight = true,
+							},
+						},
+						split_below = {
+							height = "70%",
+						},
+						split_below_all = {
+							height = "70%",
+							win_opts = {
+								winfixheight = true,
+							},
+						},
+						split_left = {
+							width = "30%",
+						},
+						split_left_most = {
+							width = "30%",
+							win_opts = {
+								winfixwidth = true,
+							},
+						},
+						split_right = {
+							width = "30%",
+						},
+						split_right_most = {
+							width = "30%",
+							win_opts = {
+								winfixwidth = true,
+							},
+						},
+					},
+					win_opts = {
+						concealcursor = "nvic",
+						conceallevel = 3,
+						cursorline = false,
+						number = false,
+						relativenumber = false,
+						winhighlight = "Normal:FylerNormal,NormalNC:FylerNormalNC",
+						wrap = false,
+						signcolumn = "no",
+					},
+				},
+			},
+		},
+	},
+	keys = { { ",", "<cmd>Fyler<cr>", desc = "file explorer" } },
+}
+
+=== ./lua/plugins/navigation/init.lua ===
+return {
+    require("plugins.navigation.comfy-line-numbers"),
+    -- require("plugins.navigation.fyler"),
+
+    require("plugins.navigation.nvim_winpick"),
+    require("plugins.navigation.oil"),
+    require("plugins.navigation.outline"),
+    -- require("plugins.navigation.project"), -- does nothing other than cd-ing into the root dir
+    require("plugins.navigation.winmove"),
+}
+
+=== ./lua/plugins/navigation/nvim_winpick.lua ===
+local map = require("utils.keymap").lazy_map
+
+return {
+	"MarcusGrass/nvim_winpick",
+	branch = "fix/nvim-12-compat",
+	lazy = false,
+	opts = {
+		-- Which chars should be used as visual prompts, no repetitions allowed.
+		-- Some chars are not rendered for the hint 'floating-big-letter', those will
+		-- cause an if used (same with repetitions).
+		selection_chars = "FJDKSLA;CMRUEIWOQP",
+		filter_rules = {
+			-- If there's only one window to choose after filtering, immediately pick it
+			autoselect_one = true,
+			-- Include the currently focused window
+			include_current_win = true,
+			-- Include windows that cannot be focused
+			include_unfocusable_windows = false,
+			-- Buffer options that should be filtered on
+			bo = {
+				filetype = {
+					-- filetype exactly matches
+					"NvimTree",
+					"neo-tree",
+					"notify",
+					"snacks_notif",
+				},
+				buftype = {
+					-- buftype exactly matches
+					"terminal",
+					"nofile",
+					"prompt",
+				},
+			},
+			file_path_contains = {
+				-- This is an array of excluding sub-strings of a file-path
+				-- Ex: /home/me/docs/my-file.md would be matched by 'docs/my'
+			},
+			file_name_contains = {
+				-- This is an array of excluding sub-strings of a filename
+				-- Ex: /home/me/docs/my-file.md would be matched by 'my-file' but not 'docs'
+			},
+		},
+		-- "floating-big-letter" or "floating-letter" is valid here
+		hint = "floating-letter",
+
+		-- characters that control multiselect
+		-- both or none must be present
+		multiselect = {
+			-- Not set by default, character that triggers a multiselect (if available on the action)
+			-- trigger_char = "m",
+			-- Not set by default, character that triggers a commit of the selected windows (if available on the action)
+			-- commit_char = "c",
+		},
+	},
+
+	keys = {
+		map("n", "<leader>wf", function()
+			require("nvim_winpick").pick_focus_window()
+		end, {
+			desc = "Focus With Winpick",
+		}),
+	},
+}
+
+=== ./lua/plugins/navigation/oil.lua ===
+local map = require("utils.keymap").lazy_map
+
+function _G.get_oil_winbar()
+	local bufnr = vim.api.nvim_win_get_buf(vim.g.statusline_winid)
+	local dir = require("oil").get_current_dir(bufnr)
+	if dir then
+		return vim.fn.fnamemodify(dir, ":~")
+	else
+		-- If there is no current directory (e.g. over ssh), just show the buffer name
+		return vim.api.nvim_buf_get_name(0)
+	end
+end
+
+return {
+	"stevearc/oil.nvim",
+	-- lazy = false,
+	dependencies = { "nvim-tree/nvim-web-devicons" },
+	opts = {
+		default_file_explorer = true,
+		columns = {
+			-- "mtime",
+			-- "size",
+			-- "permissions",
+			"icon",
+		},
+		buf_options = {
+			buflisted = true,
+			bufhidden = "hide",
+		},
+		win_options = {
+			wrap = true,
+			signcolumn = "yes:2",
+			cursorcolumn = true,
+			foldcolumn = "0",
+			spell = false,
+			list = false,
+			conceallevel = 3,
+			concealcursor = "nvic",
+			winbar = "%!v:lua.get_oil_winbar()",
+		},
+		view_options = { show_hidden = false, show_parent_dir = false },
+		delete_to_trash = true,
+		lsp_file_methods = {
+			-- Enable or disable LSP file operations
+			enabled = false,
+			-- Time to wait for LSP file operations to complete before skipping
+			timeout_ms = 1000,
+			-- Set to true to autosave buffers that are updated with LSP willRenameFiles
+			-- Set to "unmodified" to only save unmodified buffers
+			autosave_changes = false,
+		},
+	},
+	keys = {
+		map("n", "-", "<cmd>Oil<cr>", {
+			desc = "Open Oil",
+		}),
+	},
+}
+
+=== ./lua/plugins/navigation/outline.lua ===
+local map = require("utils.keymap").lazy_map
+
+return {
+	"hedyhli/outline.nvim",
+	cmd = "Outline",
+	opts = {},
+
+	keys = {
+		map({ "n" }, "<leader>bo", "<cmd>Outline<CR>", {
+			desc = "View Buffer Outline",
+		}),
+	},
+}
+
+=== ./lua/plugins/navigation/project.lua ===
+return {
+  "DrKJeff16/project.nvim",
+
+  config = function()
+    local project = require("project")
+    project.setup({
+  -- Runs before right before changing the project directory
+  ---@type nil|fun(target_dir: string, method: string, bufnr?: integer)
+  before_attach = nil,
+
+  on_attach = nil,
+  -- OR
+  ---@param dir string
+  ---@param method string
+  ---@param bufnr? integer
+  ---@param map
+  ---|fun(mode_or_maps: 'n'|'i'|'v'|'V'|'t'|'o'|'x', lhs: string, rhs: string|function, opts: vim.keymap.set.Opts)
+  ---|fun(mode_or_maps: table<'n'|'i'|'v'|'V'|'t'|'o'|'x', { [1]: string, [2]: string|function, [3]: vim.keymap.set.Opts }[]>)
+  --[[on_attach = function(dir, method, bufnr, map)
+    -- You can map a single key (ALWAYS BUFFER LOCAL AUTOMATICALLY):
+    map(
+      'n',
+      '<leader>pS',
+      function()
+        vim.cmd.Project('session')
+      end,
+      { desc = 'Project Session' }
+    )
+
+    -- Or multiple keys, in multiple modes (ALWAYS BUFFER LOCAL AUTOMATICALLY):
+    map({
+      -- Normal mode
+      n = {
+        ['<leader>pR'] = {
+          function()
+            vim.cmd.Project('recents')
+          end,
+          { desc = 'Recent Projects' },
+        },
+        ['<leader>pS'] = {
+          function()
+            vim.cmd.Project('session')
+          end,
+          { desc = 'Project Session' },
+        },
+      },
+
+      -- Insert mode
+      i = {
+        ['<A-p>'] = { ':Project<CR>', { desc = 'Project UI' } },
+      }
+    })
+
+    -- ...
+  end,]]
+
+  lsp = {
+    -- Whether to enable LSP-based detection
+    enabled = true,
+
+    -- LSP clients to ignore
+    ignore = {},
+
+    -- If `true`, no pattern matching will be used as a backup.
+    -- WARNING: ENABLE AT YOUR OWN DISCRETION!!!!
+    no_fallback = false,
+
+    -- Whether to double-check the LSP root with the pattern matching method.
+    use_pattern_matching = false,
+  },
+
+  -- Read the `Custom Projects` section below
+  custom_projects = {},
+
+  -- If enabled, projects will ONLY change manually
+  manual_mode = false,
+
+  -- Files and directories to look for to detect a root directory.
+  -- These patterns will not affect LSP-based detection unless `lsp.use_pattern_matching`
+  -- is set to `true`
+  --
+  -- This list is permanent, and any new entries are appended. You can leave this empty
+  patterns = {
+    '.git',
+    '.github',
+    '_darcs',
+    '.hg',
+    '.bzr',
+    '.svn',
+    'Pipfile',
+    'Makefile',
+    'Justfile',
+    'pyproject.toml',
+    '.pre-commit-config.yaml',
+    '.pre-commit-config.yml',
+    '.csproj',
+    '.sln',
+    '.nvim.lua',
+    '.neoconf.json',
+    'neoconf.json',
+  },
+
+  different_owners = {
+    -- Allow adding projects with a different owner to the project session
+    allow = false,
+
+    -- Notify the user when a project with a different owner is found
+    notify = true,
+  },
+
+  -- Set this to `true` if you prefer having `vim.o.autochdir` set to `true`
+  enable_autochdir = false,
+
+  -- Show projects by their name instead of their full path
+  show_by_name = false,
+
+  -- Show hidden files (global)
+  show_hidden = false,
+
+  -- Add any directory to exclude (absolute path). Keep in mind that this is recursive
+  exclude_dirs = {},
+
+  -- If disabled, you'll be notified each time the project root directory is changed
+  silent_chdir = true,
+
+  -- Whether the CWD is changed globally (`'global'`), per-tab (`'tab'`) or per-window (`'win'`)
+  ---@type 'global'|'tab'|'win'
+  scope_chdir = 'global',
+
+  history = {
+    -- The directory in which the history will be stored at.
+    -- NOTE: A subdirectory will be created called `project_nvim`, where the history file resides
+    save_dir = vim.fn.stdpath('data'),
+
+    -- The file name for the JSON project history
+    save_file = 'project_history.json',
+
+    -- The maximum number of history entries to write in your history file
+    size = 100,
+  },
+
+  log = {
+    -- Whether to enable logging
+    enabled = false,
+
+    -- The maximum file size allowed for the log file before it gets cleaned
+    -- This size is in Mebibytes (MiB), A.K.A. 1MiB -> 1024KiB
+    max_size = 1.1,
+
+    -- The directory where the log file will be written to
+    logpath = vim.fn.stdpath('state'),
+  },
+
+  snacks = {
+    -- Enable snacks.nvim picker integration
+    enabled = false,
+
+    -- Snacks project picker options
+    opts = {
+      -- path_icons = {},
+      -- icon = {},
+
+      -- Show hidden files
+      hidden = false,
+
+      layout = 'select',
+
+      -- Sort directories by the newest or oldest
+      ---@type 'newest'|'oldest'
+      sort = 'newest',
+
+      -- Snacks picker title prompt
+      title = 'Select Project',
+
+      -- Show project entries either by their path (`'paths'`) or their custom name (`'names'`)
+      ---@type 'paths'|'names'
+      show = 'paths',
+    },
+  },
+
+  fzf_lua = {
+    -- Enables fzf-lua picker integration
+    enabled = false,
+
+    -- Sort directories by the newest or oldest
+    ---@type 'newest'|'oldest'
+    sort = 'newest',
+
+    -- Show project entries either by their path (`'paths'`) or their custom name (`'names'`)
+    ---@type 'paths'|'names'
+    show = 'paths',
+  },
+
+  picker = {
+    -- Enables picker.nvim picker integration
+    enabled = false,
+
+    -- Show hidden files
+    hidden = false,
+
+    -- Sort directories by the newest or oldest
+    ---@type 'newest'|'oldest'
+    sort = 'newest',
+
+    -- Show project entries either by their path (`'paths'`) or their custom name (`'names'`)
+    ---@type 'paths'|'names'
+    show = 'paths',
+  },
+
+  disable_on = {
+    -- The filetypes that this plugin should ignore.
+    -- This list is permanent, and any new entries are appended. You can leave this empty
+    ft = {
+      '',
+      'NvimTree',
+      'TelescopePrompt',
+      'TelescopeResults',
+      'alpha',
+      'checkhealth',
+      'lazy',
+      'log',
+      'ministarter',
+      'neo-tree',
+      'notify',
+      'nvim-pack',
+      'packer',
+      'qf',
+    },
+
+    -- The buftypes that this plugin should ignore.
+    -- This list is permanent, and any new entries are appended. You can leave this empty
+    bt = { 'help', 'nofile', 'nowrite', 'terminal' },
+  },
+
+  telescope = {
+    -- Whether to disable the built-in Telescope file-picker
+    disable_file_picker = false,
+
+    -- Telescope picker mappings.
+    -- The operations can be:
+    --   - `rename_project`
+    --   - `browse_project_files`
+    --   - `delete_project`
+    --   - `find_project_files`
+    --   - `recent_project_files`
+    --   - `search_in_project_files`
+    --   - `change_cwd`
+    mappings = {
+      -- Normal mode
+      n = {
+        R = 'rename_project',
+        b = 'browse_project_files',
+        d = 'delete_project',
+        f = 'find_project_files',
+        r = 'recent_project_files',
+        s = 'search_in_project_files',
+        w = 'change_cwd',
+      },
+
+      -- Insert mode
+      i = {
+        ['<C-b>'] = 'browse_project_files',
+        ['<C-d>'] = 'delete_project',
+        ['<C-f>'] = 'find_project_files',
+        ['<C-n>'] = 'rename_project',
+        ['<C-r>'] = 'recent_project_files',
+        ['<C-s>'] = 'search_in_project_files',
+        ['<C-w>'] = 'change_cwd',
+      },
+    },
+
+    -- Whether to use `telescope-file-browser.nvim` instead
+    -- (if enabled, will set `disable_file_picker` to `false`)
+    prefer_file_browser = false,
+
+    -- Sort directories by the newest or oldest
+    ---@type 'oldest'|'newest'
+    sort = 'newest',
+
+    -- If `true`, project paths like `'/home/foo/...'` will become `'~/...'`
+    tilde = false,
+  },
+})
+
+    vim.keymap.set("n", "<leader>fp", function()
+      require("telescope").extensions.projects.projects()
+    end, { desc = "Find Projects" })
+  end,
+}
+
+=== ./lua/plugins/navigation/winmove.lua ===
+local map = require("utils.keymap").lazy_map
+
+return {
+	"MisanthropicBit/winmove.nvim",
+	keys = {
+		map("n", "<leader>wm", function()
+			require("winmove").start_mode("resize")
+		end, {
+			desc = "Resize Window",
+		}),
+	},
+}
+
+=== ./lua/plugins/sessions/init.lua ===
+return {
+
+    require("plugins.sessions.persistence"),
+}
+
+=== ./lua/plugins/sessions/persistence.lua ===
+local map = require("utils.keymap").lazy_map
+
+return {
+	"folke/persistence.nvim",
+	event = "BufReadPre", -- this will only start session saving when an actual file was opened
+	opts = {
+		dir = vim.fn.stdpath("state") .. "/sessions/", -- directory where session files are saved
+		-- minimum number of file buffers that need to be open to save
+		-- Set to 0 to always save
+		need = 1,
+		branch = true, -- use git branch to save session
+	},
+	keys = {
+		map("n", "<leader>ql", function()
+			require("persistence").select()
+		end, { desc = "Load Session (From Menu)" }),
+		map("n", "<leader>qs", function()
+			require("persistence").save()
+		end, { desc = "Save Session" }),
+		map("n", "<leader>qX", function()
+			require("persistence").stop()
+		end, { desc = "Stop Session" }),
+	},
+}
+
+=== ./lua/plugins/themes/colorscheme.lua ===
+-- The theme of our editor
+
+return {
+	{ "ellisonleao/gruvbox.nvim", priority = 1000, opts = {} },
+	{
+		"catppuccin/nvim",
+		name = "catppuccin",
+		priority = 1000,
+		lazy = false,
+		config = function()
+			require("catppuccin").setup({
+				flavour = "mocha",
+				background = {
+					light = "latte",
+					dark = "mocha",
+				},
+                custom_highlights = {
+                    LineNr = {
+                        fg = "#888888",
+                        bg = "NONE",
+                    },
+                    CursorLineNr = {
+                        fg = "#ff0000",
+                        bold = true,
+                    },
+                },
+			})
+			vim.cmd.colorscheme("catppuccin")
+		end,
+	},
+}
+
+=== ./lua/plugins/themes/init.lua ===
+return {
+    require("plugins.themes.colorscheme"),
+}
+
+=== ./lua/plugins/ui/dropbar.lua ===
+-- IDE-like breadcrumbs
+
+return {
+	"Bekaboo/dropbar.nvim",
+	dependencies = {
+		"nvim-telescope/telescope-fzf-native.nvim",
+		build = "make",
+	},
+	config = function()
+		local dropbar_api = require("dropbar.api")
+		vim.keymap.set("n", "<leader>;", dropbar_api.pick, { desc = "Pick symbols in winbar" })
+		vim.keymap.set("n", "[;", dropbar_api.goto_context_start, { desc = "Go to start of current context" })
+		vim.keymap.set("n", "];", dropbar_api.select_next_context, { desc = "Select next context" })
+	end,
+}
+
+=== ./lua/plugins/ui/incline.lua ===
+-- Floating statusline, particularly annoying when it hides the actual content!
+
+local function hex(c)
+	return string.format("#%06x", c)
+end
+
+local function get_hl_attrs(group, defaults)
+	defaults = defaults or {}
+	local ok, attrs = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
+	if not ok or not attrs then
+		return defaults
+	end
+
+	return vim.tbl_extend("force", defaults, attrs)
+end
+
+return {
+	"b0o/incline.nvim",
+	opts = {
+		debounce_threshold = {
+			falling = 30,
+			rising = 10,
+		},
+		hide = {
+			cursorline = "smart",
+			focused_win = false,
+			only_win = false,
+		},
+		highlight = {
+			groups = {
+				InclineNormal = {
+					default = true,
+					group = "NormalFloat",
+				},
+				InclineNormalNC = {
+					default = true,
+					group = "NormalFloat",
+				},
+			},
+		},
+		ignore = {
+			buftypes = "special",
+			filetypes = {},
+			floating_wins = true,
+			unlisted_buffers = true,
+			wintypes = "special",
+		},
+
+		render = function(props)
+			local buf, win = props.buf, props.win
+
+			-- 1. Gather dynamic data
+			local mode = vim.fn.mode()
+			local cur = vim.api.nvim_win_get_cursor(win)[1]
+			local total = math.max(1, vim.api.nvim_buf_line_count(buf))
+			local pct = math.floor(cur / total * 100 + 0.5)
+			local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":.")
+			local rec = vim.fn.reg_recording()
+			local rec_indicator = rec ~= "" and (" REC@" .. rec) or ""
+			local ft = vim.bo[buf].filetype or "?"
+			local flags = (vim.bo[buf].modified and "" or "")
+				.. (vim.bo[buf].readonly and "" or "")
+
+			-- 2. Safely get highlight groups
+			local normal = get_hl_attrs("NormalFloat", { fg = 0xcccccc, bg = 0x1a1a1a })
+			local title = get_hl_attrs("Title", { fg = 0xffff00, bg = normal.bg })
+			local title_bg = title.bg or normal.bg
+
+			-- 3. Build the statusline as a list of items.
+			--    Each item is either a string or a table with the string as its first element
+			--    followed by highlight attributes.
+			local parts = {}
+
+			-- Mode indicator (bold, using Title colours)
+			parts[#parts + 1] = {
+				" " .. mode .. " ",
+				guifg = hex(title.fg),
+				guibg = hex(title_bg),
+				gui = "bold",
+			}
+
+			-- Main part: name, flags, filetype, recording indicator
+			local main_text = " │ " .. name
+			if flags ~= "" then
+				main_text = main_text .. " " .. flags
+			end
+			main_text = main_text .. " [" .. ft .. "]" .. rec_indicator .. " "
+
+			parts[#parts + 1] = {
+				main_text,
+				guifg = hex(normal.fg),
+				guibg = hex(normal.bg),
+			}
+
+			-- Percentage (line number / total)
+			parts[#parts + 1] = {
+				(" │ %d/%d (%d%%)"):format(cur, total, pct),
+				guifg = hex(normal.fg),
+				guibg = hex(normal.bg),
+			}
+
+			return parts
+		end,
+
+		window = {
+			margin = {
+				horizontal = 1,
+				vertical = 1,
+			},
+			options = {
+				signcolumn = "no",
+				wrap = false,
+			},
+			overlap = {
+				borders = true,
+				statusline = false,
+				tabline = false,
+				winbar = false,
+			},
+			padding = 1,
+			padding_char = " ",
+			placement = {
+				horizontal = "right",
+				vertical = "top",
+			},
+			width = "fit",
+			winhighlight = {
+				active = {
+					EndOfBuffer = "None",
+					Normal = "InclineNormal",
+					Search = "None",
+				},
+				inactive = {
+					EndOfBuffer = "None",
+					Normal = "InclineNormalNC",
+					Search = "None",
+				},
+			},
+			zindex = 50,
+		},
+	},
+	event = "VeryLazy",
+}
+
+=== ./lua/plugins/ui/init.lua ===
+return {
+    require("plugins.ui.dropbar"),
+    -- require("plugins.ui.incline"),
+
+    require("plugins.ui.noice"),
+    require("plugins.ui.nvim-ufo"),
+    require("plugins.ui.which-key"),
+}
+
+=== ./lua/plugins/ui/noice.lua ===
+-- Press ":"
+-- See how the command input box is floating in the middle of the screen?
+-- Yeah that was *noice*
+-- The same styling also applies to like dialog boxes and notifications and allat
+-- (Notifications is passed on to be handled by nvim-notify.nvim though)
+
+local map = require("utils.keymap").lazy_map
+
+return {
+	"folke/noice.nvim",
+	event = "VeryLazy",
+	dependencies = {
+		"MunifTanjim/nui.nvim",
+		"rcarriga/nvim-notify",
+	},
+	config = function()
+		require("noice").setup({
+			routes = {
+				{
+					filter = {
+						event = "msg_show",
+						kind = "",
+						find = "written",
+					},
+					opts = { skip = true },
+				},
+			},
+
+			notify = {
+				enabled = true,
+				view = "notify",
+			},
+			lsp = {
+				progress = {
+					enabled = true,
+					-- Lsp Progress is formatted using the builtins for lsp_progress. See config.format.builtin
+					-- See the section on formatting for more details on how to customize.
+					--- @type NoiceFormat|string
+					format = "lsp_progress",
+					--- @type NoiceFormat|string
+					format_done = "lsp_progress_done",
+					throttle = 1000 / 5, -- frequency to update lsp progress message
+					view = "mini",
+				},
+			},
+		})
+	end,
+	keys = {
+		map("<leader>el", ":NoiceSnacks<CR>", {
+			mode = { "n" },
+            desc = "View Noice Notification History (With Snacks!)",
+		}),
+	},
+}
+
+=== ./lua/plugins/ui/nvim-ufo.lua ===
+-- Make folds more beautiful!
+
+local handler = function(virtText, lnum, endLnum, width, truncate)
+	local newVirtText = {}
+	-- suffix with folded lines count
+	-- local suffix = (" 󰁂 %d lines"):format(endLnum - lnum)
+	local last_line = vim.api.nvim_buf_get_lines(0, endLnum - 1, endLnum, false)[1] or ""
+	last_line = last_line:match("^%s*(.-)%s*$")
+	local suffix = (" ⮜ %d lines ➤ %s"):format(endLnum - lnum - 1, last_line)
+	local sufWidth = vim.fn.strdisplaywidth(suffix)
+	local targetWidth = width - sufWidth
+	local curWidth = 0
+
+	for _, chunk in ipairs(virtText) do
+		local chunkText = chunk[1]
+		local chunkWidth = vim.fn.strdisplaywidth(chunkText)
+		if curWidth + chunkWidth < targetWidth then
+			table.insert(newVirtText, chunk) -- keep original text
+			curWidth = curWidth + chunkWidth
+		else
+			local truncated = truncate(chunkText, targetWidth - curWidth)
+			table.insert(newVirtText, { truncated, chunk[2] })
+			curWidth = curWidth + vim.fn.strdisplaywidth(truncated)
+			break
+		end
+	end
+
+	table.insert(newVirtText, { suffix, "MoreMsg" })
+	return newVirtText
+end
+
+return {
+	"kevinhwang91/nvim-ufo",
+	event = "BufReadPost",
+	dependencies = { "kevinhwang91/promise-async" },
+	opts = {
+		open_fold_hl_timeout = 400,
+		provider_selector = function()
+			return { "treesitter", "indent" }
+		end,
+		close_fold_kinds_for_ft = { default = {} },
+		close_fold_current_line_for_ft = { default = false },
+		fold_virt_text_handler = handler,
+		enable_get_fold_virt_text = false,
+		preview = {
+			win_config = {
+				border = "rounded",
+				winblend = 12,
+				winhighlight = "Normal:Normal",
+				maxheight = 20,
+			},
+			mappings = {},
+		},
+	},
+}
+
+=== ./lua/plugins/ui/which-key.lua ===
+return {
+	"folke/which-key.nvim",
+	event = "VeryLazy",
+	lazy = false,
+	opts = {
+		-- preset = "helix",
+		delay = 0,
+		win = {
+			-- don't allow the popup to overlap with the cursor
+			no_overlap = true,
+			-- width = { min = 4, max = 50 },
+			height = { min = 4, max = 20 },
+			-- col = math.huge,
+			row = math.huge,
+			-- border = "rounded", -- rounded, none, single, double
+			border = "rounded",
+			-- {
+			--   "╭", "═", "╮",
+			--   "║", "╯", "═", "╰", "║"
+			-- },
+			padding = { 0, 0 }, -- extra window padding [top/bottom, right/left]
+			title = true,
+			title_pos = "left",
+			zindex = 1000,
+			bo = {},
+			wo = {
+				winblend = 0, -- value between 0-100 0 for fully opaque and 100 for fully transparent
+			},
+		},
+		layout = {
+			align = "center",
+			spacing = 2,
+		},
+		sort = { "local", "order", "group", "alphanum", "mod" },
+		icons = {
+			breadcrumb = "»",
+			separator = "➜",
+			group = "+",
+			ellipsis = "…",
+		},
+		triggers = {
+			{ "<leader>", mode = { "n", "v" } },
+			{ "g", mode = "n" },
+			{ "z", mode = { "n", "v" } },
+			{ "<C-w>", mode = "n" },
+		},
+	},
+	config = function(_, opts)
+		local wk = require("which-key")
+		wk.setup(opts)
+
+		-- ✅ ONLY groups go here. No action mappings with missing rhs!
+		wk.add({
+			{ "<leader>l", group = "LSP" },
+			{ "<leader>f", group = "Find" },
+			{ "<leader>s", group = "Search" },
+			{ "<leader>g", group = "Git" },
+			{ "<leader>u", group = "UI" },
+			{ "<leader>t", group = "Terminal" },
+			{ "<leader>w", group = "Windows" },
+			{ "<leader>b", group = "Buffers" },
+			{ "<leader>z", group = "Zen/Zoom" },
+			{ "<leader>h", group = "Help" },
+		})
+
+		-- ✅ This special mapping IS valid (it has a function)
+		wk.add({
+			{
+				"<leader>?",
+				function()
+					wk.show({ global = false })
+				end,
+				desc = "Buffer Local Keymaps",
+			},
+		})
+	end,
+}
+
+=== ./lua/utils/buffer.lua ===
+local M = {}
+
+function M.get_bufs()
+	return vim.tbl_filter(function(b)
+		local name = vim.api.nvim_buf_get_name(b)
+
+		return vim.api.nvim_buf_is_loaded(b) and name ~= ""
+	end, vim.api.nvim_list_bufs())
+end
+
+function M.is_buf_in_other_win(buf)
+	local current_win = vim.api.nvim_get_current_win()
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		if win ~= current_win and vim.api.nvim_win_get_buf(win) == buf then
+			return true
+		end
+	end
+	return false
+end
+
+return M
+
+=== ./lua/utils/file.lua ===
+local M = {}
+
+function M.get_current()
+	local cwd = vim.uv.cwd()
+
+	if vim.bo.buftype == "terminal" or vim.bo.filetype == "oil" then
+		return "."
+	end
+
+	local name = vim.api.nvim_buf_get_name(0)
+
+	if name == "" then
+		return "."
+	end
+
+	return vim.fn.fnamemodify(name, ":.")
+end
+
+return M
+
+=== ./lua/utils/keymap.lua ===
+local M = {}
+
+local function get_caller_info()
+	local info = debug.getinfo(4, "Sl") -- 3 = caller of keymap() / buf_keymap()
+	if not info then
+		return "unknown", 0
+	end
+	local source = info.source:gsub("^@", ""):gsub("^.*lua/", "")
+	return source, info.currentline or 0
+end
+
+-- Warn if mapping has no action (shows exact file/line)
+local function warn_if_no_action(rhs, opts)
+	if rhs == nil and (opts == nil or opts.callback == nil) then
+		local file, line = get_caller_info()
+		vim.notify(
+			string.format("Keymap with no action at %s:%d", file, line),
+			vim.log.levels.WARN,
+			{ title = "Keymap" }
+		)
+		return 1
+	end
+end
+
+local KEYMAP_DEFAULTS = {
+	silent = true,
+	noremap = true,
+}
+
+-- 🔧 Global mappings
+function M.map(modes, lhs, rhs, opts)
+	if type(rhs) == "table" then
+		opts = rhs
+		rhs = nil
+	end
+	opts = opts or {}
+
+	if warn_if_no_action(rhs, opts) then
+		return
+	end
+
+	vim.keymap.set(modes, lhs, rhs, vim.tbl_extend("force", KEYMAP_DEFAULTS, opts))
+end
+
+-- 🔧 Buffer-local mappings
+function M.buf_map(bufnr, mode, lhs, rhs, opts)
+	if type(rhs) == "table" then
+		opts = rhs
+		rhs = nil
+	end
+	opts = opts or {}
+
+	if warn_if_no_action(rhs, opts) then
+		return
+	end
+
+	local buf_defaults = vim.tbl_extend("force", KEYMAP_DEFAULTS, { buffer = bufnr })
+	vim.keymap.set(mode, lhs, rhs, vim.tbl_extend("force", buf_defaults, opts))
+end
+
+local LAZY_KEYMAP_DEFAULTS = {
+	desc = "REF HE FORGOT TO RENAME TS",
+	mode = { "n" },
+	noremap = true,
+	silent = true,
+}
+
+function M.lazy_map(modes, lhs, rhs, opts)
+	if type(rhs) == "table" then
+		opts = rhs
+		rhs = nil
+	end
+	opts = opts or {}
+
+	if warn_if_no_action(rhs, opts) then
+		return
+	end
+
+	if modes ~= nil then
+		if type(modes) == "string" then
+			modes = { modes }
+		end
+		opts.mode = modes
+	end
+
+	return vim.tbl_extend("force", {
+		lhs,
+		rhs,
+	}, vim.tbl_extend("force", LAZY_KEYMAP_DEFAULTS, opts))
+end
+
+function M.map_all_cases(map, modes, keys, action, opts)
+	local function case_combinations(str)
+		if #str == 0 then
+			return {
+				"",
+			}
+		end
+		local rest = case_combinations(str:sub(2))
+		local c = str:sub(1, 1)
+		local t = {}
+		for _, r in ipairs(rest) do
+			table.insert(t, c:lower() .. r)
+			table.insert(t, c:upper() .. r)
+		end
+		return t
+	end
+
+	opts = opts or {
+		noremap = true,
+		silent = true,
+	}
+
+	if type(modes) ~= "table" then
+		modes = {
+			modes,
+		}
+	end
+
+	local returnVal = {}
+
+	for _, mode in ipairs(modes) do
+		for _, variant in ipairs(case_combinations(keys)) do
+			local mapResults = map(mode, variant, action, opts)
+
+			if mapResults then
+				table.insert(returnVal, mapResults)
+			end
+		end
+	end
+
+	return unpack(returnVal)
+end
+
+return M
+
+=== ./lua/utils/lsp.lua ===
+local blink_cmp = require("blink.cmp")
+local map = require("utils.keymap").buf_map
+
+local M = {}
+
+-- Shared capabilities
+M.capabilities = blink_cmp.get_lsp_capabilities()
+
+-- Shared on_attach (LSP keymaps)
+M.on_attach = function(client, bufnr)
+	map(bufnr, "n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
+	map(bufnr, "n", "K", vim.lsp.buf.hover, { desc = "Hover" })
+	map(bufnr, "n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename" })
+	map(bufnr, "n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Actions" })
+	if client.server_capabilities.inlayHintProvider then
+		vim.defer_fn(function()
+			vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+		end, 100) -- 100ms is usually enough
+	end
+end
+
+-- Defaults that apply to ALL servers
+M.defaults = {
+	capabilities = M.capabilities,
+	on_attach = M.on_attach,
+}
+
+-- Register a server with the modern API
+function M.register(server_name, user_opts)
+	user_opts = user_opts or {}
+
+	-- Merge user options with defaults
+	local config = vim.tbl_deep_extend("force", M.defaults, user_opts)
+
+	-- Register using the modern API
+	vim.lsp.config(server_name, config)
+	vim.lsp.enable(server_name)
+end
+
+-- Batch register multiple servers
+function M.register_all(servers)
+	for server_name, user_opts in pairs(servers) do
+		M.register(server_name, user_opts)
+	end
+end
+
+return M
+
+=== ./lua/utils/toolset.lua ===
+local M = {}
+
+M.lsp = {
+	astro = {},
+	clangd = {},
+	cssls = {
+		cmd = { "vscode-css-language-server", "--stdio" },
+		filetypes = { "css", "scss", "less" },
+		init_options = {
+			configurationSection = { "css", "scss", "less" },
+			embeddedLanguages = {
+				css = true,
+				javascript = true,
+			},
+		},
+		root_dir = function(_)
+			return vim.fs.root(0, { "package.json", ".git" }) or vim.fn.getcwd()
+		end,
+		settings = {
+			css = { validate = true },
+			scss = { validate = true },
+			less = { validate = true },
+		},
+	},
+	dartls = {
+		cmd = { "dart", "language-server", "--protocol=lsp" },
+		settings = {
+			dart = {
+				completeFunctionCalls = true,
+				showTodos = true,
+				updateImportsOnRename = true,
+			},
+		},
+	},
+	jsonls = {},
+	just_lsp = {},
+	lua_ls = {
+		settings = {
+			Lua = {
+				runtime = { version = "LuaJIT" },
+				diagnostics = { globals = { "vim" } },
+				workspace = {
+					library = vim.api.nvim_get_runtime_file("", true),
+					checkThirdParty = false,
+				},
+				telemetry = { enable = false },
+			},
+		},
+	},
+	marksman = {
+		settings = {
+			marksman = {
+				diagnostics = { wikiLinks = false },
+			},
+		},
+	},
+	nixd = {},
+	rust_analyzer = {
+		settings = {
+			["rust-analyzer"] = {
+				cargo = {
+					features = "all",
+					buildScripts = { enable = false },
+					extraArgs = { "-j", 8 },
+				},
+				check = {
+					extraArgs = {
+						"--target-dir",
+						".target-clippy",
+						"-D",
+						"warnings",
+						"--",
+						"-j",
+						8,
+						"--quiet",
+					},
+				},
+			},
+		},
+	},
+	superhtml = {
+		filetypes = { "html" },
+		root_dir = function(_)
+			return vim.fs.root(0, { "package.json", ".git" }) or vim.fn.getcwd()
+		end,
+	},
+	svelte = {},
+	texlab = {
+		filetypes = { "tex", "markdown" },
+	},
+	tinymist = {
+		settings = {
+			exportPdf = "never",
+			semanticTokens = "disable",
+			formatterMode = "typstyle",
+			formatterProseWrap = true,
+			formatterPrintWidth = 80,
+			formatterIndentSize = 4,
+		},
+	},
+	ts_ls = {},
+	zk = {},
+}
+
+M.formatters = {
+	prettier = {
+		command = "prettier",
+		args = {
+			"--stdin-filepath",
+			"$FILENAME",
+			"--tab-width",
+			"4",
+			"--use-tabs",
+			"false",
+		},
+		stdin = true,
+	},
+	clang_format = {
+		command = "clang-format",
+		args = {
+			"-style",
+			"{BasedOnStyle: Google, IndentWidth: 4}",
+		},
+	},
+	nixfmt = {
+		command = "nixfmt",
+		args = { "--indent", "4" },
+	},
+	stylua = {
+		command = "stylua",
+		args = { "--column-width", "100", "-" },
+		stdin = true,
+	},
+	dart_format = {
+		command = "dart",
+		args = { "format", "--indent", "4", "$FILENAME" },
+	},
+}
+
+M.formatters_by_ft = {
+	dart = { "dart_format" },
+	lua = { "stylua" },
+	luau = { "stylua" },
+	tex = { "latexindent" },
+	python = { "black" },
+	sh = { "shfmt" },
+	c = { "clang_format" },
+	cpp = { "clang_format" },
+	rust = { "rustfmt" },
+	nix = { "nixfmt" },
+	toml = { "taplo" },
+	-- typst = { "lsp" }, -- Uncomment when ready
+}
+
+for _, ft in ipairs({
+	"javascript",
+	"html",
+	"css",
+	"typescript",
+	"json",
+	"markdown",
+}) do
+	M.formatters_by_ft[ft] = { "prettier" }
+end
+
+M.linters_by_ft = {
+	luau = { "selene" },
+}
+
+return M
+
+=== ./lua/utils/window.lua ===
+local M = {}
+
+function M.create_floating()
+	local buf = vim.api.nvim_create_buf(false, true)
+	local win = vim.api.nvim_open_win(buf, true, {
+		relative = "editor",
+		width = math.floor(vim.o.columns * 0.7),
+		height = math.floor(vim.o.lines * 0.6),
+		row = math.floor(vim.o.lines * 0.2),
+		col = math.floor(vim.o.columns * 0.15),
+		style = "minimal",
+		border = "rounded",
+	})
+end
+
+return M
+
+=== ./markdown.css ===
+:root {
+  --max-width: 760px;
+  --scale: 1.5;
+  --base: calc(16px * var(--scale));
+}
+
+html { font-size: var(--base); }
+
+body {
+  line-height: 1.7;
+  margin: auto;
+  max-width: var(--max-width);
+  padding: 2rem;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+* { font-size: 1rem; }
+
+h1 { font-size: 2.4rem; }
+h2 { font-size: 2.0rem; }
+h3 { font-size: 1.6rem; }
+h4 { font-size: 1.3rem; }
+h5 { font-size: 1.1rem; }
+
+.katex { font-size: 1.15rem; }
+.katex-display { font-size: 1.25rem; }
+
+pre, code { font-family: monospace; }
+pre { padding: 1em; overflow-x: auto; }
+
+=== ./output.txt ===
+
+=== ./snippets/all.lua ===
+local ls = require("luasnip")
+local s = ls.snippet
+local t = ls.text_node
+
+return {
+	s("type shi", {
+		t("quick test"),
+	}),
+}
+
+=== ./snippets/cpp.lua ===
+local ls = require("luasnip")
+local s = ls.snippet
+local t = ls.text_node
+local i = ls.insert_node
+
+local function indent(level)
+    level = level or 1
+    local unit = vim.o.expandtab
+        and string.rep(" ", vim.o.shiftwidth)
+        or "\t"
+
+    return unit:rep(level)
+end
+
+return {
+    s("template-comp-prog", {
+      t({
+        "#include <bits/stdc++.h>",
+        "",
+        "using namespace std;",
+        "",
+        "int main() {",
+        indent(1) .. "ios::sync_with_stdio(false);",
+        indent(1) .. "cin.tie(nullptr);",
+        "",
+        indent(1), -- this creates a blank line after cin.tie
+      }),
+      i(1, ""), -- now cursor is on the line after that blank line (so two lines down from cin.tie)
+      t({
+          "",
+          "",
+        indent(1) .. "return 0;",
+        "}",
+      }),
+    })
+}
+
+=== ./snippets/just.lua ===
+local ls = require("luasnip")
+local s = ls.snippet
+local t = ls.text_node
+local i = ls.insert_node
+
+local function indent(level)
+    level = level or 1
+    local unit = vim.o.expandtab
+        and string.rep(" ", vim.o.shiftwidth)
+        or "\t"
+
+    return unit:rep(level)
+end
+
+local base = {
+	"_default:",
+	indent() .. "@just --choose",
+
+	"",
+	"todo:",
+	indent() .. "taskwarrior-tui --taskdata .task",
+}
+
+return {
+	s("template", {
+		t(base),
+	}),
+	-- s("template_with_flake", {
+	-- 	t(vim.list_extend(vim.deepcopy(base), {
+	-- 		"",
+	-- 		"develop:",
+	-- 		indent() .. "@sh -c ' \\",
+	-- 		indent(2) .. "h=$(nix hash path ./flake.nix); \\",
+	-- 		indent(2) .. 'old="$FLAKE_HASH"; \\',
+	-- 		indent(2) .. 'if [ "$old" != "$h" ]; then \\',
+	-- 		indent(3) .. "echo \"Entering flake shell...\"; \\",
+	-- 		indent(3) .. 'FLAKE_HASH="$h" exec nix develop; \\',
+	-- 		indent(2) .. "else \\",
+	-- 		indent(3) .. "echo \"Inside flake shell, skipping nix develop...\"; \\",
+	-- 		indent(2) .. "fi \\",
+	-- 		indent() .. "'",
+	-- 	})),
+	-- }),
+}
+
+=== ./snippets/make.lua ===
+local ls = require("luasnip")
+local s = ls.snippet
+local t = ls.text_node
+
+local function indent(level)
+    level = level or 1
+    local unit = vim.o.expandtab and string.rep(" ", vim.o.shiftwidth) or "\t"
+    return unit:rep(level)
+end
+
+local base = {
+    "PHONY_TARGETS := git flake-develop",
+    ".PHONY: $(PHONY_TARGETS)",
+    "",
+    "all:",
+    indent() .. "@printf '%s\\n' $(PHONY_TARGETS) | fzf | xargs -r make",
+}
+
+return {
+    s("template", { t(base) }),
+}
+
+=== ./snippets/nix.lua ===
+local ls = require("luasnip")
+local s = ls.snippet
+local t = ls.text_node
+local i = ls.insert_node
+
+local function indent(level)
+    level = level or 1
+    local unit = vim.o.expandtab
+        and string.rep(" ", vim.o.shiftwidth)
+        or "\t"
+
+    return unit:rep(level)
+end
+
+return {
+	s("template-flake-rust", {
+		t({ "{", indent() .. 'description = "' }),
+		i(1, "description"),
+		t({ '";', indent() .. 'inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-' }),
+		i(2, "unstable"),
+		t({
+			'";',
+			indent() .. "outputs =",
+			indent(2) .. "{ self, nixpkgs }:",
+			indent(2) .. "let",
+			indent(3) .. 'systems = [ "x86_64-linux" ];',
+			indent(3) .. "forAllSystems = nixpkgs.lib.genAttrs systems;",
+			"",
+			indent(3) .. "perSystem = system:",
+			indent(4) .. "let",
+			indent(5) .. "pkgs = import nixpkgs { inherit system; };",
+			indent(5) .. "libs = with pkgs; [",
+			indent(6) .. "wayland",
+			indent(5) .. "];",
+			indent(5) .. "tools = with pkgs; [ ",
+			indent(6) .. "pkg-config",
+			indent(5) .. "];",
+			indent(5) .. "common = { buildInputs = libs; nativeBuildInputs = tools; };",
+			indent(4) .. "in { inherit pkgs libs tools common; };",
+			indent(2) .. "in {",
+			indent(3) .. "packages = forAllSystems (system:",
+			indent(4) .. "let ps = perSystem system; in {",
+			indent(5) .. "default = ps.pkgs.rustPlatform.buildRustPackage (ps.common // {",
+			indent(6) .. 'pname = "',
+		}),
+		i(3, "package-name"),
+		t({
+			'";',
+			indent(6) .. 'version = "0.1.0";',
+			indent(6) .. "src = ps.pkgs.lib.cleanSource ./.;",
+			indent(6) .. "cargoLock.lockFile = ./Cargo.lock;",
+			indent(5) .. "});",
+			indent(4) .. "}",
+			indent(3) .. ");",
+			"",
+			indent(3) .. "devShells = forAllSystems (system:",
+			indent(4) .. "let ps = perSystem system; in {",
+			indent(5) .. "default = ps.pkgs.mkShell (ps.common // {",
+			indent(6) .. "shellHook = ''",
+			indent(7) .. "export SHELL=${ps.pkgs.bashInteractive}/bin/bash",
+			indent(7) .. "export LD_LIBRARY_PATH=${ps.pkgs.lib.makeLibraryPath ps.libs}:$LD_LIBRARY_PATH",
+			indent(6) .. "'';",
+			indent(5) .. "});",
+			indent(4) .. "}",
+			indent(3) .. ");",
+			indent(2) .. "};",
+			"}",
+		}),
+	}),
+}
+
+=== ./snippets/python.lua ===
+local ls = require("luasnip")
+local s = ls.snippet
+local t = ls.text_node
+local i = ls.insert_node
+
+local function indent(level)
+    level = level or 1
+    local unit = vim.o.expandtab
+        and string.rep(" ", vim.o.shiftwidth)
+        or "\t"
+
+    return unit:rep(level)
+end
+
+return {
+    s("template-with-main", {
+        t("if __name__ == '__main__':"),
+        t({ "", indent() }),
+        i(1),
+    }),
+}
+
+=== ./snippets/rust.lua ===
+local ls = require("luasnip")
+local s = ls.snippet
+local t = ls.text_node
+local i = ls.insert_node
+
+local function indent(level)
+    level = level or 1
+    local unit = vim.o.expandtab
+        and string.rep(" ", vim.o.shiftwidth)
+        or "\t"
+
+    return unit:rep(level)
+end
+
+return {
+    s("template-fastio", {
+        t({
+            "use std::cell::RefCell;",
+            "use std::io::{self, Read};",
+            "",
+            "thread_local! {",
+            indent() .. "static INPUT_ITER: RefCell<std::vec::IntoIter<Vec<u8>>> = {",
+            indent(2) .. "let mut bytes = Vec::new();",
+            indent(2) .. "io::stdin().lock().read_to_end(&mut bytes).unwrap();",
+            indent(2) .. "let tokens = bytes",
+            indent(3) .. ".split(|&b| b == b' ' || b == b'\\n')",
+            indent(3) .. ".filter(|s| !s.is_empty())",
+            indent(3) .. ".map(|s| s.to_vec())",
+            indent(3) .. ".collect::<Vec<_>>();",
+            indent(2) .. "RefCell::new(tokens.into_iter())",
+            indent() .. "};",
+            "}",
+            "",
+            "macro_rules! input {",
+            indent() .. "() => {{",
+            indent(2) .. "INPUT_ITER.with(|iter_cell| {",
+            indent(3) .. "let mut iter = iter_cell.borrow_mut();",
+            indent(3) .. 'let token = iter.next().expect("not enough input");',
+            indent(3) .. 'let s = std::str::from_utf8(&token).expect("invalid utf-8");',
+            indent(3) .. "s",
+            indent(2) .. "})",
+            indent() .. "}};",
+            indent() .. "($t:ty) => {{",
+            indent(2) .. "INPUT_ITER.with(|iter_cell| {",
+            indent(3) .. "let mut iter = iter_cell.borrow_mut();",
+            indent(3) .. 'let token = iter.next().expect("not enough input");',
+            indent(3) .. 'let s = std::str::from_utf8(&token).expect("invalid utf-8");',
+            indent(3) .. 's.parse::<$t>().expect("parse error")',
+            indent(2) .. "})",
+            indent() .. "}};",
+            "}",
+            "",
+            "fn main() {",
+            indent(),
+        }),
+        i(1),
+        t({
+            "",
+            "}",
+        }),
+    }),
+}
+
+=== ./.tests/luau/default.project.json ===
+{
+  "name": "luau",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "src/shared"
+      }
+    },
+
+    "ServerScriptService": {
+      "Server": {
+        "$path": "src/server"
+      }
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "src/client"
+        }
+      }
+    },
+
+    "Workspace": {
+      "$properties": {
+        "FilteringEnabled": true
+      },
+      "Baseplate": {
+        "$className": "Part",
+        "$properties": {
+          "Anchored": true,
+          "Color": [
+            0.38823,
+            0.37254,
+            0.38823
+          ],
+          "Locked": true,
+          "Position": [
+            0,
+            -10,
+            0
+          ],
+          "Size": [
+            512,
+            20,
+            512
+          ]
+        }
+      }
+    },
+    "Lighting": {
+      "$properties": {
+        "Ambient": [
+          0,
+          0,
+          0
+        ],
+        "Brightness": 2,
+        "GlobalShadows": true,
+        "Outlines": false,
+        "Technology": "Voxel"
+      }
+    },
+    "SoundService": {
+      "$properties": {
+        "RespectFilteringEnabled": true
+      }
+    }
+  }
+}
+
+=== ./.tests/luau/.gitignore ===
+# Project place file
+/luau.rbxlx
+
+# Roblox Studio lock files
+/*.rbxlx.lock
+/*.rbxl.lock
+=== ./.tests/luau/README.md ===
+# luau
+Generated by [Rojo](https://github.com/rojo-rbx/rojo) 7.5.1.
+
+## Getting Started
+To build the place from scratch, use:
+
+```bash
+rojo build -o "luau.rbxlx"
+```
+
+Next, open `luau.rbxlx` in Roblox Studio and start the Rojo server:
+
+```bash
+rojo serve
+```
+
+For more help, check out [the Rojo documentation](https://rojo.space/docs).
+=== ./.tests/luau/src/client/init.client.luau ===
+print("Hello world, from client!")
+
+=== ./.tests/luau/src/server/init.server.luau ===
+print("Hello world, from server!")
+=== ./.tests/luau/src/shared/Hello.luau ===
+return function()
+	print("Hello, world!")
+end
+=== ./.tests/test.c ===
+#include <stdio.h>
+
+int main() {
+    printf("start\n");
+
+    if (1) {
+        int x = 5;
+        if (x > 0) {
+            int y = x * 2;
+            if (y > 5) {
+                int z = y - 3;
+                if (z < 10) {
+                    for (int i = 0; i < 2; i++) {
+                        if (i == 0) {
+                            while (z > 0) {
+                                z--;
+                                if (z % 2 == 0) {
+                                    printf("even: %d\n", z);
+                                    if (z == 2) {
+                                        printf("very close now\n");
+                                        if (z > 1) {
+                                            printf("deeper still\n");
+                                            if (z == 2) {
+                                                printf("yes yes\n");
+                                                if (z == 2) {
+                                                    printf("context context\n");
+                                                    if (z == 2) {
+                                                        printf(
+                                                            "tree sitter "
+                                                            "maxxx\n");
+                                                        if (z == 2) {
+                                                            printf(
+                                                                "hang in "
+                                                                "there!\n");
+                                                            if (z == 2) {
+                                                                printf(
+                                                                    "almost at "
+                                                                    "max\n");
+                                                                if (z == 2) {
+                                                                    printf(
+                                                                        "last "
+                                                                        "level "
+                                                                        "maybe?"
+                                                                        "\n");
+                                                                    if (z ==
+                                                                        2) {
+                                                                        printf(
+                                                                            "no"
+                                                                            "pe"
+                                                                            "! "
+                                                                            "on"
+                                                                            "e "
+                                                                            "mo"
+                                                                            "re"
+                                                                            "!"
+                                                                            "\n");
+                                                                        if (z ==
+                                                                            2) {
+                                                                            printf(
+                                                                                "we made it!\n");
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    printf("end\n");
+    return 0;
+}
+
+=== ./.tests/test.dart ===
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const App());
+}
+
+class App extends StatelessWidget {
+  const App({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Todo',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Color.fromARGB(255, 50, 0, 0),
+        ),
+      ),
+      home: const HomePage(title: 'SomeShit'),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key, required this.title});
+
+  final String title;
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _counter = 0;
+
+  void onButtonClick() {
+    setState(() {
+      _counter++;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    // This method is rerun every time setState is called, for instance as done
+    // by the _incrementCounter method above.
+    //
+    // The Flutter framework has been optimized to make rerunning build methods
+    // fast, so that you can just rebuild anything that needs updating rather
+    // than having to individually change instances of widgets.
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(widget.title),
+      ),
+      body: Center(
+        child: Column(
+          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
+          // action in the IDE, or press "p" in the console), to see the
+          // wireframe for each widget.
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text('You have pushed the button this many times:'),
+            Text('$_counter', style: Theme.of(context).textTheme.headlineSmall),
+            FloatingActionButton(
+              onPressed: onButtonClick,
+              tooltip: 'Increment',
+              child: const Icon(Icons.add),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: onButtonClick,
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ),
+
+      bottomNavigationBar: Container(
+        height: MediaQuery.of(context).size.height * 0.1,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Expanded(
+              child: IconButton(icon: Icon(Icons.home), onPressed: () {}),
+            ),
+            Expanded(
+              child: IconButton(icon: Icon(Icons.search), onPressed: () {}),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+=== ./.tests/test.md ===
+# Destinations
+
+## Actively learning
+
+- German
+
+    - Required for European travel or sum
+    - Goethe-zertifikat
+    - Testdaf
+
+- French
+
+    - Delf
+
+## Spanish
+
+-   - Dele
+
+## Hobbyist shit
+
+- Italian
+
+    > Italiano pizzoria culturia, notteria neasjfdkljfakdsfjslkdjfkdsljfldsjflkdsjfkcesaria forea communecacionea
+
+    - Cils
+
+- Dutch
+
+    > I love dutch
+
+    - Cnavt
+        > TIPS
+
+$$\sqrt{b}+ b$$
+
+# Destinations
+
+## Actively learning
+
+- German
+
+    - Required for European travel or sum
+    - Goethe-zertifikat
+    - Testdaf
+
+- French
+
+    - Required for romantic language
+    -
+    - Delf
+
+- Spanish
+
+    - Dele
+
+## Hobbyist shit
+
+- Italian
+
+    > Italiano pizzoria culturia, notteria necesaria forea communecacionea
+
+    - Cils
+
+- Dutch
+
+    > I love dutch
+
+    - Cnavt
+
+- y
+  [textx](.tests/yea.md)
+
+=== ./.tests/test.nix ===
+{
+    lib,
+    pkgs,
+    ...
+}:
+{
+    environment.systemPackages = with pkgs; [
+        (retroarch.withCores (
+            cores: with cores; [
+                genesis-plus-gx
+                snes9x
+                beetle-psx-hw
+            ]
+        ))
+
+        flare
+
+        superTux
+        superTuxKart
+
+        # melonDS
+        # mgba
+
+        # minecraft
+
+        # mcpelauncher-client
+        # mcpelauncher-ui-qt
+        #
+        # prismlauncher
+        # libGL
+        # cairo
+        # xorg.libXxf86vm
+        # minecraft
+        # appimage-run
+        # openjdk17
+        # gtk3
+        # glib
+        # gsettings-desktop-schemas
+        # fontconfig
+        # freetype
+        # stdenv.cc.cc.lib
+    ];
+}
+
+=== ./.tests/test.rs ===
+use std::cell::RefCell;
+use std::io::{self, Read};
+
+thread_local! {
+    static INPUT_ITER: RefCell<std::vec::IntoIter<Vec<u8>>> = {
+        let mut bytes = Vec::new();
+        io::stdin().lock().read_to_end(&mut bytes).unwrap();
+        let tokens = bytes
+            .split(|&b| b == b' ' || b == b'\n')
+            .filter(|s| !s.is_empty())
+            .map(|s| s.to_vec())
+            .collect::<Vec<_>>();
+        RefCell::new(tokens.into_iter())
+    };
+}
+
+macro_rules! input {
+    () => {{
+        INPUT_ITER.with(|iter_cell| {
+            let mut iter = iter_cell.borrow_mut();
+            let token = iter.next().expect("not enough input");
+            let s = std::str::from_utf8(&token).expect("invalid utf-8");
+            s
+        })
+    }};
+    ($t:ty) => {{
+        INPUT_ITER.with(|iter_cell| {
+            let mut iter = iter_cell.borrow_mut();
+            let token = iter.next().expect("not enough input");
+            let s = std::str::from_utf8(&token).expect("invalid utf-8");
+            s.parse::<$t>().expect("parse error")
+        })
+    }};
+}
+
+fn main() {}
+
+=== ./.tests/yea.md ===
+

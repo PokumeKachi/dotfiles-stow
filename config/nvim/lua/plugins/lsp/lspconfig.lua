@@ -1,12 +1,6 @@
-local map = require("utils.keymap").lazy_map
-
 return {
 	"neovim/nvim-lspconfig",
-	dependencies = { "saghen/blink.cmp" },
-
-	-- Optional: lazy-load on file open for faster startup
 	event = { "BufReadPre", "BufNewFile" },
-
 	config = function()
 		local lsp_utils = require("utils.lsp")
 		local lsp_servers = require("utils.toolset").lsp

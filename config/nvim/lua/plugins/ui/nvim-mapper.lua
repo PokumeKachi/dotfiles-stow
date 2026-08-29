@@ -1,1 +1,0 @@
-return { "kamalsacranie/nvim-mapper" }

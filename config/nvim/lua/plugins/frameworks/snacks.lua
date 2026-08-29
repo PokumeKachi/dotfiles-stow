@@ -23,8 +23,8 @@ return {
 		input = { enabled = true },
 		keymap = { enabled = true },
 		layout = { enabled = true },
-		-- lazygit = { enabled = true },
-		-- notifier = { enabled = true },
+		lazygit = { enabled = true },
+		notifier = { enabled = true },
 		notify = { enabled = true },
 		picker = {
 			enabled = true,
@@ -242,7 +242,11 @@ return {
 		map({ "n", "t" }, "[[", function()
 			Snacks.words.jump(-vim.v.count1)
 		end, { desc = "Prev Reference" }),
-		-- Custom Just mappings
+		-- Terminal mappings
+		--
+		map("n", "<leader>t", function()
+			Snacks.terminal()
+		end, { desc = "Open Terminal" }),
 		map("n", "<F5>", function()
 			Snacks.terminal({ "just", "--choose", "--", file.get_current() })
 		end, { desc = "Open Just" }),

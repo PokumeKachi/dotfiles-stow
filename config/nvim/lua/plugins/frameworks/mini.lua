@@ -1,242 +1,229 @@
+-- ~/.config/nvim/lua/plugins/mini.lua
+-- All available mini.nvim modules.
+-- Commented-out modules are either not needed or require additional setup.
+-- Uncomment and adjust as you like.
+
 return {
-	"nvim-mini/mini.nvim",
-	version = "*",
-	config = function()
-		local hues = require("mini.hues")
+  "nvim-mini/mini.nvim",
+  version = "*",
+  config = function()
+    -- ============================================================================
+    -- 1. COLORS / HUES (commented out – use your own colorscheme)
+    -- ============================================================================
+    -- local hues = require("mini.hues")
+    -- local hues_palette = {
+    --   foreground = "#f6d0d5",
+    --   background = "#202456",
+    --   n_hues = 8,
+    --   saturation = "high",
+    --   accent = "fg",
+    -- }
+    -- hues._palette = hues_palette
+    -- require("mini.hues").setup(hues._palette)
 
-		local hues_palette = {
-			foreground = "#f6d0d5",
-			-- background = "#202426",
-			-- foreground = "#ffdfb0",
-			-- background = "#303436";
-			-- foreground = "#ffffff",
-			background = "#202456",
-			n_hues = 8,
-			-- saturation = 'mediumhigh',
-			saturation = "high",
-			--One of: 'bg', 'fg', 'red', 'orange', 'yellow', 'green',
-			-- 'cyan', 'azure', 'blue', 'purple'
-			accent = "fg",
-		}
+    -- ============================================================================
+    -- 2. TEXT OBJECTS (ai)
+    -- ============================================================================
+    require("mini.ai").setup({
+      custom_textobjects = nil,
+      mappings = {
+        around = "a",
+        inside = "i",
+        around_next = "an",
+        inside_next = "in",
+        around_last = "al",
+        inside_last = "il",
+        goto_left = "g[",
+        goto_right = "g]",
+      },
+      n_lines = 200,
+      search_method = "cover_or_nearest",
+      silent = false,
+    })
 
-		hues._palette = hues_palette
+    -- ============================================================================
+    -- 3. ANIMATIONS (disabled to avoid mouse scroll issues)
+    -- ============================================================================
+    require("mini.animate").setup({
+      scroll = { enable = false },
+      resize = { enable = false },
+      cursor = { enable = false },
+      open = { enable = false },
+      close = { enable = false },
+    })
 
-		require("mini.ai").setup({
-			-- Table with textobject id as fields, textobject specification as values.
-			-- Also use this to disable builtin textobjects. See |MiniAi.config|.
-			custom_textobjects = nil,
+    -- ============================================================================
+    -- 4. OTHER MODULES – Uncomment if needed
+    -- ============================================================================
 
-			-- Module mappings. Use `''` (empty string) to disable one.
-			mappings = {
-				-- Main textobject prefixes
-				around = "a",
-				inside = "i",
+    -- base16 (colorscheme builder) – not used
+    -- require("mini.base16").setup()
 
-				-- Next/last variants
-				-- NOTE: These override built-in LSP selection mappings on Neovim>=0.12
-				-- Map LSP selection manually to use it (see `:h MiniAi.config`)
-				around_next = "an",
-				inside_next = "in",
-				around_last = "al",
-				inside_last = "il",
+    -- basics (basic keymaps, e.g., Q, ;) – not needed
+    -- require("mini.basics").setup()
 
-				-- Move cursor to corresponding edge of `a` textobject
-				goto_left = "g[",
-				goto_right = "g]",
-			},
+    -- bracket (bracket navigation) – not used
+    -- require("mini.bracket").setup()
 
-			-- Number of lines within which textobject is searched
-			n_lines = 200,
+    -- bufremove (buffer deletion) – you might already have this elsewhere
+    -- require("mini.bufremove").setup()
 
-			-- How to search for object (first inside current line, then inside
-			-- neighborhood). One of 'cover', 'cover_or_next', 'cover_or_prev',
-			-- 'cover_or_nearest', 'next', 'previous', 'nearest'.
-			search_method = "cover_or_nearest",
+    -- clue (which-key like) – not used
+    -- require("mini.clue").setup()
 
-			-- Whether to disable showing non-error feedback
-			-- This also affects (purely informational) helper messages shown after
-			-- idle time if user input is required.
-			silent = false,
-		})
+    -- colors (color preview) – not used
+    -- require("mini.colors").setup()
 
+    -- comment (built-in comments already exist in Neovim >=0.10)
+    -- require("mini.comment").setup()
 
-		require("mini.animate").setup({
-			scroll = { enable = false }, -- this shit breaks mouse scrolling
-			resize = { enable = false },
-			cursor = { enable = false },
-			open = { enable = false },
-			close = { enable = false },
-		})
+    -- completion (LSP/completion) – you likely use nvim-cmp
+    -- require("mini.completion").setup()
 
-		-- require('mini.clue').setup()
-		-- require("mini.colors").setup()
-		require("mini.cursorword").setup()
-		-- require("mini.hues").setup(hues._palette)
-		-- require("mini.cmdline").setup({
-		-- 	autocomplete = {
-		-- 		enable = false,
-		--
-		-- 		-- Delay (in ms) after which to trigger completion
-		-- 		-- Neovim>=0.12 is recommended for positive values
-		-- 		delay = 0,
-		--
-		-- 		-- Custom rule of when to trigger completion
-		-- 		predicate = nil,
-		--
-		-- 		-- Whether to map arrow keys for more consistent wildmenu behavior
-		-- 		map_arrows = true,
-		-- 	},
-		--
-		-- 	-- Autocorrection: adjust non-existing words (commands, options, etc.)
-		-- 	autocorrect = {
-		-- 		enable = true,
-		--
-		-- 		-- Custom autocorrection rule
-		-- 		func = nil,
-		-- 	},
-		--
-		-- 	-- Autopeek: show command's target range in a floating window
-		-- 	autopeek = {
-		-- 		enable = true,
-		--
-		-- 		-- Number of lines to show above and below range lines
-		-- 		n_context = 1,
-		--
-		-- 		-- Custom rule of when to show peek window
-		-- 		predicate = nil,
-		--
-		-- 		-- Window options
-		-- 		window = {
-		-- 			-- Floating window config
-		-- 			config = {},
-		--
-		-- 			-- Function to render statuscolumn
-		-- 			statuscolumn = nil,
-		-- 		},
-		-- 	},
-		-- })
-		require("mini.hipatterns").setup()
-		require("mini.icons").setup()
-		-- require("mini.indentscope").setup()
-		-- require("mini.map").setup()
-		-- require('mini.map').open()
+    -- cursorword (highlight word under cursor) – ENABLED
+    require("mini.cursorword").setup()
 
-		-- require("mini.notify").setup({
-		-- 	content = {
-		-- 		-- Function which formats the notification message
-		-- 		-- By default prepends message with notification time
-		-- 		format = nil,
-		--
-		-- 		-- Function which orders notification array from most to least important
-		-- 		-- By default orders first by level and then by update timestamp
-		-- 		sort = nil,
-		-- 	},
-		-- 	lsp_progress = { enable = false },
-		-- 	window = {
-		-- 		-- Floating window config
-		-- 		config = {},
-		--
-		-- 		-- Maximum window width as share (between 0 and 1) of available columns
-		-- 		max_width_share = 0.382,
-		--
-		-- 		-- Value of 'winblend' option
-		-- 		winblend = 25,
-		-- 	},
-		-- })
-		-- require("mini.starter").setup()
+    -- diff (git diff signs) – not used (maybe use gitsigns)
+    -- require("mini.diff").setup()
 
-		require("mini.statusline").setup({
-			use_icons = vim.g.have_nerd_font,
-			content = {
-				inactive = function()
-					local buf = vim.api.nvim_get_current_buf()
-					local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":.")
-					return MiniStatusline.combine_groups({
-						{ hl = "Comment", strings = { filename or "" } }, -- dim gray
-						{ hl = "Comment", strings = { " %=" } }, -- keep alignment
-					})
-				end,
-				active = function()
-					local buf = vim.api.nvim_get_current_buf()
+    -- doc (documentation preview) – not used
+    -- require("mini.doc").setup()
 
-					local check_macro_recording = function()
-						if vim.fn.reg_recording() ~= "" then
-							return "Recording @" .. vim.fn.reg_recording()
-						else
-							return ""
-						end
-					end
+    -- extra (extra operators: g? etc.) – optional
+    -- require("mini.extra").setup()
 
-					local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
-					local git = MiniStatusline.section_git({ trunc_width = 40 })
-					local diff = MiniStatusline.section_diff({ trunc_width = 75 })
-					local diagnostics = MiniStatusline.section_diagnostics({ trunc_width = 75 })
-					local lsp = MiniStatusline.section_lsp({ trunc_width = 75 })
-					-- local filename = MiniStatusline.section_filename({ trunc_width = 140 })
-					-- local filename = MiniStatusline.section_filename({ trunc_width = 140, modifiers = ":." })
-					local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":.")
-					local fileinfo = MiniStatusline.section_fileinfo({ trunc_width = 120 })
-					local search = MiniStatusline.section_searchcount({ trunc_width = 75 })
-					local macro = check_macro_recording()
-					local location_raw = MiniStatusline.section_location({ trunc_width = 200 })
+    -- files (file operations) – not used
+    -- require("mini.files").setup()
 
-					local line = vim.fn.line(".")
-					local total_lines = vim.fn.line("$")
-					local col = vim.fn.col(".")
-					local scroll_percent = math.floor(line / total_lines * 100)
+    -- hipatterns (highlight patterns, e.g., hex colors) – ENABLED
+    require("mini.hipatterns").setup()
 
-					-- combine like: "123|45 (42%)"
-					local location = string.format("%s (%d%%%%)", location_raw, scroll_percent)
+    -- icons (icons for other mini modules) – ENABLED
+    require("mini.icons").setup()
 
-					return MiniStatusline.combine_groups({
-						{ hl = mode_hl, strings = { mode } },
-						{ hl = "MiniStatuslineDevinfo", strings = { git, diff, diagnostics } },
-						"%<", -- Mark general truncate point
-						{ hl = "MiniStatuslineFilename", strings = { filename, lsp } },
-						"%=", -- End left alignment
-						{ hl = "MiniStatuslineFilename", strings = { macro } },
-						{ hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
-						{ hl = mode_hl, strings = { search, location } },
-					})
-				end,
-			},
-		})
-		require("mini.tabline").setup({
-			tabpage_section = "left",
-		})
-		require("mini.trailspace").setup()
+    -- indentscope (indentation guides) – not used
+    -- require("mini.indentscope").setup()
 
-		require("mini.surround").setup({
-			search_method = "cover_or_nearest",
-			n_lines = 20,
-            silent = true,
-		})
-		require("mini.pairs").setup({
-			-- In which modes mappings from this `config` should be created
-			modes = { insert = true, command = false, terminal = false },
+    -- jump (jump to next/prev character) – not used
+    -- require("mini.jump").setup()
 
-			-- Global mappings. Each right hand side should be a pair information, a
-			-- table with at least these fields (see more in |MiniPairs.map|):
-			-- - <action> - one of 'open', 'close', 'closeopen'.
-			-- - <pair> - two character string for pair to be used.
-			-- By default pair is not inserted after `\`, quotes are not recognized by
-			-- <CR>, `'` does not insert pair after a letter.
-			-- Only parts of tables can be tweaked (others will use these defaults).
-			mappings = {
-				["("] = { action = "open", pair = "()", neigh_pattern = "[^\\]." },
-				["["] = { action = "open", pair = "[]", neigh_pattern = "[^\\]." },
-				["{"] = { action = "open", pair = "{}", neigh_pattern = "[^\\]." },
-				-- ['<'] = { action = 'open', pair = '<>', neigh_pattern = '[^\\].' },
+    -- map (create mappings with descriptions) – you have your own mapping util
+    -- require("mini.map").setup()
 
-				[")"] = { action = "close", pair = "()", neigh_pattern = "[^\\]." },
-				["]"] = { action = "close", pair = "[]", neigh_pattern = "[^\\]." },
-				["}"] = { action = "close", pair = "{}", neigh_pattern = "[^\\]." },
-				[">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
+    -- misc (misc helpers) – not used
+    -- require("mini.misc").setup()
 
-				['"'] = { action = "open", pair = '""', neigh_pattern = "[^\\].", register = { cr = false } },
-				["'"] = { action = "open", pair = "''", neigh_pattern = "[^%a\\].", register = { cr = false } },
-				["`"] = { action = "open", pair = "``", neigh_pattern = "[^\\].", register = { cr = false } },
-			},
-		})
-	end,
+    -- notify (notification system) – you use snacks.notify
+    -- require("mini.notify").setup()
+
+    -- operators (g? etc.) – not used
+    -- require("mini.operators").setup()
+
+    -- pairs (auto‑pair) – ENABLED (customized)
+    require("mini.pairs").setup({
+      modes = { insert = true, command = false, terminal = false },
+      mappings = {
+        ["("] = { action = "open", pair = "()", neigh_pattern = "[^\\]." },
+        ["["] = { action = "open", pair = "[]", neigh_pattern = "[^\\]." },
+        ["{"] = { action = "open", pair = "{}", neigh_pattern = "[^\\]." },
+        -- ['<'] = { action = 'open', pair = '<>', neigh_pattern = '[^\\].' },
+        [")"] = { action = "close", pair = "()", neigh_pattern = "[^\\]." },
+        ["]"] = { action = "close", pair = "[]", neigh_pattern = "[^\\]." },
+        ["}"] = { action = "close", pair = "{}", neigh_pattern = "[^\\]." },
+        [">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
+        ['"'] = { action = "open", pair = '""', neigh_pattern = "[^\\].", register = { cr = false } },
+        ["'"] = { action = "open", pair = "''", neigh_pattern = "[^%a\\].", register = { cr = false } },
+        ["`"] = { action = "open", pair = "``", neigh_pattern = "[^\\].", register = { cr = false } },
+      },
+    })
+
+    -- picker (file picker) – you use snacks.picker
+    -- require("mini.picker").setup()
+
+    -- sessions (session management) – not used
+    -- require("mini.sessions").setup()
+
+    -- splitjoin (split/join lines) – not used
+    -- require("mini.splitjoin").setup()
+
+    -- starter (start screen) – not used
+    -- require("mini.starter").setup()
+
+    -- statusline – ENABLED (custom)
+    require("mini.statusline").setup({
+      use_icons = vim.g.have_nerd_font,
+      content = {
+        inactive = function()
+          local buf = vim.api.nvim_get_current_buf()
+          local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":.")
+          return MiniStatusline.combine_groups({
+            { hl = "Comment", strings = { filename or "" } },
+            { hl = "Comment", strings = { " %=" } },
+          })
+        end,
+        active = function()
+          local buf = vim.api.nvim_get_current_buf()
+
+          local check_macro_recording = function()
+            if vim.fn.reg_recording() ~= "" then
+              return "Recording @" .. vim.fn.reg_recording()
+            else
+              return ""
+            end
+          end
+
+          local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
+          local git = MiniStatusline.section_git({ trunc_width = 40 })
+          local diff = MiniStatusline.section_diff({ trunc_width = 75 })
+          local diagnostics = MiniStatusline.section_diagnostics({ trunc_width = 75 })
+          local lsp = MiniStatusline.section_lsp({ trunc_width = 75 })
+          local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":.")
+          local fileinfo = MiniStatusline.section_fileinfo({ trunc_width = 120 })
+          local search = MiniStatusline.section_searchcount({ trunc_width = 75 })
+          local macro = check_macro_recording()
+          local location_raw = MiniStatusline.section_location({ trunc_width = 200 })
+
+          local line = vim.fn.line(".")
+          local total_lines = vim.fn.line("$")
+          local scroll_percent = math.floor(line / total_lines * 100)
+          local location = string.format("%s (%d%%%%)", location_raw, scroll_percent)
+
+          return MiniStatusline.combine_groups({
+            { hl = mode_hl, strings = { mode } },
+            { hl = "MiniStatuslineDevinfo", strings = { git, diff, diagnostics } },
+            "%<",
+            { hl = "MiniStatuslineFilename", strings = { filename, lsp } },
+            "%=",
+            { hl = "MiniStatuslineFilename", strings = { macro } },
+            { hl = "MiniStatuslineFileinfo", strings = { fileinfo } },
+            { hl = mode_hl, strings = { search, location } },
+          })
+        end,
+      },
+    })
+
+    -- sticky (sticky scrolling) – not used
+    -- require("mini.sticky").setup()
+
+    -- surround (surroundings) – ENABLED
+    require("mini.surround").setup({
+      search_method = "cover_or_nearest",
+      n_lines = 20,
+      silent = true,
+    })
+
+    -- tabline – ENABLED
+    require("mini.tabline").setup({
+      tabpage_section = "left",
+    })
+
+    -- test (testing framework integration) – not used
+    -- require("mini.test").setup()
+
+    -- trailspace (trailing whitespace) – ENABLED
+    require("mini.trailspace").setup()
+
+    -- vis (visual mode enhancements) – not used
+    -- require("mini.vis").setup()
+  end,
 }
