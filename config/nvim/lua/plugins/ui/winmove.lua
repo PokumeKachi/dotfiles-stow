@@ -1,3 +1,0 @@
-return {
-	"MisanthropicBit/winmove.nvim",
-}

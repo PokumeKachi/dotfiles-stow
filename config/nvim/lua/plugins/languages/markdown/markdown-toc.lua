@@ -8,8 +8,7 @@ return {
 	cmd = { "Mtoc" }, -- Or, lazy load on "Mtoc" command
 	opts = {},
 	keys = {
-		map("<leader>mt", "<cmd>Mtoc<CR>", {
-			mode = { "n" },
+		map("n", "<leader>mt", "<cmd>Mtoc<CR>", {
 			desc = "Create Table of Contents",
 		}),
 	},

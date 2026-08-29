@@ -6,8 +6,7 @@ return {
 	opts = {},
 
 	keys = {
-		map("<leader>bo", ":Outline<CR>", {
-			mode = { "n" },
+		map({ "n" }, "<leader>bo", "<cmd>Outline<CR>", {
 			desc = "View Buffer Outline",
 		}),
 	},

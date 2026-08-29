@@ -1,5 +1,5 @@
 local autocmd = vim.api.nvim_create_autocmd
-local augroup = vim.api.nvim_create_augroup("Oil", { clear = true })
+local augroup = vim.api.nvim_create_augroup("Buffer", { clear = true })
 
 local oil = require("oil")
 

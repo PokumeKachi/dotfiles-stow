@@ -19,8 +19,7 @@ return {
 		vim.g.mkdp_browserfunc = "OpenMarkdownPreview"
 	end,
 	keys = {
-		map("<leader>mp", "<cmd>MarkdownPreviewToggle<CR>", {
-			mode = { "n" },
+		map("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<CR>", {
 			desc = "Toggle Markdown Preview",
 		}),
 	},

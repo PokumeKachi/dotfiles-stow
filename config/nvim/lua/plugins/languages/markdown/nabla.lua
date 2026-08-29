@@ -12,11 +12,9 @@ return {
 		vim.g.nabla_border = "rounded" -- "single", "double", "none"
 	end,
 	keys = {
-		map("<leader>mp", {
-			callback = function()
-				require("nabla").popup()
-			end,
-			mode = { "n", "v" },
+		map({ "n", "v" }, "<leader>mp", function()
+			require("nabla").popup()
+		end, {
 			desc = "Preview Math Expression",
 		}),
 	},

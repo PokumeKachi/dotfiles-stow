@@ -1,3 +1,5 @@
+local map = require("utils.keymap").lazy_map
+
 return {
 	"neovim/nvim-lspconfig",
 	dependencies = { "saghen/blink.cmp" },

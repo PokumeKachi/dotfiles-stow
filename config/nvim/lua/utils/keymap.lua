@@ -1,6 +1,5 @@
 local M = {}
 
--- Helper to get caller info for debugging
 local function get_caller_info()
 	local info = debug.getinfo(4, "Sl") -- 3 = caller of keymap() / buf_keymap()
 	if not info then
@@ -88,6 +87,49 @@ function M.lazy_map(modes, lhs, rhs, opts)
 		lhs,
 		rhs,
 	}, vim.tbl_extend("force", LAZY_KEYMAP_DEFAULTS, opts))
+end
+
+function M.map_all_cases(map, modes, keys, action, opts)
+	local function case_combinations(str)
+		if #str == 0 then
+			return {
+				"",
+			}
+		end
+		local rest = case_combinations(str:sub(2))
+		local c = str:sub(1, 1)
+		local t = {}
+		for _, r in ipairs(rest) do
+			table.insert(t, c:lower() .. r)
+			table.insert(t, c:upper() .. r)
+		end
+		return t
+	end
+
+	opts = opts or {
+		noremap = true,
+		silent = true,
+	}
+
+	if type(modes) ~= "table" then
+		modes = {
+			modes,
+		}
+	end
+
+	local returnVal = {}
+
+	for _, mode in ipairs(modes) do
+		for _, variant in ipairs(case_combinations(keys)) do
+			local mapResults = map(mode, variant, action, opts)
+
+			if mapResults then
+				table.insert(returnVal, mapResults)
+			end
+		end
+	end
+
+	return unpack(returnVal)
 end
 
 return M

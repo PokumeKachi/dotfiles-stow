@@ -1,7 +1,6 @@
 -- A bunch of plugins...
 
 local map = require("utils.keymap").lazy_map
-
 local file = require("utils.file")
 
 return {
@@ -45,19 +44,20 @@ return {
 		zen = { enabled = true },
 	},
 	keys = {
-		-- Top Pickers & Explorer
 		map("n", "<leader><space>", function()
 			Snacks.picker.smart()
 		end, { desc = "Smart Find Files" }),
 		map("n", "<leader>nh", function()
 			Snacks.notifier.show_history()
 		end, { desc = "Notification History" }),
-		map("n", "<leader>nn", function()
-			Snacks.picker.notifications()
-		end, { desc = "Notification History" }),
 		map("n", "<leader>e", function()
-			Snacks.explorer()
-		end, { desc = "Open Explorer" }),
+			local explorers = Snacks.picker.get({ source = "explorer" })
+			if explorers and #explorers > 0 then
+				explorers[1]:focus()
+			else
+				Snacks.explorer()
+			end
+		end, { desc = "Toggle Explorer" }),
 		-- find
 		map("n", "<leader>fb", function()
 			Snacks.picker.buffers()

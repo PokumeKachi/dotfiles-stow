@@ -15,23 +15,12 @@ for key, direction in pairs(DIRECTION_MAP) do
 	})
 end
 
-map("n", "<leader>ws", "<C-w>s", { desc = "Horizontal Split Window" })
-map("n", "<leader>wv", "<C-w>v", { desc = "Vertical Split Window" })
-
 for key, direction in pairs(DIRECTION_MAP) do
 	map("n", "<leader>w" .. key, "<C-w>" .. key, {
 		desc = "Focus Window " .. direction,
 	})
 end
 
-map("n", "<leader>wm", function()
-	require("winmove").start_mode("resize")
-end, {
-	desc = "Resize Window",
-})
-
-map("n", "<leader>wt", ":term<CR>", { desc = "Open Terminal" })
-
-map("n", "<leader>wqc", ":quit<CR>", { desc = "Quit Current Window" })
-map("n", "<leader>wqa", ":qa<CR>", { desc = "Quit All Windows" })
-map("n", "<leader>wqo", ":only<CR>", { desc = "Quit Other Windows" })
+map("n", "<leader>qwc", ":quit<CR>", { desc = "Quit Current Window" })
+map("n", "<leader>qwa", ":qa<CR>", { desc = "Quit All Windows" })
+map("n", "<leader>qwo", ":only<CR>", { desc = "Quit Other Windows" })

@@ -948,8 +948,7 @@ return {
 		},
 	},
 	keys = {
-		map("<leader>mr", ":RenderMarkdown buf_toggle<CR>", {
-            mode = { "n", "v", "s", "o" },
+		map({ "n", "v", "s", "o" }, "<leader>mr", "<cmd>RenderMarkdown buf_toggle<CR>", {
 			desc = "Toggle RenderMarkdown",
 		}),
 	},
