@@ -8,10 +8,6 @@ M.capabilities = blink_cmp.get_lsp_capabilities()
 
 -- Shared on_attach (LSP keymaps)
 M.on_attach = function(client, bufnr)
-	map(bufnr, "n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
-	map(bufnr, "n", "K", vim.lsp.buf.hover, { desc = "Hover" })
-	map(bufnr, "n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename" })
-	map(bufnr, "n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Actions" })
 	if client.server_capabilities.inlayHintProvider then
 		vim.defer_fn(function()
 			vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
