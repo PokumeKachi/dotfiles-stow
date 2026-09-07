@@ -1,16 +1,14 @@
+local toolset = require("utils.toolset")
+
 return {
 	"nvim-treesitter/nvim-treesitter",
-    branch = "main",
+	branch = "main",
 	build = ":TSUpdate",
 	event = { "BufReadPost", "BufNewFile" },
 	dependencies = {
 		-- "hiphish/rainbow-delimiters.nvim",
 	},
 	opts = {
-		highlight = {
-			enable = true, -- enable treesitter-based highlighting
-			additional_vim_regex_highlighting = false, -- disable legacy regex highlighting for speed & accuracy
-		},
 		incremental_selection = {
 			enable = true,
 		},
@@ -29,42 +27,21 @@ return {
 		auto_install = true,
 
 		ignore_install = {},
-		ensure_installed = {
-			"c",
-			"cpp",
-			"rust",
-
-			"lua",
-			"luau",
-			"python",
-
-			"make",
-			"just",
-
-			"bash",
-
-			"kdl",
-			"toml",
-			"yaml",
-
-			"html",
-			"css",
-			"javascript",
-			"typescript",
-			"typst",
-			"json",
-
-			"astro",
-			"tsx",
-            "svelte",
-
-			"latex",
-			"markdown",
-			"markdown_inline",
-		},
+		ensure_installed = toolset.treesitter_parsers,
 	},
 	config = function(_, opts)
 		require("nvim-treesitter").setup(opts)
+
+		vim.api.nvim_create_autocmd("FileType", {
+			callback = function(args)
+				local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
+				if not lang then
+					return
+				end
+
+				pcall(vim.treesitter.start, args.buf, lang)
+			end,
+		})
 
 		vim.api.nvim_create_autocmd("ColorScheme", {
 			callback = function()

@@ -1,5 +1,39 @@
 local M = {}
 
+M.treesitter_parsers = {
+	"c",
+	"cpp",
+	"rust",
+
+	"lua",
+	"luau",
+	"python",
+
+	"make",
+	"just",
+
+	"bash",
+
+	"kdl",
+	"toml",
+	"yaml",
+
+	"html",
+	"css",
+	"javascript",
+	"typescript",
+	"typst",
+	"json",
+
+	"astro",
+	"tsx",
+	"svelte",
+
+	"latex",
+	"markdown",
+	"markdown_inline",
+}
+
 M.lsp = {
 	astro = {},
 	clangd = {},
@@ -150,7 +184,7 @@ for _, ft in ipairs({
 	"typescript",
 	"json",
 	"markdown",
-    "svelte",
+	"svelte",
 }) do
 	M.formatters_by_ft[ft] = { "prettier" }
 end
