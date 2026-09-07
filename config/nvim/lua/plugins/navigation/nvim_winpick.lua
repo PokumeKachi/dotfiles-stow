@@ -55,10 +55,10 @@ return {
 	},
 
 	keys = {
-		map("n", "<leader>wf", function()
+		map("n", "<leader>wpf", function()
 			require("nvim_winpick").pick_focus_window()
 		end, {
-			desc = "Focus With Winpick",
+			desc = "Pick Window To Focus",
 		}),
 	},
 }
