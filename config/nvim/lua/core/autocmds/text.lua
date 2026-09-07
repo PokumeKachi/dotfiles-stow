@@ -15,7 +15,6 @@ autocmd("FileType", {
 	pattern = "markdown",
     group = augroup,
 	callback = function()
-        vim.notify('yea')
         -- Enable spell check
 
 		vim.opt_local.spell = true
