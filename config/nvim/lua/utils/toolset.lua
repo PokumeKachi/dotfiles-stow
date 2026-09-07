@@ -150,6 +150,7 @@ for _, ft in ipairs({
 	"typescript",
 	"json",
 	"markdown",
+    "svelte",
 }) do
 	M.formatters_by_ft[ft] = { "prettier" }
 end

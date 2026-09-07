@@ -56,6 +56,7 @@ return {
 
 			"astro",
 			"tsx",
+            "svelte",
 
 			"latex",
 			"markdown",
