@@ -46,8 +46,6 @@ return {
 	end,
     keys = {
         map({ "n", "x" }, "<leader>zk", "<nop>", { desc = "Zk Commands" }),
-        map("n", "<leader>zkp", "<nop>", { desc = "Picker" }),
-        map({ "n", "x" }, "<leader>zkn", "<nop>", { desc = "Create New" }),
 
         map("n", "<leader>zknn", "<cmd>ZkNew<CR>", {
             desc = "New Note",

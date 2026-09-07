@@ -212,10 +212,10 @@ return {
 			Snacks.picker.lsp_workspace_symbols()
 		end, { desc = "LSP Workspace Symbols" }),
 		-- Other
-		map("n", "<leader>zz", function()
+		map("n", "<leader>uz", function()
 			Snacks.zen()
 		end, { desc = "Toggle Zen Mode" }),
-		map("n", "<leader>zZ", function()
+		map("n", "<leader>uZ", function()
 			Snacks.zen.zoom()
 		end, { desc = "Toggle Zoom (Fullscreen) Mode" }),
 		map("n", "<leader>.", function()
@@ -244,8 +244,12 @@ return {
 		end, { desc = "Prev Reference" }),
 		-- Terminal mappings
 		--
-		map("n", "<leader>t", function()
-			Snacks.terminal()
+		map("n", "<leader>tt", function()
+			Snacks.terminal(nil, {
+				win = {
+					position = "current",
+				},
+			})
 		end, { desc = "Open Terminal" }),
 		map("n", "<F5>", function()
 			Snacks.terminal({ "just", "--choose", "--", file.get_current() })

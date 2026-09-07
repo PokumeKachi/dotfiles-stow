@@ -51,16 +51,25 @@ return {
 
 		-- ✅ ONLY groups go here. No action mappings with missing rhs!
 		wk.add({
-			{ "<leader>l", group = "LSP" },
-			{ "<leader>f", group = "Find" },
-			{ "<leader>s", group = "Search" },
-			{ "<leader>g", group = "Git" },
-			{ "<leader>u", group = "UI" },
-			{ "<leader>t", group = "Terminal" },
-			{ "<leader>w", group = "Windows" },
 			{ "<leader>b", group = "Buffers" },
-			{ "<leader>z", group = "Zen/Zoom" },
-			{ "<leader>h", group = "Help" },
+			{ "<leader>c", group = "Code" },
+			{ "<leader>d", group = "Diagnostics" },
+			{ "<leader>f", group = "Find" },
+			{ "<leader>g", group = "Git" },
+			{ "<leader>l", group = "LSP" },
+			{ "<leader>m", group = "Markdown" },
+			{ "<leader>n", group = "Notification" },
+			{ "<leader>q", group = "Quit" },
+			{ "<leader>s", group = "Search" },
+			{ "<leader>t", group = "Terminal" },
+			{ "<leader>u", group = "Toggle" },
+			{ "<leader>w", group = "Window" },
+
+			{ "<leader>z", group = "Zen/Zoom/Zk" },
+
+			{ "<leader>zk", group = "Zk" },
+			{ "<leader>zkn", group = "Zk New" },
+			{ "<leader>zkp", group = "Zk Pick" },
 		})
 
 		-- ✅ This special mapping IS valid (it has a function)
