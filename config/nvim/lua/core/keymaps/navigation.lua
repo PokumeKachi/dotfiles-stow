@@ -25,10 +25,10 @@ local function prev_same_indent()
 	end
 end
 
-map({ "n", "i", "c", "x", "t" }, "<leader>]", next_same_indent, {
+map({ "n", "c", "x", "t" }, "<leader>]", next_same_indent, {
 	desc = "Next Same Indent",
 })
-map({ "n", "i", "c", "x", "t" }, "<leader>[", prev_same_indent, {
+map({ "n", "c", "x", "t" }, "<leader>[", prev_same_indent, {
 	desc = "Previous Same Indent",
 })
 
@@ -38,4 +38,3 @@ map("n", "<leader><Tab>", "<C-^>")
 
 map("n", "<C-d>", "<C-d>zz")
 map("n", "<C-u>", "<C-u>zz")
-
