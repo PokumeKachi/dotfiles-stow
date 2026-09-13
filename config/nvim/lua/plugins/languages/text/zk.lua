@@ -1,11 +1,11 @@
 local map = require("utils.keymap").lazy_map
 
 local function zk()
-    return require("zk")
+	return require("zk")
 end
 
 local function zk_api()
-    return require("zk.api")
+	return require("zk.api")
 end
 
 local function pickNotes(param1, param2)
@@ -44,62 +44,62 @@ return {
 			},
 		})
 	end,
-    keys = {
-        map({ "n", "x" }, "<leader>zk", "<nop>", { desc = "Zk Commands" }),
+	keys = {
+		map({ "n", "x" }, "<leader>zk", "<nop>", { desc = "Zk Commands" }),
 
-        map("n", "<leader>zknn", "<cmd>ZkNew<CR>", {
-            desc = "New Note",
-        }),
+		map("n", "<leader>zknn", "<cmd>ZkNew<CR>", {
+			desc = "New Note",
+		}),
 
-        map("x", "<leader>zknn", "<cmd>ZkNewFromTitleSelection<CR>", {
-            desc = "New Note (Named From Selection)",
-        }),
+		map("x", "<leader>zknn", ":ZkNewFromTitleSelection<CR>", {
+			desc = "New Note (Named From Selection)",
+		}),
 
-        map("n", "<leader>zknl", function()
-            zk_api().index()
-            vim.cmd("ZkInsertLink")
-        end, {
-            desc = "New Link",
-        }),
+		map("n", "<leader>zknl", function()
+			zk_api().index()
+			vim.cmd("ZkInsertLink")
+		end, {
+			desc = "New Link",
+		}),
 
-        map("x", "<leader>zknl", "<cmd>'<,'>ZkInsertLinkAtSelection<CR>", {
-            desc = "New Link (Named From Selection)",
-        }),
+		map("x", "<leader>zknl", ":ZkInsertLinkAtSelection<CR>", {
+			desc = "New Link (Named From Selection)",
+		}),
 
-        map("n", "<leader>zkpn", function()
-            zk().index()
-            pickNotes()
-        end, {
-            desc = "Pick By Note Name",
-        }),
+		map("n", "<leader>zkpn", function()
+			zk().index()
+			pickNotes()
+		end, {
+			desc = "Pick By Note Name",
+		}),
 
-        map("n", "<leader>zkpt", function()
-            zk().index()
-            zk().pick_tags({}, {}, function(selection)
-                if not selection then
-                    return
-                end
+		map("n", "<leader>zkpt", function()
+			zk().index()
+			zk().pick_tags({}, {}, function(selection)
+				if not selection then
+					return
+				end
 
-                local tags = {}
+				local tags = {}
 
-                for _, tag in pairs(selection) do
-                    table.insert(tags, tag.name)
-                end
+				for _, tag in pairs(selection) do
+					table.insert(tags, tag.name)
+				end
 
-                pickNotes({
-                    tags = tags,
-                })
-            end)
-        end, {
-            desc = "Pick By Tag",
-        }),
+				pickNotes({
+					tags = tags,
+				})
+			end)
+		end, {
+			desc = "Pick By Tag",
+		}),
 
-        map("n", "<leader>zkl", "<cmd>ZkLinks<CR>", {
-            desc = "View Links",
-        }),
+		map("n", "<leader>zkl", "<cmd>ZkLinks<CR>", {
+			desc = "View Links",
+		}),
 
-        map("n", "<leader>zkb", "<cmd>ZkBacklinks<CR>", {
-            desc = "View Backlinks",
-        }),
-    },
+		map("n", "<leader>zkb", "<cmd>ZkBacklinks<CR>", {
+			desc = "View Backlinks",
+		}),
+	},
 }
