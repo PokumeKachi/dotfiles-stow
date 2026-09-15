@@ -1,4 +1,4 @@
 return {
 
-    require("plugins.languages.rust.rustaceanvim"),
+    -- require("plugins.languages.rust.rustaceanvim"),
 }
