@@ -16,7 +16,7 @@ return {
         })
 
         markview.setup({
-            enable_math = true,
+            enable_math = false,
             preview = {
                 icon_provider = "mini",
             },
