@@ -1,5 +1,4 @@
 return {
-    require("plugins.navigation.comfy-line-numbers"),
     -- require("plugins.navigation.fyler"),
 
     require("plugins.navigation.nvim_winpick"),

@@ -160,17 +160,22 @@ M.formatters = {
 		command = "dart",
 		args = { "format", "--indent", "4", "$FILENAME" },
 	},
+	kdlfmt = {
+		command = "kdlfmt",
+		stdin = true,
+	},
 }
 
 M.formatters_by_ft = {
+	c = { "clang_format" },
+	cpp = { "clang_format" },
 	dart = { "dart_format" },
 	lua = { "stylua" },
 	luau = { "stylua" },
 	tex = { "latexindent" },
 	python = { "black" },
 	sh = { "shfmt" },
-	c = { "clang_format" },
-	cpp = { "clang_format" },
+	kdl = { "kdlfmt" },
 	rust = { "rustfmt" },
 	nix = { "nixfmt" },
 	toml = { "taplo" },
