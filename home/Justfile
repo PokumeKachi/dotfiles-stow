@@ -4,12 +4,17 @@ VISUAL_PLAYBACK := "mpv --no-video --ao=alsa --af=aresample=resampler=soxr --loo
 _default:
     @just --choose
 
-night:
-    @pgrep gammastep >/dev/null \
-      && pkill gammastep \
-      || (gammastep -P -O {{env_var_or_default("COLOR", "3500")}} & disown)
+music:
+    @choice="$(printf '%s\n' choose play chill update | fzf --reverse --header='Music')"; \
+    [ -z "$choice" ] && exit 0; \
+    case "$choice" in \
+        choose) just _choose-music ;; \
+        play) just _play-music ;; \
+        chill) just _chill-music ;; \
+        update) just _update-music ;; \
+    esac
 
-choose-music:
+_choose-music:
     @clear
     @easyeffects & disown
     @find "$HOME/media/music" -type f \
@@ -21,17 +26,17 @@ choose-music:
             --preview 'mediainfo {} 2>/dev/null | head -30' \
         | {{VISUAL_PLAYBACK}} --playlist=-
 
-music:
+_play-music:
 	@clear
 	@easyeffects & disown
 	{{PLAYBACK}} ~/media/music
 
-chill:
+_chill-music:
 	@clear
 	@easyeffects & disown
 	{{PLAYBACK}} https://www.youtube.com/watch?v=ZUIT_rQIR5M
 
-update-music:
+_update-music:
     cd ~/media/music && \
     for f in *.opus; do \
         [ -f "$f" ] || continue; \
@@ -81,17 +86,6 @@ chat:
 
 freeze pid="":
     pid="{{pid}}"; [ -z "$pid" ] && read -p "PID to pause: " pid; kill -STOP "$pid" && read -p "paused. press enter to resume" && kill -CONT "$pid"
-
-todo:
-	taskwarrior-tui --taskdata .task
-
-wifi:
-    DEVICE_IP="192.168.1.9:37229"
-    adb connect $DEVICE_IP
-    scrcpy --serial $DEVICE_IP
-
-sshfs-vps:
-    nix-shell -p sshfs --run "sshfs root@minhluu.pro.vn:/ ~/vps"
 
 nix-switch:
     nix run ~/dotfiles/nix#switch

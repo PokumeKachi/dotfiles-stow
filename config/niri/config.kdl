@@ -1,5 +1,3 @@
-// This config is in the KDL format: https://kdl.dev
-// Check the wiki for a full description of the configuration:
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Introduction
 
 overview {
@@ -16,14 +14,14 @@ gestures {
 environment {
     NIXOS_OZONE_WL "1"
     XDG_SESSION_TYPE "wayland"
-    XDG_CURRENT_DESKTOP "niri"
+    XDG_CURRENT_DESKTOP "niri:GNOME"
     XDG_SESSION_DESKTOP "niri"
     XDG_TERMINAL_EXEC "kitty"
     // WAYLAND_DISPLAY "wayland-0"
     // // XDG_RUNTIME_DIR "/run/user/1000"
 
-    GDK_BACKEND "wayland"
     QT_QPA_PLATFORM "wayland"
+    EDITOR "nvim"
 
     // QT_WAYLAND_CURSOR_THEME "breeze_cursors"
     // QT_WAYLAND_CURSOR_SIZE "24"
@@ -257,9 +255,8 @@ layout {
 // See the binds section below for more spawn examples.
 
 // This line starts waybar, a commonly used bar for Wayland compositors.
-spawn-at-startup "waybar"
+spawn-at-startup "noctalia"
 spawn-at-startup "hyprpaper"
-spawn-at-startup "mako"
 spawn-at-startup "korganizer"
 spawn-at-startup "keepassxc"
 spawn-at-startup "ibus-daemon -drx"
