@@ -215,9 +215,6 @@ layout {
 // See the binds section below for more spawn examples.
 // This line starts waybar, a commonly used bar for Wayland compositors.
 spawn-at-startup "noctalia"
-spawn-at-startup "hyprpaper"
-spawn-at-startup "korganizer"
-spawn-at-startup "keepassxc"
 spawn-at-startup "ibus-daemon -drx"
 spawn-at-startup "ibus start"
 spawn-at-startup "xwayland-satellite"
