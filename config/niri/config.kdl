@@ -708,3 +708,6 @@ binds {
     }
 }
 
+
+
+include "noctalia.kdl"
