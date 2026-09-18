@@ -1,0 +1,4 @@
+spawn-at-startup "noctalia"
+spawn-at-startup "ibus-daemon -drx"
+spawn-at-startup "ibus start"
+spawn-at-startup "xwayland-satellite"

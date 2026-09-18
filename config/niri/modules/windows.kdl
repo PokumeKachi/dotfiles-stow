@@ -1,0 +1,36 @@
+layout {
+    gaps 16
+    center-focused-column "on-overflow"
+    preset-column-widths {
+        proportion 0.2
+        proportion 0.4
+        proportion 0.6
+        proportion 0.8
+    }
+    default-column-width {
+        proportion 0.5
+    }
+    preset-window-heights {
+        proportion 0.2
+        proportion 0.4
+        proportion 0.6
+        proportion 0.8
+    }
+    focus-ring {
+        width 4
+        inactive-color "#505050"
+        active-gradient from="#aaccff" to="#ffaa00" angle=45
+    }
+}
+window-rule {
+    match is-focused=false
+    opacity 0.5
+    background-effect {
+        blur true
+    }
+}
+window-rule {
+    match is-floating=true
+    geometry-corner-radius 12
+    clip-to-geometry true
+}
