@@ -18,7 +18,3 @@ link-force:
     done
     stow {{ARGS}} -t ~/.config config
     stow {{ARGS}} -t ~ home
-
-todo:
-    taskwarrior-tui --taskdata .task
-
