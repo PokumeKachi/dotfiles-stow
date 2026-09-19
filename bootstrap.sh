@@ -70,7 +70,7 @@ get_user_prompt() {
     while true; do
         local username=$(gum_prompt "Enter the username for your user" "kachi")
 
-        if echo "$RESERVED_USERS" | grep -qw "$username"; then
+        if echo "$RESERVED_USERS" | grep -qwF -- "$username"; then
             gum_announce "Username '$username' is reserved for system use. Please choose a different one."
             continue
         fi
