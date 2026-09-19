@@ -1,3 +1,8 @@
+gestures {
+    hot-corners {
+        off
+    }
+}
 input {
     mod-key "Super"
     touchpad {
