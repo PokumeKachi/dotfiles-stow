@@ -35,6 +35,7 @@ M.treesitter_parsers = {
 }
 
 M.lsp = {
+	ansiblels = {},
 	astro = {},
 	clangd = {},
 	cssls = {

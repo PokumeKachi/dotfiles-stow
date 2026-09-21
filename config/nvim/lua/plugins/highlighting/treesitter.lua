@@ -13,15 +13,8 @@ return {
 			enable = true,
 		},
 		indent = {
-			enable = true, -- enable treesitter indent (can improve indent accuracy)
+			enable = true,
 		},
-		-- optional: enable rainbow parentheses for easier nesting visibility
-		-- rainbow = {
-		--   enable = true,
-		--   extended_mode = true, -- highlight non-bracket delimiters too
-		--   max_file_lines = nil, -- disable limit on file size
-		-- },
-		--
 		modules = {},
 		sync_install = false,
 		auto_install = true,
