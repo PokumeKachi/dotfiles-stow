@@ -15,10 +15,6 @@ end
 local base = {
 	"_default:",
 	indent() .. "@just --choose",
-
-	"",
-	"todo:",
-	indent() .. "taskwarrior-tui --taskdata .task",
 }
 
 return {
