@@ -27,7 +27,6 @@ return {
 				},
 				buftype = {
 					-- buftype exactly matches
-					"terminal",
 					"nofile",
 					"prompt",
 				},
