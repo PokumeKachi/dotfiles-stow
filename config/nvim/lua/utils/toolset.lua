@@ -37,6 +37,7 @@ M.treesitter_parsers = {
 M.lsp = {
 	ansiblels = {},
 	astro = {},
+	basedpyright = {},
 	clangd = {},
 	cssls = {
 		cmd = { "vscode-css-language-server", "--stdio" },
@@ -93,16 +94,12 @@ M.lsp = {
 	rust_analyzer = {
 		settings = {
 			["rust-analyzer"] = {
-				check = {
-					extraArgs = {
-						"--target-dir",
-						".target-clippy",
-						"--",
-						"--quiet",
-					},
+				cargo = {
+					targetDir = ".target-clippy",
 				},
 			},
 		},
+		trace = "verbose",
 	},
 	superhtml = {
 		filetypes = { "html" },

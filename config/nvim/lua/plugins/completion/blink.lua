@@ -12,7 +12,7 @@ return {
 		cmdline = { enabled = true, sources = { "cmdline", "path" } },
 		appearance = { nerd_font_variant = "mono" },
 		completion = {
-			keyword = { range = "full" },
+			keyword = { range = "full" }, -- full or prefix
 			accept = { auto_brackets = { enabled = false } },
 			list = { selection = { preselect = false, auto_insert = false } },
 			menu = {
@@ -21,6 +21,7 @@ return {
 					columns = {
 						{ "label", "label_description", gap = 1 },
 						{ "kind_icon", "kind" },
+						{ "source_id" },
 					},
 				},
 			},
