@@ -1,5 +1,6 @@
 return {
     require("plugins.languages.text.browser-preview"),
+    require("plugins.languages.text.bullets"),
 
     -- require("plugins.languages.text.markdown-preview"),
     require("plugins.languages.text.markdown-toc"),
