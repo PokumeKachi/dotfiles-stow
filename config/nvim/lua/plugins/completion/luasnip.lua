@@ -13,17 +13,15 @@ return {
 	end,
 	keys = {
 		{
-			"<C-k>",
-			function()
-				require("luasnip").expand()
-			end,
-			mode = "i",
-			silent = true,
-		},
-		{
 			"<C-l>",
 			function()
-				require("luasnip").jump(1)
+				local ls = require("luasnip")
+				if ls.jumpable(1) then
+					local dest = ls.jump_destination(1)
+					if dest and dest:get_jump_index() ~= 0 then
+						ls.jump(1)
+					end
+				end
 			end,
 			mode = { "i", "s" },
 			silent = true,
@@ -31,7 +29,13 @@ return {
 		{
 			"<C-h>",
 			function()
-				require("luasnip").jump(-1)
+				local ls = require("luasnip")
+				if ls.jumpable(-1) then
+					local dest = ls.jump_destination(-1)
+					if dest and dest:get_jump_index() ~= 0 then
+						ls.jump(-1)
+					end
+				end
 			end,
 			mode = { "i", "s" },
 			silent = true,
