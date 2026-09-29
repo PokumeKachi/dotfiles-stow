@@ -5,25 +5,10 @@ return {
 	branch = "main",
 	build = ":TSUpdate",
 	event = { "BufReadPost", "BufNewFile" },
-	dependencies = {
-		-- "hiphish/rainbow-delimiters.nvim",
-	},
-	opts = {
-		incremental_selection = {
-			enable = true,
-		},
-		indent = {
-			enable = true,
-		},
-		modules = {},
-		sync_install = false,
-		auto_install = true,
+	config = function()
+		require("nvim-treesitter").install(toolset.treesitter_parsers)
 
-		ignore_install = {},
-		ensure_installed = toolset.treesitter_parsers,
-	},
-	config = function(_, opts)
-		require("nvim-treesitter").setup(opts)
+		vim.treesitter.language.register("rust", "rune")
 
 		vim.api.nvim_create_autocmd("FileType", {
 			callback = function(args)
@@ -31,7 +16,6 @@ return {
 				if not lang then
 					return
 				end
-
 				pcall(vim.treesitter.start, args.buf, lang)
 			end,
 		})

@@ -91,6 +91,13 @@ M.lsp = {
 		},
 	},
 	nixd = {},
+	rune_languageserver = {
+		cmd = { "rune", "language-server" },
+		filetypes = { "rune" },
+		root_dir = function(_)
+			return vim.fs.root(0, { "Cargo.toml", ".git" }) or vim.fn.getcwd()
+		end,
+	},
 	rust_analyzer = {
 		settings = {
 			["rust-analyzer"] = {
@@ -149,6 +156,11 @@ M.formatters = {
 		command = "nixfmt",
 		args = { "--indent", "4" },
 	},
+	rune_fmt = {
+		command = "rune",
+		args = { "fmt", "$FILENAME" },
+		stdin = false,
+	},
 	stylua = {
 		command = "stylua",
 		args = { "--column-width", "100", "-" },
@@ -174,6 +186,7 @@ M.formatters_by_ft = {
 	python = { "black" },
 	sh = { "shfmt" },
 	kdl = { "kdlfmt" },
+	rune = { "rune_fmt" },
 	rust = { "rustfmt" },
 	nix = { "nixfmt" },
 	toml = { "taplo" },

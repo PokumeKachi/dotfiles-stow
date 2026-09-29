@@ -9,6 +9,8 @@ local excluded_packages = {
 	nixd = true,
 	just_lsp = true,
 
+    rune_languageserver = true,
+    rune_fmt = true,
 	rustfmt = true,
 	dart_format = true,
 }
