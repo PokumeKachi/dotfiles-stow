@@ -1,4 +1,4 @@
 return {
 
-    require("plugins.languages.pdf.pdfreader"),
+    -- require("plugins.languages.pdf.pdfreader"),
 }
