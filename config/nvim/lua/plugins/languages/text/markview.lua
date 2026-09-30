@@ -25,6 +25,7 @@ return {
 				headings = { enable = false },
 				block_quotes = { enable = false },
 				code_blocks = { enable = false },
+				frontmatter = { enable = false },
 				horizontal_rules = { enable = false },
 				list_items = { enable = false },
 				tables = { enable = false },
@@ -34,8 +35,9 @@ return {
 				email_links = { enable = false },
 				entities = { enable = false },
 				escaped_characters = { enable = false },
+				metadata_minus = { enable = false },
 				reference_links = { enable = false },
-				hyperlinks = { enable = true },
+				hyperlinks = { enable = false },
 			},
 		})
 	end,
