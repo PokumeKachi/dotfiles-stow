@@ -17,18 +17,18 @@ layout {
         proportion 0.8
     }
     focus-ring {
-        width 4
+        width 16
         inactive-color "#505050"
         active-gradient from="#aaccff" to="#ffaa00" angle=45
     }
 }
-window-rule {
-    match is-focused=false
-    opacity 0.5
-    background-effect {
-        blur true
-    }
-}
+// window-rule {
+//     match is-focused=false
+//     opacity 1.0
+//     background-effect {
+//         blur true
+//     }
+// }
 window-rule {
     match is-floating=true
     geometry-corner-radius 12
