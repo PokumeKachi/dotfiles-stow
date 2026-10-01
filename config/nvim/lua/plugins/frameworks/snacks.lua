@@ -21,7 +21,7 @@ return {
 		image = {
 			enabled = true,
 			math = {
-				enabled = true,
+				enabled = false,
 			},
 		},
 		indent = { enabled = true },
