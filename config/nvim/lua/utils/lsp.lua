@@ -1,5 +1,4 @@
 local blink_cmp = require("blink.cmp")
-local map = require("utils.keymap").buf_map
 
 local M = {}
 
