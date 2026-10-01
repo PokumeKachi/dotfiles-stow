@@ -19,7 +19,8 @@ layout {
     focus-ring {
         width 16
         inactive-color "#505050"
-        active-gradient from="#aaccff" to="#ffaa00" angle=45
+        // active-gradient from="#aaccff" to="#ffaa00" angle=45
+        active-gradient from="#fa5c0f" to="#ff0a00" angle=45
     }
 }
 // window-rule {
