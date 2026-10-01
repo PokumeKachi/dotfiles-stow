@@ -17,27 +17,23 @@ return {
 
 		markview.setup({
 			enable_math = false,
+            latex = {
+                enable = false,
+            },
 			preview = {
 				icon_provider = "mini",
 			},
 			markdown = {
 				-- disable everything except hyperlinks
-				headings = { enable = false },
 				block_quotes = { enable = false },
 				code_blocks = { enable = false },
-				frontmatter = { enable = false },
+				headings = { enable = false },
 				horizontal_rules = { enable = false },
 				list_items = { enable = false },
 				tables = { enable = false },
-				footnotes = { enable = false },
-				inline_codes = { enable = false },
-				images = { enable = false },
-				email_links = { enable = false },
-				entities = { enable = false },
-				escaped_characters = { enable = false },
 				metadata_minus = { enable = false },
-				reference_links = { enable = false },
-				hyperlinks = { enable = false },
+				metadata_plus = { enable = false },
+				reference_definitions = { enable = false },
 			},
 		})
 	end,
