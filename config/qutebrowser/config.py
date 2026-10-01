@@ -216,3 +216,12 @@ config.set("content.javascript.enabled", True, "https://github.com/*")
 
 # HCMUS
 config.set("content.javascript.enabled", True, "https://*.hcmus.edu.vn/*")
+
+# Enable dark mode for web pages
+c.colors.webpage.darkmode.enabled = True
+
+# Optional: Choose the algorithm for how colors are transformed
+c.colors.webpage.darkmode.algorithm = 'lightness-cielab'
+
+# Optional: Prevent images from being inverted (often looks better)
+c.colors.webpage.darkmode.policy.images = 'never'
