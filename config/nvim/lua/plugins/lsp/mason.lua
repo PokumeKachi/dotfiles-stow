@@ -13,6 +13,7 @@ local excluded_packages = {
     rune_fmt = true,
 	rustfmt = true,
 	dart_format = true,
+    meson_format = true,
 }
 
 local FORMATTER_TO_MASON = {}

@@ -3,6 +3,7 @@ local M = {}
 M.treesitter_parsers = {
 	"c",
 	"cpp",
+	"meson",
 	"rust",
 
 	"lua",
@@ -90,6 +91,13 @@ M.lsp = {
 			},
 		},
 	},
+	mesonlsp = {
+		cmd = { "mesonlsp", "--lsp" },
+		filetypes = { "meson" },
+		root_dir = function(_)
+			return vim.fs.root(0, { "meson.build", ".git" }) or vim.fn.getcwd()
+		end,
+	},
 	nixd = {},
 	rune_languageserver = {
 		cmd = { "rune", "language-server" },
@@ -161,6 +169,11 @@ M.formatters = {
 		args = { "fmt", "$FILENAME" },
 		stdin = false,
 	},
+	meson_format = {
+		command = "meson",
+		args = { "format", "-i", "$FILENAME" },
+		stdin = false,
+	},
 	stylua = {
 		command = "stylua",
 		args = { "--column-width", "100", "-" },
@@ -183,6 +196,7 @@ M.formatters_by_ft = {
 	lua = { "stylua" },
 	luau = { "stylua" },
 	tex = { "latexindent" },
+	meson = { "meson_format" },
 	python = { "black" },
 	sh = { "shfmt" },
 	kdl = { "kdlfmt" },
