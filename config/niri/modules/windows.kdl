@@ -1,5 +1,5 @@
 layout {
-    gaps 16
+    gaps 4
     center-focused-column "on-overflow"
     preset-column-widths {
         proportion 0.2
@@ -17,7 +17,7 @@ layout {
         proportion 0.8
     }
     focus-ring {
-        width 16
+        width 4
         inactive-color "#505050"
         // active-gradient from="#aaccff" to="#ffaa00" angle=45
         active-gradient from="#fa5c0f" to="#ff0a00" angle=45
