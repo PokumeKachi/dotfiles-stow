@@ -33,9 +33,9 @@ binds {
     Henkan hotkey-overlay-title="Run an Application: fuzzel" {
         spawn "sh" "-c" "tofi-run --width 100% --height 100% --anchor top --hint-font false --num-results 10 --ascii-input true --late-keyboard-init | sh"
     }
-    Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" {
-        spawn "swaylock"
-    }
+    // Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" {
+    //     spawn "swaylock"
+    // }
     XF86Display {
         spawn "nwg-displays"
     }
