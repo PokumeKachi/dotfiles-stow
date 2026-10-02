@@ -157,7 +157,7 @@ M.formatters = {
 		command = "clang-format",
 		args = {
 			"-style",
-			"{BasedOnStyle: Google, IndentWidth: 4}",
+			"{BasedOnStyle: Google, IndentWidth: 4, AccessModifierOffset: -4, ColumnLimit: 100}",
 		},
 	},
 	nixfmt = {
