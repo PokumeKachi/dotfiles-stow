@@ -24,11 +24,23 @@ return {
 			partial_rendering = true,
 			follow_cursor = true,
 		},
+		config = function(_, opts)
+			require("typst-preview").setup(opts)
+
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "typst",
+				callback = function()
+					vim.opt_local.expandtab = true
+					vim.opt_local.shiftwidth = 4
+					vim.opt_local.softtabstop = 4
+				end,
+			})
+		end,
 	},
 
 	{
 		"lervag/vimtex",
-        lazy = false,
+		lazy = false,
 		init = function()
 			vim.g.vimtex_view_method = "zathura"
 
