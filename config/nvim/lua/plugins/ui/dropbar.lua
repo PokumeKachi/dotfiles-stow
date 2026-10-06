@@ -1,4 +1,5 @@
 -- IDE-like breadcrumbs
+local map = require("utils.keymap").map
 
 return {
 	"Bekaboo/dropbar.nvim",
@@ -8,8 +9,8 @@ return {
 	},
 	config = function()
 		local dropbar_api = require("dropbar.api")
-		vim.keymap.set("n", "<leader>;", dropbar_api.pick, { desc = "Pick symbols in winbar" })
-		vim.keymap.set("n", "[;", dropbar_api.goto_context_start, { desc = "Go to start of current context" })
-		vim.keymap.set("n", "];", dropbar_api.select_next_context, { desc = "Select next context" })
+		map("n", "<leader>;", dropbar_api.pick, { desc = "Pick symbols in winbar" })
+		map("n", "[;", dropbar_api.goto_context_start, { desc = "Go to start of current context" })
+		map("n", "];", dropbar_api.select_next_context, { desc = "Select next context" })
 	end,
 }

@@ -4,6 +4,7 @@ local opt = vim.opt
 opt.autoread = true
 opt.updatetime = 200
 opt.timeoutlen = 200
+opt.exrc = true
 
 -- === UI & Display ===
 opt.number = true

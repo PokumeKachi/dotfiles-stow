@@ -282,8 +282,8 @@ return {
 			},
 		})
 
-		vim.keymap.set("n", "<leader>fp", function()
-			require("telescope").extensions.projects.projects()
-		end, { desc = "Find Projects" })
+		-- vim.keymap.set("n", "<leader>fp", function()
+		-- 	require("telescope").extensions.projects.projects()
+		-- end, { desc = "Find Projects" })
 	end,
 }

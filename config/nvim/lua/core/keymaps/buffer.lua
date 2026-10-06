@@ -2,7 +2,7 @@ local map = require("utils.keymap").map
 
 local buffer = require("utils.buffer")
 
-vim.keymap.set("n", "<leader>qbc", function()
+map("n", "<leader>qbc", function()
 	local current_buf = vim.api.nvim_get_current_buf()
 	vim.cmd("bnext")
 	vim.api.nvim_buf_delete(current_buf, { force = false })
