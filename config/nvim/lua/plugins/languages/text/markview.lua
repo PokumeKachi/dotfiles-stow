@@ -35,6 +35,9 @@ return {
 				metadata_plus = { enable = false },
 				reference_definitions = { enable = false },
 			},
+            typst = {
+                enable = false,
+            },
 		})
 	end,
 	priority = 49,
