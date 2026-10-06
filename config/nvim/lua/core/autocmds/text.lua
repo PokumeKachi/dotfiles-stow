@@ -12,13 +12,13 @@ autocmd("FileType", {
 })
 
 autocmd("FileType", {
-	pattern = "markdown",
+	pattern = {"markdown", "typst"},
     group = augroup,
 	callback = function()
         -- Enable spell check
 
-		vim.opt_local.spell = true
-		vim.opt_local.spelllang = "en"
+		-- vim.opt_local.spell = true
+		-- vim.opt_local.spelllang = "en"
 
         -- Disable autocomplete
 
