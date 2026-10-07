@@ -22,14 +22,26 @@ layout {
         // active-gradient from="#aaccff" to="#ffaa00" angle=45
         active-gradient from="#fa5c0f" to="#ff0a00" angle=45
     }
+    tab-indicator {
+        width 8
+        gap 0
+        // gaps-between-tabs 4
+        // corner-radius 16
+        active-color "#9070ff"
+        inactive-color "#505050"
+        length total-proportion=1.0
+        position "left"
+        place-within-column
+        hide-when-single-tab
+    }
 }
-// window-rule {
-//     match is-focused=false
-//     opacity 1.0
-//     background-effect {
-//         blur true
-//     }
-// }
+window-rule {
+    match is-focused=false
+    opacity 0.8
+    background-effect {
+        blur true
+    }
+}
 window-rule {
     match is-floating=true
     geometry-corner-radius 12
