@@ -228,9 +228,7 @@ return {
 		})
 
 		-- tabline – ENABLED
-		require("mini.tabline").setup({
-			tabpage_section = "left",
-		})
+		require("mini.tabline").setup({})
 
 		-- test (testing framework integration) – not used
 		-- require("mini.test").setup()
