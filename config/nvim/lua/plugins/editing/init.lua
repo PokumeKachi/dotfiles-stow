@@ -1,4 +1,5 @@
 return {
+    require("plugins.editing.codex"),
 
     require("plugins.editing.nvim-ts-autotag"),
     require("plugins.editing.tex2uni"),

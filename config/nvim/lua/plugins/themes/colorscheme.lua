@@ -9,7 +9,7 @@ return {
 		lazy = false,
 		config = function()
 			require("catppuccin").setup({
-				flavour = "mocha",
+				flavour = "frappe",
 				background = {
 					light = "latte",
 					dark = "mocha",
