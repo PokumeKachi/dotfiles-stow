@@ -901,7 +901,7 @@ return {
 				-- Used when not being rendered, get user setting.
 				default = vim.o.conceallevel,
 				-- Used when being rendered, concealed text is completely hidden.
-				rendered = 3,
+				rendered = 0,
 			},
 			-- @see :h 'concealcursor'
 			concealcursor = {
