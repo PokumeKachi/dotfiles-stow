@@ -3,7 +3,9 @@ local M = {}
 M.treesitter_parsers = {
 	"c",
 	"cpp",
+	"cmake",
 	"meson",
+
 	"rust",
 
 	"lua",
@@ -25,6 +27,7 @@ M.treesitter_parsers = {
 	"typescript",
 	"typst",
 	"json",
+	"qml",
 
 	"astro",
 	"tsx",
@@ -40,6 +43,7 @@ M.lsp = {
 	astro = {},
 	basedpyright = {},
 	clangd = {},
+	cmake = {},
 	cssls = {
 		cmd = { "vscode-css-language-server", "--stdio" },
 		filetypes = { "css", "scss", "less" },
@@ -99,6 +103,10 @@ M.lsp = {
 		end,
 	},
 	nixd = {},
+	qmlls = {
+		cmd = { "qmlls" },
+		filetypes = { "qml" },
+	},
 	rune_languageserver = {
 		cmd = { "rune", "language-server" },
 		filetypes = { "rune" },
@@ -141,6 +149,18 @@ M.lsp = {
 }
 
 M.formatters = {
+	cmake_format = {
+		command = "cmake-format",
+		args = {
+			"--line-width",
+			"100",
+			"--tab-size",
+			"4",
+			"-i",
+			"$FILENAME",
+		},
+		stdin = false,
+	},
 	prettier = {
 		command = "prettier",
 		args = {
@@ -164,6 +184,11 @@ M.formatters = {
 		command = "nixfmt",
 		args = { "--indent", "4" },
 	},
+	-- qmlformat = {
+	-- 	command = "qmlformat",
+	-- 	args = { "--inplace", "$FILENAME" },
+	-- 	stdin = false,
+	-- },
 	rune_fmt = {
 		command = "rune",
 		args = { "fmt", "$FILENAME" },
@@ -192,6 +217,7 @@ M.formatters = {
 M.formatters_by_ft = {
 	c = { "clang_format" },
 	cpp = { "clang_format" },
+	cmake = { "cmake_format" },
 	dart = { "dart_format" },
 	lua = { "stylua" },
 	luau = { "stylua" },
@@ -200,6 +226,7 @@ M.formatters_by_ft = {
 	python = { "black" },
 	sh = { "shfmt" },
 	kdl = { "kdlfmt" },
+	-- qml = { "qmlformat" },
 	rune = { "rune_fmt" },
 	rust = { "rustfmt" },
 	nix = { "nixfmt" },

@@ -14,6 +14,7 @@ local excluded_packages = {
 	rustfmt = true,
 	dart_format = true,
     meson_format = true,
+    cmake_format = true,
 }
 
 local FORMATTER_TO_MASON = {}
