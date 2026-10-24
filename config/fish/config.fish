@@ -5,6 +5,7 @@ function fish_greeting
 end
 
 direnv hook fish | source
+zoxide init fish | source
 
 function y
 	set tmp (mktemp -t "yazi-cwd.XXXXXX")
