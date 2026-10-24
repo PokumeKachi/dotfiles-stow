@@ -248,14 +248,18 @@ return {
 			Snacks.words.jump(-vim.v.count1)
 		end, { desc = "Prev Reference" }),
 		-- Terminal mappings
-		--
 		map("n", "<leader>tt", function()
+			Snacks.terminal.toggle(nil, {
+				win = { position = "float" },
+			})
+		end, { desc = "Open Floating Terminal" }),
+		map("n", "<leader>wt", function()
 			Snacks.terminal(nil, {
 				win = {
 					position = "current",
 				},
 			})
-		end, { desc = "Open Terminal" }),
+		end, { desc = "Convert Window To Terminal" }),
 		map("n", "<F5>", function()
 			Snacks.terminal({ "just", "--choose", "--", file.get_current() })
 		end, { desc = "Open Just" }),
