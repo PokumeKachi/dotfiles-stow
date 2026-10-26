@@ -225,3 +225,15 @@ c.colors.webpage.darkmode.algorithm = 'lightness-cielab'
 
 # Optional: Prevent images from being inverted (often looks better)
 c.colors.webpage.darkmode.policy.images = 'never'
+
+config.bind(
+    'pw',
+    'spawn --userscript qute-keepassxc',
+    mode='normal'
+)
+
+config.bind(
+    '<Alt-Shift-u>',
+    'spawn --userscript qute-keepassxc',
+    mode='insert'
+)
