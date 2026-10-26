@@ -1,0 +1,410 @@
+#!/usr/bin/env python3
+
+# Qutebrowser userscript to fetch credentials from KeepassXC password database
+# Copyright (c) 2018-2024 Markus Blöchl
+# Released under the MIT License
+
+import sys
+import os
+import socket
+import json
+import base64
+import subprocess
+import argparse
+import shutil
+
+import nacl.utils
+import nacl.public
+
+BUFFER_SIZE = 1024 * 1024
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Full passwords from KeepassXC")
+    parser.add_argument('url', nargs='?', default=os.environ.get('QUTE_URL'))
+    parser.add_argument('--totp', action='store_true',
+                        help="Fill in current TOTP field instead of username/password")
+    parser.add_argument('--socket', '-s', default='/run/user/{}/org.keepassxc.KeePassXC.BrowserServer'.format(os.getuid()),
+                        help='Path to KeepassXC browser socket')
+    parser.add_argument(
+        '--ssh-public-key',
+        default=os.path.expanduser('~/.ssh/id_ed25519.pub'),
+        help="SSH public key used by age to encrypt the association key",
+    )
+    parser.add_argument(
+        '--ssh-private-key',
+        default=os.path.expanduser('~/.ssh/id_ed25519'),
+        help="SSH private key used by age to decrypt the association key",
+    )
+    parser.add_argument('--insecure', action='store_true',
+                        help="Store the association key unencrypted (not recommended)")
+    return parser.parse_args()
+
+
+class KeepassError(Exception):
+    def __init__(self, code, desc):
+        self.code = code
+        self.description = desc
+
+    def __str__(self):
+        return f"KeepassXC Error [{self.code}]: {self.description}"
+
+
+class KeepassXC:
+    """ Wrapper around the KeepassXC socket API """
+    def __init__(self, id=None, *, key, socket_path):
+        self.sock        = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        self.id          = id
+        self.socket_path = socket_path
+        self.client_key  = nacl.public.PrivateKey.generate()
+        self.id_key      = nacl.public.PrivateKey.from_seed(key)
+        self.cryptobox   = None
+
+    def connect(self):
+        if not os.path.exists(self.socket_path):
+            raise KeepassError(-1, "KeepassXC Browser socket does not exists")
+        self.client_id = base64.b64encode(nacl.utils.random(nacl.public.Box.NONCE_SIZE)).decode('utf-8')
+        self.sock.connect(self.socket_path)
+
+        self.send_raw_msg(dict(
+            action    = 'change-public-keys',
+            publicKey = base64.b64encode(self.client_key.public_key.encode()).decode('utf-8'),
+            nonce     = base64.b64encode(nacl.utils.random(nacl.public.Box.NONCE_SIZE)).decode('utf-8'),
+            clientID  = self.client_id
+        ))
+
+        resp = self.recv_raw_msg()
+        assert resp['action'] == 'change-public-keys'
+        assert resp['success'] == 'true'
+        assert resp['nonce']
+        self.cryptobox = nacl.public.Box(
+            self.client_key,
+            nacl.public.PublicKey(base64.b64decode(resp['publicKey']))
+        )
+
+    def get_databasehash(self):
+        self.send_msg(dict(action='get-databasehash'))
+        return self.recv_msg()['hash']
+
+    def lock_database(self):
+        self.send_msg(dict(action='lock-database'))
+        try:
+            self.recv_msg()
+        except KeepassError as e:
+            if e.code == 1:
+                return True
+            raise
+        return False
+
+
+    def test_associate(self):
+        if not self.id:
+            return False
+        self.send_msg(dict(
+            action = 'test-associate',
+            id     = self.id,
+            key    = base64.b64encode(self.id_key.public_key.encode()).decode('utf-8')
+        ), triggerUnlock = 'true')
+        return self.recv_msg()['success'] == 'true'
+
+    def associate(self):
+        self.send_msg(dict(
+            action = 'associate',
+            key    = base64.b64encode(self.client_key.public_key.encode()).decode('utf-8'),
+            idKey  = base64.b64encode(self.id_key.public_key.encode()).decode('utf-8')
+        ))
+        resp = self.recv_msg()
+        self.id = resp['id']
+
+    def get_logins(self, url):
+        self.send_msg(dict(
+            action = 'get-logins',
+            url    = url,
+            keys   = [{ 'id': self.id, 'key': base64.b64encode(self.id_key.public_key.encode()).decode('utf-8') }]
+        ))
+        return self.recv_msg()['entries']
+
+    def send_raw_msg(self, msg):
+        self.sock.send( json.dumps(msg).encode('utf-8') )
+
+    def recv_raw_msg(self):
+        return json.loads( self.sock.recv(BUFFER_SIZE).decode('utf-8') )
+
+    def send_msg(self, msg, **extra):
+        nonce = nacl.utils.random(nacl.public.Box.NONCE_SIZE)
+        self.send_raw_msg(dict(
+            action   = msg['action'],
+            message  = base64.b64encode(self.cryptobox.encrypt(json.dumps(msg).encode('utf-8'), nonce).ciphertext).decode('utf-8'),
+            nonce    = base64.b64encode(nonce).decode('utf-8'),
+            clientID = self.client_id,
+            **extra
+        ))
+
+    def recv_msg(self):
+        resp = self.recv_raw_msg()
+        if 'error' in resp:
+            raise KeepassError(resp['errorCode'], resp['error'])
+        assert resp['action']
+        return json.loads(self.cryptobox.decrypt(base64.b64decode(resp['message']), base64.b64decode(resp['nonce'])).decode('utf-8'))
+
+
+
+class SecretKeyStore:
+    """Store the KeePassXC association key, encrypted with age + an SSH key."""
+
+    def __init__(self, ssh_public_key, ssh_private_key, insecure=False):
+        data_dir = os.environ.get('QUTE_DATA_DIR')
+        if not data_dir:
+            raise RuntimeError("QUTE_DATA_DIR is not set; run this as a qutebrowser userscript")
+
+        self.insecure = insecure
+        self.ssh_public_key = os.path.expanduser(ssh_public_key)
+        self.ssh_private_key = os.path.expanduser(ssh_private_key)
+        filename = 'keepassxc.key' if insecure else 'keepassxc.key.age'
+        self.path = os.path.join(data_dir, filename)
+
+        if not self.insecure:
+            if not shutil.which('age'):
+                raise RuntimeError("'age' is required; install it with: sudo pacman -S age")
+            if not os.path.isfile(self.ssh_public_key):
+                raise RuntimeError(f"SSH public key not found: {self.ssh_public_key}")
+            if not os.path.isfile(self.ssh_private_key):
+                raise RuntimeError(f"SSH private key not found: {self.ssh_private_key}")
+
+    @staticmethod
+    def _run_age(command, *, input_data=None):
+        try:
+            # Leave stderr attached so age can display diagnostics and request
+            # a private-key passphrase where terminal interaction is available.
+            return subprocess.run(
+                command,
+                input=input_data,
+                stdout=subprocess.PIPE,
+                check=True,
+            )
+        except FileNotFoundError as exc:
+            raise RuntimeError("'age' was not found; install it with: sudo pacman -S age") from exc
+        except subprocess.CalledProcessError as exc:
+            raise RuntimeError(
+                f"age failed with exit code {exc.returncode}; check its diagnostic output and SSH key"
+            ) from exc
+
+    def load(self):
+        """Load an existing association key from disk."""
+        if self.insecure:
+            with open(self.path, 'r', encoding='utf-8') as key_file:
+                jsondata = key_file.read()
+        else:
+            result = self._run_age([
+                'age', '-d', '-i', self.ssh_private_key, self.path,
+            ])
+            jsondata = result.stdout.decode('utf-8')
+
+        data = json.loads(jsondata)
+        self.id = data['id']
+        self.key = base64.b64decode(data['key'])
+
+    def create(self):
+        """Create a new association key."""
+        self.key = nacl.utils.random(32)
+        self.id = None
+
+    def store(self, id):
+        """Persist a new association key, encrypted unless --insecure was used."""
+        self.id = id
+        jsondata = json.dumps({
+            'id': self.id,
+            'key': base64.b64encode(self.key).decode('utf-8'),
+        }).encode('utf-8')
+
+        if self.insecure:
+            # Restrictive permissions help prevent other local users from
+            # reading this plaintext file, but do not encrypt its contents.
+            fd = os.open(self.path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            with os.fdopen(fd, 'w', encoding='utf-8') as key_file:
+                key_file.write(jsondata.decode('utf-8'))
+            os.chmod(self.path, 0o600)
+        else:
+            self._run_age([
+                'age', '-R', self.ssh_public_key, '-o', self.path,
+            ], input_data=jsondata)
+            os.chmod(self.path, 0o600)
+
+
+def qute(cmd):
+    with open(os.environ['QUTE_FIFO'], 'w') as fifo:
+        fifo.write(cmd)
+        fifo.write('\n')
+        fifo.flush()
+
+def error(msg):
+    print(msg, file=sys.stderr)
+    qute('message-error "{}"'.format(msg))
+
+
+def connect_to_keepassxc(args):
+    keystore = SecretKeyStore(
+        args.ssh_public_key,
+        args.ssh_private_key,
+        insecure=args.insecure,
+    )
+    if os.path.isfile(keystore.path):
+        keystore.load()
+        kp = KeepassXC(keystore.id, key=keystore.key, socket_path=args.socket)
+        kp.connect()
+        if not kp.test_associate():
+            error('No KeepassXC association')
+            return None
+    else:
+        keystore.create()
+        kp = KeepassXC(key=keystore.key, socket_path=args.socket)
+        kp.connect()
+        kp.associate()
+        if not kp.test_associate():
+            error('No KeepassXC association')
+            return None
+        keystore.store(kp.id)
+    return kp
+
+
+def select_account(creds):
+    try:
+        if len(creds) == 1:
+            return creds[0]
+        idx = subprocess.check_output(
+                ['rofi', '-dmenu', '-format', 'i', '-matching', 'fuzzy',
+                '-p', 'Search',
+                '-mesg', '<b>qute-keepassxc</b>: select an account, please!'],
+                input=b"\n".join(c['login'].encode('utf-8') for c in creds)
+        )
+        idx = int(idx)
+        if idx < 0:
+            return None
+        return creds[idx]
+    except subprocess.CalledProcessError:
+        return None
+    except FileNotFoundError:
+        error("rofi not found. Please install rofi to select from multiple credentials")
+        return creds[0]
+    except Exception as e:
+        error(f"Error while picking account: {e}")
+        return None
+
+
+def make_js_code(username, password):
+    return ' '.join("""
+        function isVisible(elem) {
+            var style = elem.ownerDocument.defaultView.getComputedStyle(elem, null);
+
+            if (style.getPropertyValue("visibility") !== "visible" ||
+                style.getPropertyValue("display") === "none" ||
+                style.getPropertyValue("opacity") === "0") {
+                return false;
+            }
+
+            return elem.offsetWidth > 0 && elem.offsetHeight > 0;
+        };
+
+        function hasPasswordOrUsernameField(form) {
+            var inputs = form.getElementsByTagName("input");
+            for (var j = 0; j < inputs.length; j++) {
+                var input = inputs[j];
+                if (input.type === "password") {
+                    return true;
+                }
+                if (input.type === "text" || input.type === "email") {
+                    if (input.autocomplete && input.autocomplete.includes("username")) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        };
+
+        function loadData2Form (form) {
+            var inputs = form.getElementsByTagName("input");
+            for (var j = 0; j < inputs.length; j++) {
+                var input = inputs[j];
+                if (isVisible(input) && (input.type === "text" || input.type === "email")) {
+                    input.focus();
+                    input.value = %s;
+                    input.dispatchEvent(new Event('input', { 'bubbles': true }));
+                    input.dispatchEvent(new Event('change', { 'bubbles': true }));
+                    input.blur();
+                }
+                if (input.type === "password") {
+                    input.focus();
+                    input.value = %s;
+                    input.dispatchEvent(new Event('input', { 'bubbles': true }));
+                    input.dispatchEvent(new Event('change', { 'bubbles': true }));
+                    input.blur();
+                }
+            }
+        };
+
+        function fillFirstForm() {
+            var forms = document.getElementsByTagName("form");
+            for (i = 0; i < forms.length; i++) {
+                if (hasPasswordOrUsernameField(forms[i])) {
+                    loadData2Form(forms[i]);
+                    return;
+                }
+            }
+            alert("No Credentials Form found");
+        };
+
+        fillFirstForm()
+    """.splitlines()) % (json.dumps(username), json.dumps(password))
+
+
+def make_js_totp_code(totp):
+    return ' '.join("""
+        (function () {
+            var input = document.activeElement;
+            if (!input || input.tagName !== "INPUT") {
+                alert("No TOTP input field selected");
+                return;
+            }
+            input.value = %s;
+            input.dispatchEvent(new Event('input', { 'bubbles': true }));
+            input.dispatchEvent(new Event('change', { 'bubbles': true }));
+        })();
+    """.splitlines()) % (json.dumps(totp),)
+
+
+def main():
+    if 'QUTE_FIFO' not in os.environ:
+        print(f"No QUTE_FIFO found - {sys.argv[0]} must be run as a qutebrowser userscript")
+        sys.exit(-1)
+
+    try:
+        args = parse_args()
+        assert args.url, "Missing URL"
+        kp = connect_to_keepassxc(args)
+        if not kp:
+            error('Could not connect to KeepassXC')
+            return
+        creds = kp.get_logins(args.url)
+        if not creds:
+            error('No credentials found')
+            return
+        cred = select_account(creds)
+        if not cred:
+            error('No credentials selected')
+            return
+        if args.totp:
+            totp = cred.get('totp')
+            if not totp:
+                error('No TOTP key found')
+                return
+            qute('jseval -q ' + make_js_totp_code(totp))
+        else:
+            name, pw = cred['login'], cred['password']
+            if name and pw:
+                qute('jseval -q ' + make_js_code(name, pw))
+    except Exception as e:
+        error(str(e))
+
+
+if __name__ == '__main__':
+    main()
