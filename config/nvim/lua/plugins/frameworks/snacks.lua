@@ -249,12 +249,11 @@ return {
 		end, { desc = "Prev Reference" }),
 		-- Terminal mappings
 		map("n", "<leader>tt", function()
-			Snacks.terminal.toggle(nil, {
-				win = { position = "float" },
-			})
+			Snacks.terminal.toggle()
 		end, { desc = "Open Floating Terminal" }),
 		map("n", "<leader>wt", function()
 			Snacks.terminal(nil, {
+				interactive = false,
 				win = {
 					position = "current",
 				},
