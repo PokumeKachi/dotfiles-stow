@@ -9,12 +9,13 @@ local excluded_packages = {
 	nixd = true,
 	just_lsp = true,
 
-    rune_languageserver = true,
-    rune_fmt = true,
+	rune_languageserver = true,
+	rune_fmt = true,
 	rustfmt = true,
+	gofmt = true,
 	dart_format = true,
-    meson_format = true,
-    cmake_format = true,
+	meson_format = true,
+	cmake_format = true,
 }
 
 local FORMATTER_TO_MASON = {}

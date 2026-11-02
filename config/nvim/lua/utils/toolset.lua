@@ -7,6 +7,7 @@ M.treesitter_parsers = {
 	"meson",
 
 	"rust",
+	"go",
 
 	"lua",
 	"luau",
@@ -70,6 +71,18 @@ M.lsp = {
 				completeFunctionCalls = true,
 				showTodos = true,
 				updateImportsOnRename = true,
+			},
+		},
+	},
+	gopls = {
+		settings = {
+			gopls = {
+				usePlaceholders = true,
+				completeUnimported = true,
+				analyses = {
+					unusedparams = true,
+				},
+				staticcheck = true,
 			},
 		},
 	},
@@ -184,6 +197,10 @@ M.formatters = {
 		command = "nixfmt",
 		args = { "--indent", "4" },
 	},
+	gofmt = {
+		command = "gofmt",
+		stdin = true,
+	},
 	-- qmlformat = {
 	-- 	command = "qmlformat",
 	-- 	args = { "--inplace", "$FILENAME" },
@@ -219,6 +236,7 @@ M.formatters_by_ft = {
 	cpp = { "clang_format" },
 	cmake = { "cmake_format" },
 	dart = { "dart_format" },
+	go = { "gofmt" },
 	lua = { "stylua" },
 	luau = { "stylua" },
 	tex = { "latexindent" },
