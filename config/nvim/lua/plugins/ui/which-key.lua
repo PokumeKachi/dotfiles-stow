@@ -7,7 +7,7 @@ return {
 		delay = 0,
 		win = {
 			-- don't allow the popup to overlap with the cursor
-			no_overlap = true,
+			no_overlap = false,
 			-- width = { min = 4, max = 50 },
 			height = { min = 4, max = 20 },
 			-- col = math.huge,
@@ -70,6 +70,8 @@ return {
 			{ "<leader>zk", group = "Zk" },
 			{ "<leader>zkn", group = "Zk New" },
 			{ "<leader>zkp", group = "Zk Pick" },
+
+			{ "<leader>st", group = "Picker Toggles" },
 		})
 
 		-- ✅ This special mapping IS valid (it has a function)

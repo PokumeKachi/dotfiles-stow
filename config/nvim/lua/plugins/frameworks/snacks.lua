@@ -3,6 +3,95 @@
 local map = require("utils.keymap").lazy_map
 local file = require("utils.file")
 
+local function notify_toggle(name, enabled)
+	Snacks.notify.info(name .. (enabled and " enabled" or " disabled"), {
+		title = "Toggle Status",
+	})
+end
+
+-- ---- Picker toggle helpers ----
+local function picker_current()
+	if not (Snacks and Snacks.picker) then
+		return nil
+	end
+	local pickers = Snacks.picker.get() or {}
+	local cwin = vim.api.nvim_get_current_win()
+	for _, p in ipairs(pickers) do
+		if p.win and p.win.win == cwin then
+			return p
+		end
+	end
+	return pickers[1]
+end
+
+local function is_grep(p)
+    return true
+	-- local src = type(p.opts.source) == "string" and p.opts.source or ""
+	-- return src:find("grep") ~= nil
+end
+
+local function toggle_case(p)
+	if is_grep(p) then
+		local args = vim.list_extend({}, p.opts.args or {})
+		local was_cs = vim.tbl_contains(args, "--case-sensitive")
+		args = vim.tbl_filter(function(a)
+			return a ~= "--case-sensitive" and a ~= "--ignore-case"
+		end, args)
+		if was_cs then
+			table.insert(args, "--ignore-case")
+		else
+			table.insert(args, "--case-sensitive")
+		end
+		p.opts.args = args
+		p:find()
+		notify_toggle("Case sensitive", not was_cs)
+	else
+		local m =
+			vim.tbl_extend("force", { smartcase = true, ignorecase = true }, p.opts.matcher or {})
+		m.smartcase = false
+		m.ignorecase = not m.ignorecase
+		p.opts.matcher = m
+		p:find()
+		notify_toggle("Case sensitive", not m.ignorecase)
+	end
+end
+
+local function toggle_word(p)
+	if not is_grep(p) then
+		return
+	end
+	local args = vim.list_extend({}, p.opts.args or {})
+	local has_w = vim.tbl_contains(args, "-w")
+	if has_w then
+		args = vim.tbl_filter(function(a)
+			return a ~= "-w"
+		end, args)
+	else
+		table.insert(args, "-w")
+	end
+	p.opts.args = args
+	p:find()
+	notify_toggle("Whole word", not has_w)
+end
+
+local function toggle_regex(p)
+	if not is_grep(p) then
+		return
+	end
+	p.opts.regex = not p.opts.regex
+	p:find()
+	notify_toggle("Regex", p.opts.regex)
+end
+
+local function with_picker(fn)
+	return function()
+		local p = picker_current()
+		if p then
+			fn(p)
+		end
+	end
+end
+
 return {
 	"folke/snacks.nvim",
 	priority = 1000,
@@ -49,6 +138,9 @@ return {
 		zen = { enabled = true },
 	},
 	keys = {
+		map({ "n", "i" }, "<leader>stc", with_picker(toggle_case), { desc = "Toggle Case" }),
+		map({ "n", "i" }, "<leader>stw", with_picker(toggle_word), { desc = "Toggle Whole Word" }),
+		map({ "n", "i" }, "<leader>str", with_picker(toggle_regex), { desc = "Toggle Regex" }),
 		map("n", "<leader><space>", function()
 			Snacks.picker.smart()
 		end, { desc = "Smart Find Files" }),
