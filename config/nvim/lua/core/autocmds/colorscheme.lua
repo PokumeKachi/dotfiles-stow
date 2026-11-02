@@ -35,3 +35,14 @@ autocmd("ColorScheme", {
 	callback = apply_overrides,
 	desc = "Apply Custom Highlight Overrides",
 })
+
+autocmd("OptionSet", {
+	pattern = "background",
+	callback = function()
+		-- Re-run the current colorscheme so it picks up the new background
+		local ok, current = pcall(vim.api.nvim_get_var, "colors_name")
+		if ok and current ~= "" then
+			vim.cmd.colorscheme(current)
+		end
+	end,
+})
